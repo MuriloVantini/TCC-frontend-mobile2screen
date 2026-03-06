@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { animate } from "animejs";
+import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
   Plus,
   Monitor,
@@ -50,18 +50,6 @@ const tagColors = [
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
 type Feedback = { type: "success" | "error"; msg: string } | null;
-
-const enterFrom = {
-  opacity: 0,
-  scale: 0.92,
-  translateY: 16,
-};
-
-const leaveTo = {
-  opacity: 0,
-  scale: 0.9,
-  translateY: -14,
-};
 
 function DeviceIcon({ type, size = "md" }: { type: DeviceType; size?: "sm" | "md" }) {
   const s = size === "sm" ? "w-3.5 h-3.5" : "w-5 h-5";
@@ -131,6 +119,7 @@ export function Dispositivos() {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const deviceRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const pendingEnterId = useRef<number | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState<{ name: string; type: DeviceType; location: string; tags: string[] }>({
     name: "", type: "tv", location: "", tags: [],
@@ -146,14 +135,6 @@ export function Dispositivos() {
       return;
     }
 
-    animate(el, {
-      opacity: [enterFrom.opacity, 1],
-      scale: [enterFrom.scale, 1],
-      translateY: [enterFrom.translateY, 0],
-      duration: 1200,
-      ease: "outElastic(1, .5)",
-    });
-
     pendingEnterId.current = null;
   }, [devices]);
 
@@ -162,6 +143,8 @@ export function Dispositivos() {
     const matchTag = !filterTag || d.tags.includes(filterTag);
     return matchSearch && matchTag;
   });
+
+  useGridAnimation(gridRef, { effect: "hapi", deps: [filtered.map((d) => d.id).join()] });
 
   const openNew = () => {
     setForm({ name: "", type: "tv", location: "", tags: [] });
@@ -195,21 +178,7 @@ export function Dispositivos() {
   };
 
   const handleDelete = async (id: number) => {
-    const el = deviceRefs.current[id];
     setDeleteConfirm(null);
-
-    if (el) {
-      await new Promise<void>((resolve) => {
-        animate(el, {
-          opacity: [1, leaveTo.opacity],
-          scale: [1, leaveTo.scale],
-          translateY: [0, leaveTo.translateY],
-          duration: 800,
-          ease: "outElastic(.5, 1)",
-          onComplete: () => resolve(),
-        });
-      });
-    }
 
     setDevices((prev) => prev.filter((d) => d.id !== id));
     showFeedback({ type: "success", msg: "Dispositivo removido." });
@@ -257,7 +226,7 @@ export function Dispositivos() {
       </div>
 
       {/* Device Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {filtered.map((device) => (
           <div
             key={device.id}
