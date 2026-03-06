@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Outlet, NavLink, useNavigate, Link } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
+import { animate } from "animejs";
 import {
   LayoutDashboard,
   Monitor,
@@ -29,6 +30,37 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const sidebarNavRef = useRef<HTMLElement>(null);
+  const mobileNavRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (sidebarNavRef.current) {
+        const activeLink = sidebarNavRef.current.querySelector<HTMLElement>(".bg-blue-600");
+        if (activeLink) {
+          animate(activeLink, {
+            scale: [0.92, 1],
+            opacity: [0.6, 1],
+            duration: 380,
+            ease: "outBack(1.6)",
+          });
+        }
+      }
+      if (mobileNavRef.current) {
+        const activeMobile = mobileNavRef.current.querySelector<HTMLElement>(".text-blue-600");
+        if (activeMobile) {
+          animate(activeMobile, {
+            scale: [0.88, 1],
+            opacity: [0.5, 1],
+            duration: 320,
+            ease: "outBack(1.8)",
+          });
+        }
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [location.pathname]);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
@@ -60,7 +92,7 @@ export function Layout() {
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
+        <nav ref={sidebarNavRef} className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
@@ -163,7 +195,7 @@ export function Layout() {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden bg-white border-t border-slate-200 flex items-center justify-around px-1 py-2 shrink-0">
+        <nav ref={mobileNavRef} className="md:hidden bg-white border-t border-slate-200 flex items-center justify-around px-1 py-2 shrink-0">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
