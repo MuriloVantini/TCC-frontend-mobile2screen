@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
+import { AnimatedCounter } from "../components/AnimatedCounter";
 import {
   Monitor,
   BellRing,
@@ -60,29 +61,6 @@ const tagColors = [
   "bg-cyan-100 text-cyan-700",
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
-
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
-    const obj = { val: 0 };
-    const anim = animate(obj, {
-      val: value,
-      duration: 1200,
-      ease: "outExpo",
-      onUpdate: () => {
-        el.textContent = Math.round(obj.val) + suffix;
-      },
-    });
-    return () => { anim.pause(); };
-  }, [value, suffix]);
-  return (
-    <p ref={ref} className="text-xl font-semibold text-slate-800">
-      0{suffix}
-    </p>
-  );
-}
 
 export function Dashboard() {
   const onlineCount = devices.filter((d) => d.online).length;

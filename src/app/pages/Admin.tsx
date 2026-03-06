@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { AnimatedCounter } from "../components/AnimatedCounter";
 import {
   Users,
   Monitor,
@@ -62,10 +63,10 @@ const topUsers = [
 ];
 
 const metrics = [
-  { label: "Usuários cadastrados", value: "94", change: "+18%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-  { label: "Dispositivos ativos", value: "428", change: "+24%", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
-  { label: "Alertas este mês", value: "2.841", change: "+31%", icon: BellRing, color: "text-red-500", bg: "bg-red-50" },
-  { label: "Média TV / usuário", value: "4,6", change: "+0,8", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+  { label: "Usuários cadastrados", numericValue: 94, change: "+18%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+  { label: "Dispositivos ativos", numericValue: 428, change: "+24%", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
+  { label: "Alertas este mês", numericValue: 2841, format: (v: number) => Math.round(v).toLocaleString("pt-BR"), change: "+31%", icon: BellRing, color: "text-red-500", bg: "bg-red-50" },
+  { label: "Média TV / usuário", numericValue: 4.6, format: (v: number) => v.toFixed(1).replace(".", ","), change: "+0,8", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
 ];
 
 export function Admin() {
@@ -78,7 +79,7 @@ export function Admin() {
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {metrics.map(({ label, value, change, icon: Icon, color, bg }) => (
+        {metrics.map(({ label, numericValue, format, change, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
             <div className="flex items-start justify-between mb-3">
               <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center`}>
@@ -88,7 +89,7 @@ export function Admin() {
                 <ArrowUpRight className="w-3 h-3" /> {change}
               </span>
             </div>
-            <p className="text-2xl font-bold text-slate-800">{value}</p>
+            <AnimatedCounter value={numericValue} format={format} className="text-2xl font-bold text-slate-800" />
             <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
           </div>
         ))}
