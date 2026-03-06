@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
 import {
   Info,
   AlertTriangle,
@@ -57,6 +58,29 @@ const tagColors = [
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    const obj = { val: 0 };
+    const anim = animate(obj, {
+      val: value,
+      duration: 1200,
+      ease: "outExpo",
+      onUpdate: () => {
+        el.textContent = Math.round(obj.val) + suffix;
+      },
+    });
+    return () => { anim.pause(); };
+  }, [value, suffix]);
+  return (
+    <p ref={ref} className="text-lg font-semibold text-slate-800">
+      0{suffix}
+    </p>
+  );
+}
+
 const PAGE_SIZE = 5;
 
 export function Historico() {
@@ -77,6 +101,18 @@ export function Historico() {
   const totalDelivered = alertHistory.reduce((s, a) => s + a.delivered, 0);
   const totalFailed = alertHistory.reduce((s, a) => s + a.failed, 0);
   const deliveryRate = Math.round((totalDelivered / (totalDelivered + totalFailed)) * 100);
+  const summaryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!summaryRef.current) return;
+    animate(Array.from(summaryRef.current.children), {
+      opacity: [0, 1],
+      translateY: [14, 0],
+      delay: stagger(80),
+      duration: 500,
+      ease: "outExpo",
+    });
+  }, []);
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-4xl mx-auto">
@@ -86,18 +122,18 @@ export function Historico() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total enviados", value: alertHistory.length, sub: "alertas", icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Entregues", value: totalDelivered, sub: "notificações", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Falhas", value: totalFailed, sub: "não entregues", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
-          { label: "Taxa de entrega", value: `${deliveryRate}%`, sub: "sucesso", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
-        ].map(({ label, value, sub, icon: Icon, color, bg }) => (
+          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", sub: "alertas", icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Entregues", numericValue: totalDelivered, suffix: "", sub: "notificações", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Falhas", numericValue: totalFailed, suffix: "", sub: "não entregues", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
+          { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", sub: "sucesso", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
+        ].map(({ label, numericValue, suffix, sub, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
             <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
-            <p className="text-lg font-semibold text-slate-800">{value}</p>
+            <AnimatedCounter value={numericValue} suffix={suffix} />
             <p className="text-xs text-slate-500 mt-0.5">{label}</p>
           </div>
         ))}
