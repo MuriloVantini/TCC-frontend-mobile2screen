@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
 import {
   Monitor,
   BellRing,
@@ -59,9 +61,44 @@ const tagColors = [
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    const obj = { val: 0 };
+    const anim = animate(obj, {
+      val: value,
+      duration: 1200,
+      ease: "outExpo",
+      onUpdate: () => {
+        el.textContent = Math.round(obj.val) + suffix;
+      },
+    });
+    return () => { anim.pause(); };
+  }, [value, suffix]);
+  return (
+    <p ref={ref} className="text-xl font-semibold text-slate-800">
+      0{suffix}
+    </p>
+  );
+}
+
 export function Dashboard() {
   const onlineCount = devices.filter((d) => d.online).length;
   const offlineCount = devices.length - onlineCount;
+  const metricsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!metricsRef.current) return;
+    animate(Array.from(metricsRef.current.children), {
+      opacity: [0, 1],
+      translateY: [14, 0],
+      delay: stagger(80),
+      duration: 500,
+      ease: "outExpo",
+    });
+  }, []);
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-7xl mx-auto">
@@ -83,18 +120,18 @@ export function Dashboard() {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div ref={metricsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Dispositivos", value: devices.length, sub: `${onlineCount} online`, icon: Monitor, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Online agora", value: onlineCount, sub: `${offlineCount} offline`, icon: Wifi, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Alertas hoje", value: 9, sub: "+3 vs ontem", icon: BellRing, color: "text-violet-600", bg: "bg-violet-50" },
-          { label: "Entregues", value: "94%", sub: "taxa de entrega", icon: CheckCircle2, color: "text-amber-600", bg: "bg-amber-50" },
-        ].map(({ label, value, sub, icon: Icon, color, bg }) => (
+          { label: "Dispositivos", numericValue: devices.length, suffix: "", sub: `${onlineCount} online`, icon: Monitor, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Online agora", numericValue: onlineCount, suffix: "", sub: `${offlineCount} offline`, icon: Wifi, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Alertas hoje", numericValue: 9, suffix: "", sub: "+3 vs ontem", icon: BellRing, color: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Entregues", numericValue: 94, suffix: "%", sub: "taxa de entrega", icon: CheckCircle2, color: "text-amber-600", bg: "bg-amber-50" },
+        ].map(({ label, numericValue, suffix, sub, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
             <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center mb-3`}>
               <Icon className={`w-4.5 h-4.5 ${color}`} />
             </div>
-            <p className="text-xl font-semibold text-slate-800">{value}</p>
+            <AnimatedCounter value={numericValue} suffix={suffix} />
             <p className="text-xs text-slate-500 mt-0.5">{label}</p>
             <p className={`text-xs mt-1 ${color}`}>{sub}</p>
           </div>

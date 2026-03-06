@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
 import {
   Search,
   Layers,
@@ -64,6 +65,34 @@ export function MapaInterativo() {
   const [selectedPoint, setSelectedPoint] = useState<typeof mapPoints[0] | null>(null);
   const [showPanel, setShowPanel] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Entrance animation: markers fade in with stagger
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const groups = svgRef.current.querySelectorAll<SVGGElement>(".map-point-group");
+    animate(Array.from(groups), {
+      opacity: [0, 1],
+      delay: stagger(120),
+      duration: 600,
+      ease: "outExpo",
+    });
+  }, []);
+
+  // Loop pulse animation for alert-status markers
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const pulseCircles = svgRef.current.querySelectorAll<SVGCircleElement>(".alert-pulse");
+    if (!pulseCircles.length) return;
+    const anim = animate(Array.from(pulseCircles), {
+      scale: [1, 2.5],
+      opacity: [0.75, 0],
+      duration: 1400,
+      ease: "outCubic",
+      loop: true,
+    });
+    return () => { anim.pause(); };
+  }, []);
 
   const filtered = mapPoints.filter((p) =>
     p.label.toLowerCase().includes(search.toLowerCase())
@@ -187,7 +216,7 @@ export function MapaInterativo() {
         {/* Map background */}
         <div className="absolute inset-0" style={{ transform: `scale(${zoom / 100})`, transformOrigin: "center", transition: "transform 0.2s" }}>
           {/* Road network SVG overlay */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <svg ref={svgRef} className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             {/* Background zones */}
             <rect x="0" y="0" width="100" height="100" fill="#e8ede8" />
             <rect x="5" y="5" width="35" height="40" fill="#dce8dc" rx="1" />
@@ -212,7 +241,17 @@ export function MapaInterativo() {
             ))}
             {/* Map points */}
             {mapPoints.map((point) => (
-              <g key={point.id} onClick={() => handlePointClick(point)} style={{ cursor: "pointer" }}>
+              <g key={point.id} className="map-point-group" onClick={() => handlePointClick(point)} style={{ cursor: "pointer" }}>
+                {point.status === "alert" && (
+                  <circle
+                    className="alert-pulse"
+                    cx={point.x}
+                    cy={point.y}
+                    r="4"
+                    fill={typeColor[point.type as keyof typeof typeColor]}
+                    style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                  />
+                )}
                 <circle
                   cx={point.x}
                   cy={point.y}
