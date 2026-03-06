@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
+import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
   Info,
   AlertTriangle,
   Zap,
   CheckCircle2,
   Monitor,
-  Tag,
   Clock,
   Search,
   ChevronLeft,
@@ -98,6 +98,10 @@ export function Historico() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useGridAnimation(listRef, { effect: "hapi", deps: [paginated.map((a) => a.id).join()] });
+
   const totalDelivered = alertHistory.reduce((s, a) => s + a.delivered, 0);
   const totalFailed = alertHistory.reduce((s, a) => s + a.failed, 0);
   const deliveryRate = Math.round((totalDelivered / (totalDelivered + totalFailed)) * 100);
@@ -128,7 +132,7 @@ export function Historico() {
           { label: "Entregues", numericValue: totalDelivered, suffix: "", sub: "notificações", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "Falhas", numericValue: totalFailed, suffix: "", sub: "não entregues", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
           { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", sub: "sucesso", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
-        ].map(({ label, numericValue, suffix, sub, icon: Icon, color, bg }) => (
+        ].map(({ label, numericValue, suffix, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
             <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
               <Icon className={`w-4 h-4 ${color}`} />
@@ -164,7 +168,7 @@ export function Historico() {
 
       {/* Alert list */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="divide-y divide-slate-50">
+        <div ref={listRef} className="divide-y divide-slate-50">
           {paginated.map((alert) => {
             const cfg = alertTypeConfig[alert.type];
             const Icon = cfg.icon;
