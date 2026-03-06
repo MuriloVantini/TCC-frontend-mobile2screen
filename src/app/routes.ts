@@ -7,6 +7,7 @@ import { Dispositivos } from "./pages/Dispositivos";
 import { EnviarAlerta } from "./pages/EnviarAlerta";
 import { Historico } from "./pages/Historico";
 import { Configuracoes } from "./pages/Configuracoes";
+import { MapaInterativo } from "./pages/MapaInterativo";
 import { Admin } from "./pages/Admin";
 import { AdminUsuarios } from "./pages/AdminUsuarios";
 import { NotFound } from "./pages/NotFound";
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: "dispositivos", Component: Dispositivos },
       { path: "enviar", Component: EnviarAlerta },
       { path: "historico", Component: Historico },
+      { path: "mapa", Component: MapaInterativo },
       { path: "configuracoes", Component: Configuracoes },
     ],
   },

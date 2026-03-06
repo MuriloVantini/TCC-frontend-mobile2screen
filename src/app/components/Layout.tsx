@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Zap,
   ShieldCheck,
+  Map,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/app/dispositivos", label: "Dispositivos", icon: Monitor },
   { to: "/app/enviar", label: "Enviar Alerta", icon: BellRing },
   { to: "/app/historico", label: "Histórico", icon: History },
+  { to: "/app/mapa", label: "Mapa Interativo", icon: Map },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 
