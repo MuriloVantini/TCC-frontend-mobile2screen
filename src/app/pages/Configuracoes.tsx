@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { animate } from "animejs";
 import {
   User,
   Bell,
   Shield,
   Webhook,
-  Key,
   Save,
   Check,
   Eye,
@@ -16,8 +16,6 @@ import {
   Phone,
   Building2,
   Lock,
-  Zap,
-  Monitor,
 } from "lucide-react";
 
 const sections = [
@@ -61,6 +59,20 @@ export function Configuracoes() {
   const activeItem = sections.find((s) => s.id === active)!;
   const ActiveIcon = activeItem.icon;
 
+  useEffect(() => {
+    animate(".js-settings-section", {
+      opacity: [0, 1],
+      translateY: [0, 16],
+      duration: 380,
+      ease: "outCubic",
+    });
+  }, [active]);
+
+  const handleSectionChange = (sectionId: string) => {
+    setActive(sectionId);
+    setMobileOpen(false);
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="mb-5">
@@ -82,7 +94,7 @@ export function Configuracoes() {
           {mobileOpen && (
             <div className="mt-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-md">
               {sections.map(({ id, label, icon: Icon }) => (
-                <button key={id} onClick={() => { setActive(id); setMobileOpen(false); }}
+                <button key={id} onClick={() => handleSectionChange(id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm border-b border-slate-50 last:border-0 ${active === id ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}>
                   <Icon className="w-4 h-4" />{label}
                 </button>
@@ -95,7 +107,7 @@ export function Configuracoes() {
         <aside className="hidden md:block w-48 shrink-0">
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
             {sections.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setActive(id)}
+              <button key={id} onClick={() => handleSectionChange(id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors border-b border-slate-50 last:border-0 ${active === id ? "bg-blue-50 text-blue-700 border-l-2 border-l-blue-600" : "text-slate-600 hover:bg-slate-50"
                   }`}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
@@ -110,7 +122,7 @@ export function Configuracoes() {
 
             {/* Perfil */}
             {active === "perfil" && (
-              <div className="space-y-5">
+              <div key="perfil" className="js-settings-section space-y-5">
                 <div className="flex items-center gap-4 pb-5 border-b border-slate-100">
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-md">
                     <span className="text-white text-xl font-bold">JS</span>
@@ -153,7 +165,7 @@ export function Configuracoes() {
 
             {/* Notificações */}
             {active === "notificacoes" && (
-              <div className="space-y-5">
+              <div key="notificacoes" className="js-settings-section space-y-5">
                 <div>
                   <h3 className="text-slate-800 mb-1">Notificações</h3>
                   <p className="text-slate-500 text-sm">Quando você quer ser notificado por e-mail</p>
@@ -192,7 +204,7 @@ export function Configuracoes() {
 
             {/* Segurança */}
             {active === "seguranca" && (
-              <div className="space-y-5">
+              <div key="seguranca" className="js-settings-section space-y-5">
                 <div>
                   <h3 className="text-slate-800 mb-1">Alterar Senha</h3>
                   <p className="text-slate-500 text-sm">Recomendamos uma senha forte com +8 caracteres</p>
@@ -234,7 +246,7 @@ export function Configuracoes() {
 
             {/* API */}
             {active === "api" && (
-              <div className="space-y-5">
+              <div key="api" className="js-settings-section space-y-5">
                 <div>
                   <h3 className="text-slate-800 mb-1">API & Integração</h3>
                   <p className="text-slate-500 text-sm">Use a API para integrar AlertaTV com seus sistemas</p>
