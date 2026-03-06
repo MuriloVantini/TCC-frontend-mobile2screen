@@ -96,9 +96,8 @@ export function Configuracoes() {
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
             {sections.map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => setActive(id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors border-b border-slate-50 last:border-0 ${
-                  active === id ? "bg-blue-50 text-blue-700 border-l-2 border-l-blue-600" : "text-slate-600 hover:bg-slate-50"
-                }`}>
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors border-b border-slate-50 last:border-0 ${active === id ? "bg-blue-50 text-blue-700 border-l-2 border-l-blue-600" : "text-slate-600 hover:bg-slate-50"
+                  }`}>
                 <Icon className="w-4 h-4 shrink-0" />{label}
               </button>
             ))}
@@ -265,16 +264,16 @@ export function Configuracoes() {
                 <div className="space-y-3">
                   <h4 className="text-slate-700">Exemplo de uso</h4>
                   <pre className="bg-slate-900 text-slate-300 p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
-{`POST https://api.alertatv.io/v1/alerts
-Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
+                    {`POST https://api.alertatv.io/v1/alerts
+                      Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
 
-{
-  "title": "Aviso de manutenção",
-  "message": "Sistema em manutenção às 18h",
-  "type": "warning",
-  "tags": ["ti", "todos"],
-  "duration": "10min"
-}`}
+                      {
+                        "title": "Aviso de manutenção",
+                        "message": "Sistema em manutenção às 18h",
+                        "type": "warning",
+                        "tags": ["ti", "todos"],
+                        "duration": "10min"
+                      }`}
                   </pre>
                 </div>
 

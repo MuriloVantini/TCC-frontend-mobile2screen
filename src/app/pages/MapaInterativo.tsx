@@ -67,7 +67,6 @@ export function MapaInterativo() {
   const [zoom, setZoom] = useState(100);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Entrance animation: markers fade in with stagger
   useEffect(() => {
     if (!svgRef.current) return;
     const groups = svgRef.current.querySelectorAll<SVGGElement>(".map-point-group");
@@ -79,7 +78,6 @@ export function MapaInterativo() {
     });
   }, []);
 
-  // Loop pulse animation for alert-status markers
   useEffect(() => {
     if (!svgRef.current) return;
     const pulseCircles = svgRef.current.querySelectorAll<SVGCircleElement>(".alert-pulse");
