@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { animate } from "animejs";
 import {
   Plus,
   Monitor,
@@ -12,7 +13,6 @@ import {
   CheckCircle,
   AlertCircle,
   ChevronDown,
-  CircuitBoard,
 } from "lucide-react";
 
 type DeviceType = "tv" | "rpi";
@@ -51,7 +51,19 @@ const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.len
 
 type Feedback = { type: "success" | "error"; msg: string } | null;
 
-function DeviceIcon({ type, online, size = "md" }: { type: DeviceType; online: boolean; size?: "sm" | "md" }) {
+const enterFrom = {
+  opacity: 0,
+  scale: 0.92,
+  translateY: 16,
+};
+
+const leaveTo = {
+  opacity: 0,
+  scale: 0.9,
+  translateY: -14,
+};
+
+function DeviceIcon({ type, size = "md" }: { type: DeviceType; size?: "sm" | "md" }) {
   const s = size === "sm" ? "w-3.5 h-3.5" : "w-5 h-5";
   if (type === "tv") return <Monitor className={s} />;
   return (
@@ -117,12 +129,33 @@ export function Dispositivos() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const deviceRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const pendingEnterId = useRef<number | null>(null);
 
   const [form, setForm] = useState<{ name: string; type: DeviceType; location: string; tags: string[] }>({
     name: "", type: "tv", location: "", tags: [],
   });
 
   const allTags = Array.from(new Set(devices.flatMap((d) => d.tags)));
+
+  useEffect(() => {
+    if (pendingEnterId.current === null) return;
+    const el = deviceRefs.current[pendingEnterId.current];
+    if (!el) {
+      pendingEnterId.current = null;
+      return;
+    }
+
+    animate(el, {
+      opacity: [enterFrom.opacity, 1],
+      scale: [enterFrom.scale, 1],
+      translateY: [enterFrom.translateY, 0],
+      duration: 1200,
+      ease: "outElastic(1, .5)",
+    });
+
+    pendingEnterId.current = null;
+  }, [devices]);
 
   const filtered = devices.filter((d) => {
     const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) || d.location.toLowerCase().includes(search.toLowerCase());
@@ -154,15 +187,31 @@ export function Dispositivos() {
       showFeedback({ type: "success", msg: "Dispositivo atualizado com sucesso!" });
     } else {
       const id = Math.max(0, ...devices.map((d) => d.id)) + 1;
+      pendingEnterId.current = id;
       setDevices((prev) => [...prev, { id, name: form.name, type: form.type, location: form.location, tags: form.tags, online: false, lastSeen: "nunca", ip: `192.168.1.${100 + id}` }]);
       showFeedback({ type: "success", msg: "Dispositivo cadastrado! Aguardando conexão." });
     }
     setShowModal(false);
   };
 
-  const handleDelete = (id: number) => {
-    setDevices((prev) => prev.filter((d) => d.id !== id));
+  const handleDelete = async (id: number) => {
+    const el = deviceRefs.current[id];
     setDeleteConfirm(null);
+
+    if (el) {
+      await new Promise<void>((resolve) => {
+        animate(el, {
+          opacity: [1, leaveTo.opacity],
+          scale: [1, leaveTo.scale],
+          translateY: [0, leaveTo.translateY],
+          duration: 800,
+          ease: "outElastic(.5, 1)",
+          onComplete: () => resolve(),
+        });
+      });
+    }
+
+    setDevices((prev) => prev.filter((d) => d.id !== id));
     showFeedback({ type: "success", msg: "Dispositivo removido." });
   };
 
@@ -210,11 +259,17 @@ export function Dispositivos() {
       {/* Device Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {filtered.map((device) => (
-          <div key={device.id} className={`bg-white border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow ${device.online ? "border-slate-100" : "border-slate-100 opacity-80"}`}>
+          <div
+            key={device.id}
+            ref={(el) => {
+              deviceRefs.current[device.id] = el;
+            }}
+            className={`bg-white border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow ${device.online ? "border-slate-100" : "border-slate-100 opacity-80"}`}
+          >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${device.online ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
-                  <DeviceIcon type={device.type} online={device.online} />
+                  <DeviceIcon type={device.type} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-800 leading-tight">{device.name}</p>
@@ -288,7 +343,7 @@ export function Dispositivos() {
                         form.type === t ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
-                      <DeviceIcon type={t} online={true} />
+                      <DeviceIcon type={t} />
                       <span className="font-medium">{t === "tv" ? "Television" : "Raspberry Pi"}</span>
                     </button>
                   ))}
@@ -316,7 +371,7 @@ export function Dispositivos() {
               </div>
 
               <div>
-                <label className="text-sm text-slate-600 mb-1.5 block flex items-center gap-1.5">
+                <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5" />
                   Tags de segmentação
                 </label>
@@ -355,7 +410,7 @@ export function Dispositivos() {
             <p className="text-slate-500 text-sm">O dispositivo perderá a conexão e não receberá mais alertas.</p>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50">Cancelar</button>
-              <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium">Remover</button>
+              <button onClick={() => void handleDelete(deleteConfirm)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium">Remover</button>
             </div>
           </div>
         </div>
