@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
   Search,
   Monitor,
@@ -68,6 +69,12 @@ export function AdminUsuarios() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const tbodyRef = useRef<HTMLTableSectionElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
+
+  useGridAnimation(tbodyRef, { effect: "ra", selector: ":scope > tr", deps: [paginated.map((u) => u.id).join()] });
+  useGridAnimation(mobileListRef, { effect: "ra", deps: [paginated.map((u) => u.id).join()] });
+
   const toggleSuspend = (id: number) => {
     setLocalUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: u.status === "active" ? "suspended" : "active" } : u));
     if (selected?.id === id) setSelected((s) => s ? { ...s, status: s.status === "active" ? "suspended" : "active" } : null);
@@ -127,7 +134,7 @@ export function AdminUsuarios() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody ref={tbodyRef} className="divide-y divide-slate-50">
               {paginated.map((u) => (
                 <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-3">
@@ -191,7 +198,7 @@ export function AdminUsuarios() {
       </div>
 
       {/* Mobile cards */}
-      <div className="sm:hidden space-y-3">
+      <div ref={mobileListRef} className="sm:hidden space-y-3">
         {paginated.map((u) => (
           <div key={u.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
             <div className="flex items-start gap-3 mb-3">
