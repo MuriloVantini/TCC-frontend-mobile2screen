@@ -1,3 +1,8 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* Animação de pulso do marcador de alerta do Leaflet */
+@keyframes lf-ping {
+  75%, 100% { transform: scale(2.5); opacity: 0; }
+}
