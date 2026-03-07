@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
@@ -8,6 +8,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { Alert, AlertDescription } from "../components/ui/alert";
 import {
   Monitor,
   Tag,
@@ -15,6 +21,7 @@ import {
   Info,
   AlertTriangle,
   Zap,
+  Check,
   CheckCircle2,
   Eye,
   ChevronDown,
@@ -189,9 +196,9 @@ export function EnviarAlerta() {
         </p>
         <p className="text-slate-400 text-sm mb-8">{matchingDevices.filter((d) => d.online).length} online · {matchingDevices.filter((d) => !d.online).length} offline</p>
         <div className="flex gap-3 w-full">
-          <button onClick={reset} className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors">
+          <Button onClick={reset} className="flex-1 rounded-xl">
             Enviar outro alerta
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -205,27 +212,27 @@ export function EnviarAlerta() {
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center w-full">
         {([1, 2, 3] as Step[]).map((s, i) => (
-          <div key={s} className="flex items-center gap-2 flex-1">
+          <React.Fragment key={s}>
             <button
               onClick={() => { if (s < step || (s === 2 && selectedTags.length > 0) || (s === 1)) setStep(s); }}
               className={`flex items-center gap-2 shrink-0 ${s <= step ? "cursor-pointer" : "cursor-default"}`}
             >
               <div
                 ref={(el) => { stepCircleRefs.current[i] = el; }}
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  s < step ? "bg-blue-600 text-white" : s === step ? "bg-blue-600 text-white ring-4 ring-blue-100" : "bg-slate-200 text-slate-500"
-                }`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${s < step ? "bg-blue-600 text-white" : s === step ? "bg-blue-600 text-white ring-4 ring-blue-100" : "bg-slate-200 text-slate-500"
+                  }`}
               >
-                {s < step ? <CheckCircle2 className="w-4 h-4" /> : s}
+                {s < step ? <Check className="w-4 h-4" /> : s}
               </div>
               <span className={`text-xs hidden sm:block ${s === step ? "text-blue-600 font-medium" : "text-slate-400"}`}>
                 {["Destino", "Mensagem", "Enviar"][i]}
               </span>
             </button>
+
             {i < 2 && (
-              <div className="h-0.5 flex-1 rounded bg-slate-200 overflow-hidden">
+              <div className="h-0.5 flex-1 mx-2 rounded bg-slate-200 overflow-hidden">
                 <div
                   ref={(el) => { connectorRefs.current[i] = el; }}
                   className="h-full bg-blue-600 origin-left"
@@ -233,7 +240,7 @@ export function EnviarAlerta() {
                 />
               </div>
             )}
-          </div>
+          </React.Fragment>
         ))}
       </div>
 
@@ -247,9 +254,8 @@ export function EnviarAlerta() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
               <button
                 onClick={() => { setSelectAll(true); setSelectedTags(allTags); }}
-                className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${
-                  selectAll ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
+                className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${selectAll ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
               >
                 <Monitor className="w-4 h-4 shrink-0" />
                 <span className="font-medium">Todos</span>
@@ -258,11 +264,10 @@ export function EnviarAlerta() {
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all text-left ${
-                    selectedTags.includes(tag) && !selectAll
+                  className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all text-left ${selectedTags.includes(tag) && !selectAll
                       ? "border-blue-600 bg-blue-50 text-blue-700"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   <Tag className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{tag}</span>
@@ -289,13 +294,13 @@ export function EnviarAlerta() {
             </div>
           </div>
 
-          <button
+          <Button
             onClick={() => setStep(2)}
             disabled={matchingDevices.length === 0}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-medium text-sm transition-colors"
+            className="w-full rounded-xl"
           >
             Próximo: Compor mensagem →
-          </button>
+          </Button>
         </div>
       )}
 
@@ -310,9 +315,8 @@ export function EnviarAlerta() {
                   <button
                     key={id}
                     onClick={() => setAlertType(id)}
-                    className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${
-                      alertType === id ? `${border} bg-slate-50 text-slate-800` : "border-slate-200 text-slate-500 hover:bg-slate-50"
-                    }`}
+                    className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${alertType === id ? `${border} bg-slate-50 text-slate-800` : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                      }`}
                   >
                     <div className={`w-5 h-5 ${color} rounded-md flex items-center justify-center`}>
                       <Icon className="w-3 h-3 text-white" />
@@ -323,41 +327,41 @@ export function EnviarAlerta() {
               </div>
             </div>
 
-            <div>
-              <label className="text-sm text-slate-600 mb-1.5 block">Título <span className="text-red-500">*</span></label>
-              <input
+            <div className="space-y-1.5">
+              <Label className="text-slate-600">Título <span className="text-red-500">*</span></Label>
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Reunião em 10 minutos"
                 maxLength={60}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="rounded-xl"
               />
-              <p className="text-xs text-slate-400 mt-1 text-right">{title.length}/60</p>
+              <p className="text-xs text-slate-400 text-right">{title.length}/60</p>
             </div>
 
-            <div>
-              <label className="text-sm text-slate-600 mb-1.5 block">Mensagem</label>
-              <textarea
+            <div className="space-y-1.5">
+              <Label className="text-slate-600">Mensagem</Label>
+              <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Texto adicional que aparecerá na tela..."
                 rows={3}
                 maxLength={200}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="rounded-xl"
               />
-              <p className="text-xs text-slate-400 mt-1 text-right">{message.length}/200</p>
+              <p className="text-xs text-slate-400 text-right">{message.length}/200</p>
             </div>
 
-            <div>
-              <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5">
+            <div className="space-y-1.5">
+              <Label className="text-slate-600">
                 <Clock className="w-3.5 h-3.5" /> Duração na tela
-              </label>
+              </Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-full flex items-center justify-between px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                  <Button variant="outline" className="w-full justify-between rounded-xl font-normal">
                     {duration}
                     <ChevronDown className="w-4 h-4 text-slate-400" />
-                  </button>
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
                   <DropdownMenuRadioGroup value={duration} onValueChange={setDuration}>
@@ -372,8 +376,10 @@ export function EnviarAlerta() {
             {/* Preview */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-slate-600">Prévia na TV</label>
-                <button
+                <Label className="text-slate-600">Prévia na TV</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     const opening = !showPreview;
                     setShowPreview(opening);
@@ -383,11 +389,11 @@ export function EnviarAlerta() {
                       }, 80);
                     }
                   }}
-                  className="text-xs text-blue-600 flex items-center gap-1"
+                  className="text-blue-600 h-auto p-0 hover:bg-transparent"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   {showPreview ? "Ocultar" : "Visualizar"}
-                </button>
+                </Button>
               </div>
               <div
                 ref={previewContainerRef}
@@ -415,13 +421,12 @@ export function EnviarAlerta() {
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(1)} className="px-4 py-3 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50 transition-colors">
+            <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl">
               ← Voltar
-            </button>
-            <button onClick={() => setStep(3)} disabled={!title}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-medium text-sm transition-colors">
+            </Button>
+            <Button onClick={() => setStep(3)} disabled={!title} className="flex-1 rounded-xl">
               Próximo: Revisar e enviar →
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -466,9 +471,9 @@ export function EnviarAlerta() {
                 <p className="text-xs text-slate-400 mb-2">Tags selecionadas</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedTags.map((tag) => (
-                    <span key={tag} className={`text-xs px-2.5 py-1 rounded-full font-medium ${getTagColor(tag)}`}>{tag}</span>
+                    <Badge key={tag} variant="outline" className={`rounded-full border-0 font-medium ${getTagColor(tag)}`}>{tag}</Badge>
                   ))}
-                  {selectAll && <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-100 text-blue-700">todos os dispositivos</span>}
+                  {selectAll && <Badge variant="outline" className="rounded-full border-0 font-medium bg-blue-100 text-blue-700">todos os dispositivos</Badge>}
                 </div>
               </div>
 
@@ -488,22 +493,23 @@ export function EnviarAlerta() {
           </div>
 
           {matchingDevices.some((d) => !d.online) && (
-            <div className="flex items-start gap-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <p>{matchingDevices.filter((d) => !d.online).length} dispositivo(s) estão offline e receberão o alerta quando reconectarem.</p>
-            </div>
+            <Alert className="border-amber-200 bg-amber-50 text-amber-700">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription>
+                {matchingDevices.filter((d) => !d.online).length} dispositivo(s) estão offline e receberão o alerta quando reconectarem.
+              </AlertDescription>
+            </Alert>
           )}
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(2)} className="px-4 py-3 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50 transition-colors">
+            <Button variant="outline" onClick={() => setStep(2)} className="rounded-xl">
               ← Voltar
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSend}
               disabled={sending}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${
-                alertType === "critical" ? "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30" : "bg-blue-600 hover:bg-blue-700 text-white"
-              } disabled:opacity-70`}
+              variant={alertType === "critical" ? "destructive" : "default"}
+              className="flex-1 rounded-xl"
             >
               {sending ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -511,7 +517,7 @@ export function EnviarAlerta() {
                 <Send className="w-4 h-4" />
               )}
               {sending ? "Enviando..." : `Enviar para ${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""}`}
-            </button>
+            </Button>
           </div>
         </div>
       )}
