@@ -513,10 +513,7 @@ export function EnviarAlerta() {
               onClick={handleSend}
               disabled={sendState !== "idle"}
               style={sendMorphStyle}
-              className={`overflow-hidden ${
-                sendState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
-                sendState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
-              }`}
+              className="overflow-hidden"
             >
               {sendMorphContent}
             </Button>

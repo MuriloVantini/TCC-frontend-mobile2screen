@@ -355,10 +355,7 @@ export function Historico() {
                   onClick={handleResend}
                   disabled={resendState !== "idle"}
                   style={resendMorphStyle}
-                  className={`overflow-hidden ${
-                    resendState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
-                    resendState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
-                  }`}
+                  className="overflow-hidden"
                 >
                   {resendMorphContent}
                 </Button>

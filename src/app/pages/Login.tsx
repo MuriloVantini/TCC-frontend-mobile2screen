@@ -158,10 +158,7 @@ export function Login() {
                     type="submit"
                     disabled={loginState !== "idle"}
                     style={loginMorphStyle}
-                    className={`overflow-hidden ${
-                      loginState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
-                      loginState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
-                    }`}
+                    className="overflow-hidden"
                   >
                     {loginMorphContent}
                   </Button>
@@ -228,10 +225,7 @@ export function Login() {
                     type="submit"
                     disabled={registerState !== "idle"}
                     style={registerMorphStyle}
-                    className={`overflow-hidden ${
-                      registerState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
-                      registerState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
-                    }`}
+                    className="overflow-hidden"
                   >
                     {registerMorphContent}
                   </Button>
