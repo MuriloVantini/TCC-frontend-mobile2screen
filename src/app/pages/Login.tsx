@@ -1,14 +1,12 @@
 import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
-import { useFormSubmitAnimation } from "../hooks/useFormSubmitAnimation";
+import { useFormSubmitAnimation, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
-
-type SubmitState = "idle" | "loading" | "success" | "error";
 
 export function Login() {
   const [tab, setTab] = useState<"login" | "register">("login");
@@ -25,6 +23,8 @@ export function Login() {
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const { shakeCard } = useFormSubmitAnimation(cardRef, tab);
+  const { morphStyle: loginMorphStyle, morphClass: loginMorphClass } = useMorphButton(loginState);
+  const { morphStyle: registerMorphStyle, morphClass: registerMorphClass } = useMorphButton(registerState);
 
   useDrawableAnimation(logoRef, { textSelector: "span" });
 
@@ -157,19 +157,8 @@ export function Login() {
                   <Button
                     type="submit"
                     disabled={loginState !== "idle"}
-                    style={{
-                      width: loginState === "idle" ? "100%" : "48px",
-                      height: "48px",
-                      borderRadius: loginState === "idle" ? "12px" : "9999px",
-                      transition: "width 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), border-radius 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), background-color 0.35s ease",
-                    }}
-                    className={`overflow-hidden text-white font-medium text-sm ${
-                      loginState === "success"
-                        ? "bg-emerald-500 hover:bg-emerald-500"
-                        : loginState === "error"
-                        ? "bg-red-500 hover:bg-red-500"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                    style={loginMorphStyle}
+                    className={loginMorphClass}
                   >
                     {loginState === "idle" && <span>Entrar</span>}
                     {loginState === "loading" && (
@@ -251,19 +240,8 @@ export function Login() {
                   <Button
                     type="submit"
                     disabled={registerState !== "idle"}
-                    style={{
-                      width: registerState === "idle" ? "100%" : "48px",
-                      height: "48px",
-                      borderRadius: registerState === "idle" ? "12px" : "9999px",
-                      transition: "width 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), border-radius 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), background-color 0.35s ease",
-                    }}
-                    className={`overflow-hidden text-white font-medium text-sm ${
-                      registerState === "success"
-                        ? "bg-emerald-500 hover:bg-emerald-500"
-                        : registerState === "error"
-                        ? "bg-red-500 hover:bg-red-500"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                    style={registerMorphStyle}
+                    className={registerMorphClass}
                   >
                     {registerState === "idle" && <span>Criar Minha Conta</span>}
                     {registerState === "loading" && (
