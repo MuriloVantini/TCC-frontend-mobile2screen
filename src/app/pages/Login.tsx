@@ -23,8 +23,8 @@ export function Login() {
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const { shakeCard } = useFormSubmitAnimation(cardRef, tab);
-  const { morphStyle: loginMorphStyle, morphClass: loginMorphClass } = useMorphButton(loginState);
-  const { morphStyle: registerMorphStyle, morphClass: registerMorphClass } = useMorphButton(registerState);
+  const { morphStyle: loginMorphStyle, morphContent: loginMorphContent } = useMorphButton(loginState, <span>Entrar</span>);
+  const { morphStyle: registerMorphStyle, morphContent: registerMorphContent } = useMorphButton(registerState, <span>Criar Minha Conta</span>);
 
   useDrawableAnimation(logoRef, { textSelector: "span" });
 
@@ -158,25 +158,12 @@ export function Login() {
                     type="submit"
                     disabled={loginState !== "idle"}
                     style={loginMorphStyle}
-                    className={loginMorphClass}
+                    className={`overflow-hidden ${
+                      loginState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
+                      loginState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
+                    }`}
                   >
-                    {loginState === "idle" && <span>Entrar</span>}
-                    {loginState === "loading" && (
-                      <svg className="animate-spin" viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
-                        <path d="M12 3a9 9 0 0 1 9 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                      </svg>
-                    )}
-                    {loginState === "success" && (
-                      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                    {loginState === "error" && (
-                      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <path d="M8 8l8 8M16 8l-8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                      </svg>
-                    )}
+                    {loginMorphContent}
                   </Button>
                 </div>
 
@@ -241,25 +228,12 @@ export function Login() {
                     type="submit"
                     disabled={registerState !== "idle"}
                     style={registerMorphStyle}
-                    className={registerMorphClass}
+                    className={`overflow-hidden ${
+                      registerState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
+                      registerState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
+                    }`}
                   >
-                    {registerState === "idle" && <span>Criar Minha Conta</span>}
-                    {registerState === "loading" && (
-                      <svg className="animate-spin" viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
-                        <path d="M12 3a9 9 0 0 1 9 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                      </svg>
-                    )}
-                    {registerState === "success" && (
-                      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                    {registerState === "error" && (
-                      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-                        <path d="M8 8l8 8M16 8l-8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                      </svg>
-                    )}
+                    {registerMorphContent}
                   </Button>
                 </div>
                 <p className="form-field text-xs text-slate-400 text-center">Ao criar uma conta, você concorda com os <span className="text-blue-600 cursor-pointer hover:underline">Termos de Uso</span>.</p>
