@@ -5,6 +5,8 @@ export type SubmitState = "idle" | "loading" | "success" | "error";
 
 export function shake(cardRef: RefObject<HTMLElement | null>, tab: string) {
   useEffect(() => {
+    if (!cardRef.current) return;
+
     animate(cardRef.current!, {
       translateY: [30, 0],
       opacity: [0, 1],
@@ -20,6 +22,8 @@ export function shake(cardRef: RefObject<HTMLElement | null>, tab: string) {
   }, [tab]);
 
   const shakeCard = () => {
+    if (!cardRef.current) return;
+
     animate(cardRef.current!, {
       translateX: [-10, 10, -8, 8, -4, 4, 0],
       duration: 500,
