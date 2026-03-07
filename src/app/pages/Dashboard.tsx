@@ -227,7 +227,7 @@ export function Dashboard() {
                     ) : (
                       <XCircle className="w-3.5 h-3.5 text-red-400" />
                     )}
-                    <span className="text-xs text-slate-400">{alert.devices} {alert.devices == 1 ? "disponível" : "disponíveis"}</span>
+                    <span className="text-xs text-slate-400">{alert.devices} {alert.devices == 1 ? "dispositivo" : "dispositivos"}</span>
                   </div>
                   <span className="text-xs text-slate-400">{alert.time}</span>
                 </div>
