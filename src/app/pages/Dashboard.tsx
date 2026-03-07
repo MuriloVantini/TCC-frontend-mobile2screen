@@ -16,7 +16,8 @@ import {
   Zap,
   ChevronRight,
 } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
 
 const activityData = [
   { hora: "08h", alertas: 2 },
@@ -51,6 +52,10 @@ const alertTypeConfig = {
   critical: { icon: Zap, color: "text-red-600", bg: "bg-red-100", label: "Crítico" },
   success: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100", label: "Sucesso" },
 };
+
+const activityChartConfig = {
+  alertas: { label: "Alertas", color: "#2563eb" },
+} satisfies ChartConfig;
 
 const tagColors = [
   "bg-blue-100 text-blue-700",
@@ -129,21 +134,21 @@ export function Dashboard() {
               <Clock className="w-3.5 h-3.5" /> Hoje
             </span>
           </div>
-          <ResponsiveContainer width="100%" height={160}>
+          <ChartContainer config={activityChartConfig} className="h-48 w-full aspect-auto">
             <AreaChart data={activityData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
               <defs>
                 <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--color-alertas)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--color-alertas)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12 }} />
-              <Area type="monotone" dataKey="alertas" stroke="#2563eb" fill="url(#grad)" strokeWidth={2} dot={false} />
+              <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+              <Area type="monotone" dataKey="alertas" stroke="var(--color-alertas)" fill="url(#grad)" strokeWidth={2} dot={false} />
             </AreaChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
 
         {/* Devices status */}
