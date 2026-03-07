@@ -17,6 +17,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Card } from "../components/ui/card";
+import { useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import {
   Select,
   SelectContent,
@@ -103,6 +104,23 @@ export function Historico() {
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AlertRecord | null>(null);
+  const [resendState, setResendState] = useState<SubmitState>("idle");
+
+  const handleResend = async () => {
+    setResendState("loading");
+    await new Promise((r) => setTimeout(r, 1500));
+    setResendState("success");
+    setTimeout(() => setResendState("idle"), 1500);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) { setSelected(null); setResendState("idle"); }
+  };
+
+  const { morphStyle: resendMorphStyle, morphContent: resendMorphContent } = useMorphButton(
+    resendState,
+    <><RotateCcw className="w-4 h-4" /> Reenviar este alerta</>
+  );
 
   const filtered = alertHistory.filter((a) => {
     const matchSearch = a.title.toLowerCase().includes(search.toLowerCase()) || a.tags.join(" ").includes(search.toLowerCase());
@@ -278,7 +296,7 @@ export function Historico() {
       </div>
 
       {/* Detail Dialog */}
-      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+      <Dialog open={!!selected} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh] gap-0">
           {selected && (
             <>
@@ -332,9 +350,17 @@ export function Historico() {
               </div>
             </div>
 
-              <div className="px-5 py-4 border-t border-slate-100">
-                <Button className="w-full">
-                  <RotateCcw className="w-4 h-4" /> Reenviar este alerta
+              <div className="px-5 py-4 border-t border-slate-100 flex justify-center">
+                <Button
+                  onClick={handleResend}
+                  disabled={resendState !== "idle"}
+                  style={resendMorphStyle}
+                  className={`overflow-hidden ${
+                    resendState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
+                    resendState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
+                  }`}
+                >
+                  {resendMorphContent}
                 </Button>
               </div>
             </>
