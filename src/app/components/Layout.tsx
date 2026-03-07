@@ -35,10 +35,8 @@ export function Layout() {
   const sidebarNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLElement>(null);
 
   useDrawableAnimation(logoRef, { textSelector: "span" });
-  useDrawableAnimation(sidebarRef, { textSelector: "span" });
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       if (sidebarNavRef.current) {
@@ -78,7 +76,6 @@ export function Layout() {
 
       {/* Sidebar */}
       <aside
-        ref={sidebarRef}
         className={`fixed left-0 top-0 h-full w-64 bg-[#0f172a] z-50 flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
@@ -114,9 +111,6 @@ export function Layout() {
             >
               <Icon className="w-4.5 h-4.5 shrink-0" />
               <span>{label}</span>
-              {label === "Enviar Alerta" && (
-                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold">NOVO</span>
-              )}
             </NavLink>
           ))}
         </nav>
