@@ -72,8 +72,8 @@ export function AdminUsuarios() {
   const tbodyRef = useRef<HTMLTableSectionElement>(null);
   const mobileListRef = useRef<HTMLDivElement>(null);
 
-  useGridAnimation(tbodyRef, { effect: "ra", selector: ":scope > tr", deps: [paginated.map((u) => u.id).join()] });
-  useGridAnimation(mobileListRef, { effect: "ra", deps: [paginated.map((u) => u.id).join()] });
+  useGridAnimation(tbodyRef, { effect: "seket", selector: ":scope > tr", deps: [paginated.map((u) => u.id).join()] });
+  useGridAnimation(mobileListRef, { effect: "seket", deps: [paginated.map((u) => u.id).join()] });
 
   const toggleSuspend = (id: number) => {
     setLocalUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: u.status === "active" ? "suspended" : "active" } : u));
