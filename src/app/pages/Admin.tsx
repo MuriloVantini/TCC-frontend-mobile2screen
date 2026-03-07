@@ -18,15 +18,38 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Legend,
   LineChart,
   Line,
 } from "recharts";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
+import { Progress } from "../components/ui/progress";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "../components/ui/chart";
 
 const weeklyAlerts = [
   { dia: "Seg", alertas: 34, usuarios: 12 },
@@ -39,10 +62,10 @@ const weeklyAlerts = [
 ];
 
 const alertTypesDist = [
-  { name: "Informativo", value: 42, color: "#3b82f6" },
-  { name: "Aviso", value: 28, color: "#f59e0b" },
-  { name: "Crítico", value: 18, color: "#ef4444" },
-  { name: "Sucesso", value: 12, color: "#10b981" },
+  { key: "informativo", name: "Informativo", value: 42 },
+  { key: "aviso", name: "Aviso", value: 28 },
+  { key: "critico", name: "Crítico", value: 18 },
+  { key: "sucesso", name: "Sucesso", value: 12 },
 ];
 
 const userGrowth = [
@@ -69,6 +92,22 @@ const metrics = [
   { label: "Média TV / usuário", numericValue: 4.6, format: (v: number) => v.toFixed(1).replace(".", ","), change: "+0,8", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
 ];
 
+const weeklyChartConfig = {
+  alertas: { label: "Alertas", color: "#2563eb" },
+  usuarios: { label: "Usuários ativos", color: "#8b5cf6" },
+} satisfies ChartConfig;
+
+const alertTypesChartConfig = {
+  informativo: { label: "Informativo", color: "#3b82f6" },
+  aviso: { label: "Aviso", color: "#f59e0b" },
+  critico: { label: "Crítico", color: "#ef4444" },
+  sucesso: { label: "Sucesso", color: "#10b981" },
+} satisfies ChartConfig;
+
+const userGrowthChartConfig = {
+  usuarios: { label: "Usuários", color: "#8b5cf6" },
+} satisfies ChartConfig;
+
 export function Admin() {
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
@@ -80,123 +119,144 @@ export function Admin() {
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {metrics.map(({ label, numericValue, format, change, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <Card key={label} className="gap-0 border-slate-100 shadow-sm p-4 bg-white">
             <div className="flex items-start justify-between mb-3">
               <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center`}>
                 <Icon className={`w-4.5 h-4.5 ${color}`} />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-medium text-emerald-600">
+              <Badge variant="outline" className="gap-0.5 border-emerald-200 bg-emerald-50 text-emerald-700">
                 <ArrowUpRight className="w-3 h-3" /> {change}
-              </span>
+              </Badge>
             </div>
             <AnimatedCounter value={numericValue} format={format} className="text-2xl font-bold text-slate-800" />
             <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Alertas por dia */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h3 className="text-slate-800 mb-1">Atividade semanal</h3>
-          <p className="text-slate-500 text-xs mb-4">Alertas e usuários ativos por dia</p>
-          <ResponsiveContainer width="100%" height={200}>
+        <Card className="lg:col-span-2 gap-0 bg-white border-slate-100 shadow-sm">
+          <CardHeader className="px-5 pt-5 pb-3">
+            <CardTitle className="text-slate-800">Atividade semanal</CardTitle>
+            <CardDescription className="text-slate-500 text-xs">Alertas e usuários ativos por dia</CardDescription>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+          <ChartContainer config={weeklyChartConfig} className="h-[200px] w-full">
             <BarChart data={weeklyAlerts} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12 }} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="alertas" name="Alertas" fill="#2563eb" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="usuarios" name="Usuários ativos" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar dataKey="alertas" fill="var(--color-alertas)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="usuarios" fill="var(--color-usuarios)" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
-        </div>
+          </ChartContainer>
+          </CardContent>
+        </Card>
 
         {/* Alert types distribution */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h3 className="text-slate-800 mb-1">Tipos de alertas</h3>
-          <p className="text-slate-500 text-xs mb-4">Distribuição no mês</p>
-          <ResponsiveContainer width="100%" height={200}>
+        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+          <CardHeader className="px-5 pt-5 pb-3">
+            <CardTitle className="text-slate-800">Tipos de alertas</CardTitle>
+            <CardDescription className="text-slate-500 text-xs">Distribuição no mês</CardDescription>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+          <ChartContainer config={alertTypesChartConfig} className="h-[200px] w-full">
             <PieChart>
               <Pie data={alertTypesDist} cx="50%" cy="45%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
-                {alertTypesDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                {alertTypesDist.map((entry) => <Cell key={entry.key} fill={`var(--color-${entry.key})`} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12 }} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+              <ChartTooltip content={<ChartTooltipContent nameKey="key" />} />
+              <ChartLegend content={<ChartLegendContent nameKey="key" />} />
             </PieChart>
-          </ResponsiveContainer>
-        </div>
+          </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
 
       {/* User growth + top users */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Growth chart */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h3 className="text-slate-800 mb-1">Crescimento de usuários</h3>
-          <p className="text-slate-500 text-xs mb-4">Últimos 6 meses</p>
-          <ResponsiveContainer width="100%" height={180}>
+        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+          <CardHeader className="px-5 pt-5 pb-3">
+            <CardTitle className="text-slate-800">Crescimento de usuários</CardTitle>
+            <CardDescription className="text-slate-500 text-xs">Últimos 6 meses</CardDescription>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+          <ChartContainer config={userGrowthChartConfig} className="h-[180px] w-full">
             <LineChart data={userGrowth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12 }} />
-              <Line type="monotone" dataKey="usuarios" stroke="#8b5cf6" strokeWidth={2.5} dot={{ fill: "#8b5cf6", r: 4 }} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Line type="monotone" dataKey="usuarios" stroke="var(--color-usuarios)" strokeWidth={2.5} dot={{ fill: "var(--color-usuarios)", r: 4 }} />
             </LineChart>
-          </ResponsiveContainer>
-        </div>
+          </ChartContainer>
+          </CardContent>
+        </Card>
 
         {/* Alert type breakdown */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h3 className="text-slate-800 mb-4">Distribuição por tipo</h3>
-          <div className="space-y-3">
+        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+          <CardHeader className="px-5 pt-5 pb-3">
+            <CardTitle className="text-slate-800">Distribuição por tipo</CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+          <div className="space-y-4">
             {[
               { label: "Informativo", count: 1192, pct: 42, color: "bg-blue-500", icon: Info, textColor: "text-blue-600" },
               { label: "Aviso", count: 795, pct: 28, color: "bg-amber-500", icon: AlertTriangle, textColor: "text-amber-600" },
               { label: "Crítico", count: 511, pct: 18, color: "bg-red-500", icon: Zap, textColor: "text-red-500" },
               { label: "Sucesso", count: 341, pct: 12, color: "bg-emerald-500", icon: CheckCircle2, textColor: "text-emerald-600" },
-            ].map(({ label, count, pct, color, icon: Icon, textColor }) => (
+            ].map(({ label, count, pct, icon: Icon, textColor }) => (
               <div key={label}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <Icon className={`w-3.5 h-3.5 ${textColor}`} />
                     <span className="text-sm text-slate-600">{label}</span>
                   </div>
-                  <span className="text-sm font-medium text-slate-700">{count.toLocaleString("pt-BR")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-slate-700">{count.toLocaleString("pt-BR")}</span>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-slate-200 text-slate-600">{pct}%</Badge>
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5">
-                  <div className={`${color} h-1.5 rounded-full`} style={{ width: `${pct}%` }} />
-                </div>
+                <Progress value={pct} className="h-1.5 bg-slate-100" />
               </div>
             ))}
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Top users table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h3 className="text-slate-800">Top usuários</h3>
-          <Link to="/admin/usuarios" className="text-xs text-violet-600 hover:underline flex items-center gap-0.5">
-            Ver todos <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+      <Card className="gap-0 bg-white border-slate-100 shadow-sm overflow-hidden">
+        <CardHeader className="px-5 py-4 border-b border-slate-100">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-slate-800">Top usuários</CardTitle>
+            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs text-violet-600 hover:text-violet-700 hover:bg-violet-50">
+              <Link to="/admin/usuarios">
+                Ver todos <ChevronRight className="w-3 h-3" />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
 
         {/* Desktop table */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-slate-100 bg-slate-50 hover:bg-slate-50">
                 {["Usuário", "Dispositivos", "Alertas enviados", "Taxa entrega"].map((h) => (
-                  <th key={h} className="text-left px-5 py-3 text-xs text-slate-500 uppercase tracking-wider">{h}</th>
+                  <TableHead key={h} className="px-5 py-3 text-xs text-slate-500 uppercase tracking-wider">{h}</TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-50">
               {topUsers.map((u, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-5 py-3">
+                <TableRow key={i} className="hover:bg-slate-50/50 border-slate-50">
+                  <TableCell className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg flex items-center justify-center shrink-0">
                         <span className="text-white text-xs font-bold">{u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
@@ -206,26 +266,26 @@ export function Admin() {
                         <p className="text-xs text-slate-400">{u.email}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-5 py-3">
+                  </TableCell>
+                  <TableCell className="px-5 py-3">
                     <div className="flex items-center gap-1.5 text-sm text-slate-700">
                       <Monitor className="w-3.5 h-3.5 text-slate-400" /> {u.devices}
                     </div>
-                  </td>
-                  <td className="px-5 py-3">
+                  </TableCell>
+                  <TableCell className="px-5 py-3">
                     <div className="flex items-center gap-1.5 text-sm text-slate-700">
                       <BellRing className="w-3.5 h-3.5 text-slate-400" /> {u.alerts}
                     </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className={`text-sm font-medium ${parseInt(u.rate) === 100 ? "text-emerald-600" : parseInt(u.rate) >= 95 ? "text-blue-600" : "text-amber-600"}`}>
+                  </TableCell>
+                  <TableCell className="px-5 py-3">
+                    <span className={`text-sm font-medium ${parseInt(u.rate, 10) === 100 ? "text-emerald-600" : parseInt(u.rate, 10) >= 95 ? "text-blue-600" : "text-amber-600"}`}>
                       {u.rate}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
 
         {/* Mobile cards */}
@@ -241,13 +301,13 @@ export function Admin() {
                 <div className="flex gap-4 text-xs text-slate-600">
                   <span className="flex items-center gap-1"><Monitor className="w-3 h-3" /> {u.devices} disp.</span>
                   <span className="flex items-center gap-1"><BellRing className="w-3 h-3" /> {u.alerts} alertas</span>
-                  <span className={`font-medium ${parseInt(u.rate) >= 95 ? "text-emerald-600" : "text-amber-600"}`}>{u.rate}</span>
+                  <span className={`font-medium ${parseInt(u.rate, 10) >= 95 ? "text-emerald-600" : "text-amber-600"}`}>{u.rate}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
