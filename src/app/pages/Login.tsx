@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
-import { animate, stagger } from "animejs";
+import { useFormSubmitAnimation } from "../hooks/useFormSubmitAnimation";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
@@ -18,29 +18,7 @@ export function Login() {
 
   const navigate = useNavigate();
   const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    animate(cardRef.current!, {
-      translateY: [30, 0],
-      opacity: [0, 1],
-      duration: 700,
-      easing: "easeOutExpo",
-    });
-    animate(".form-field", {
-      translateX: [-12, 0],
-      opacity: [0, 1],
-      delay: stagger(70, { start: 250 }),
-      easing: "easeOutQuad",
-    });
-  }, [tab]);
-
-  const shakeCard = () => {
-    animate(cardRef.current!, {
-      translateX: [-10, 10, -8, 8, -4, 4, 0],
-      duration: 500,
-      easing: "easeInOutSine",
-    });
-  };
+  const { shakeCard } = useFormSubmitAnimation(cardRef, tab);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
