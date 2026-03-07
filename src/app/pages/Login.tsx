@@ -5,6 +5,7 @@ import { useFormSubmitAnimation } from "../hooks/useFormSubmitAnimation";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
@@ -86,41 +87,39 @@ export function Login() {
 
         {/* Card */}
         <div ref={cardRef} className="bg-white rounded-2xl shadow-2xl overflow-hidden opacity-0">
-          {/* Tabs */}
-          <div className="flex border-b border-slate-100">
-            <Button
-              variant="ghost"
-              onClick={() => { setTab("login"); setError(""); setSuccess(""); }}
-              className={`flex-1 h-auto py-3.5 rounded-none text-sm font-medium transition-colors ${
-                tab === "login" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700 hover:bg-transparent"
-              }`}
-            >
-              Entrar
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => { setTab("register"); setError(""); setSuccess(""); }}
-              className={`flex-1 h-auto py-3.5 rounded-none text-sm font-medium transition-colors ${
-                tab === "register" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700 hover:bg-transparent"
-              }`}
-            >
-              Criar Conta
-            </Button>
-          </div>
+          <Tabs
+            value={tab}
+            onValueChange={(v) => { setTab(v as "login" | "register"); setError(""); setSuccess(""); }}
+            className="gap-0"
+          >
+            <TabsList className="w-full h-auto rounded-none border-b border-slate-100 bg-white p-0">
+              <TabsTrigger
+                value="login"
+                className="flex-1 h-auto py-3.5 rounded-none border-b-2 border-transparent text-slate-500 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 data-[state=active]:shadow-none"
+              >
+                Entrar
+              </TabsTrigger>
+              <TabsTrigger
+                value="register"
+                className="flex-1 h-auto py-3.5 rounded-none border-b-2 border-transparent text-slate-500 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 data-[state=active]:bg-blue-50/50 data-[state=active]:shadow-none"
+              >
+                Criar Conta
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="p-6 sm:p-7">
-            {error && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3 mb-4">
-                <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-              </div>
-            )}
-            {success && (
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl p-3 mb-4">
-                <CheckCircle className="w-4 h-4 shrink-0" /> {success}
-              </div>
-            )}
+            <div className="p-6 sm:p-7">
+              {error && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3 mb-4">
+                  <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+                </div>
+              )}
+              {success && (
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl p-3 mb-4">
+                  <CheckCircle className="w-4 h-4 shrink-0" /> {success}
+                </div>
+              )}
 
-            {tab === "login" ? (
+              <TabsContent value="login" className="mt-0">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="form-field">
                   <Label className="text-slate-600 mb-1.5">E-mail</Label>
@@ -202,7 +201,9 @@ export function Login() {
                   </Button>
                 </Link>
               </form>
-            ) : (
+              </TabsContent>
+
+              <TabsContent value="register" className="mt-0">
               <form onSubmit={handleRegister} className="space-y-3.5">
                 <div className="form-field">
                   <Label className="text-slate-600 mb-1.5">Nome completo <span className="text-red-500">*</span></Label>
@@ -285,8 +286,9 @@ export function Login() {
                 </div>
                 <p className="form-field text-xs text-slate-400 text-center">Ao criar uma conta, você concorda com os <span className="text-blue-600 cursor-pointer hover:underline">Termos de Uso</span>.</p>
               </form>
-            )}
-          </div>
+              </TabsContent>
+            </div>
+          </Tabs>
         </div>
 
         <p className="text-center text-slate-600/40 text-xs mt-6">© 2026 AlertaTV · v1.0</p>
