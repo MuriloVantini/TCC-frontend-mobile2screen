@@ -2,6 +2,10 @@ import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
 import { useFormSubmitAnimation } from "../hooks/useFormSubmitAnimation";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
+import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
@@ -18,7 +22,11 @@ export function Login() {
 
   const navigate = useNavigate();
   const cardRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
   const { shakeCard } = useFormSubmitAnimation(cardRef, tab);
+
+  useDrawableAnimation(logoRef, { textSelector: "span" });
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +76,7 @@ export function Login() {
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div ref={logoRef} className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-xl shadow-blue-600/30">
             <Zap className="w-8 h-8 text-white" />
           </div>
@@ -80,22 +88,24 @@ export function Login() {
         <div ref={cardRef} className="bg-white rounded-2xl shadow-2xl overflow-hidden opacity-0">
           {/* Tabs */}
           <div className="flex border-b border-slate-100">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => { setTab("login"); setError(""); setSuccess(""); }}
-              className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
-                tab === "login" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"
+              className={`flex-1 h-auto py-3.5 rounded-none text-sm font-medium transition-colors ${
+                tab === "login" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700 hover:bg-transparent"
               }`}
             >
               Entrar
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => { setTab("register"); setError(""); setSuccess(""); }}
-              className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
-                tab === "register" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700"
+              className={`flex-1 h-auto py-3.5 rounded-none text-sm font-medium transition-colors ${
+                tab === "register" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-slate-500 hover:text-slate-700 hover:bg-transparent"
               }`}
             >
               Criar Conta
-            </button>
+            </Button>
           </div>
 
           <div className="p-6 sm:p-7">
@@ -113,39 +123,39 @@ export function Login() {
             {tab === "login" ? (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="form-field">
-                  <label className="text-sm text-slate-600 mb-1.5 block">E-mail</label>
+                  <Label className="text-slate-600 mb-1.5">E-mail</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                    <Input
                       type="email"
                       value={loginForm.email}
                       onChange={(e) => setLoginForm((f) => ({ ...f, email: e.target.value }))}
                       placeholder="seu@email.com"
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="pl-9 rounded-xl bg-slate-50"
                     />
                   </div>
                 </div>
                 <div className="form-field">
-                  <label className="text-sm text-slate-600 mb-1.5 block">Senha</label>
+                  <Label className="text-slate-600 mb-1.5">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                    <Input
                       type={showPassword ? "text" : "password"}
                       value={loginForm.password}
                       onChange={(e) => setLoginForm((f) => ({ ...f, password: e.target.value }))}
                       placeholder="••••••••"
-                      className="w-full pl-9 pr-10 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="pl-9 pr-10 rounded-xl bg-slate-50"
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Button type="button" variant="ghost" size="icon" onClick={() => setShowPassword(!showPassword)} className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-slate-400 hover:text-slate-600 hover:bg-transparent">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <div className="form-field flex justify-end">
-                  <button type="button" className="text-xs text-blue-600 hover:underline">Esqueci a senha</button>
+                  <Button type="button" variant="link" className="text-xs p-0 h-auto text-blue-600">Esqueci a senha</Button>
                 </div>
                 <div className="form-field flex justify-center">
-                  <button
+                  <Button
                     type="submit"
                     disabled={loginState !== "idle"}
                     style={{
@@ -154,11 +164,11 @@ export function Login() {
                       borderRadius: loginState === "idle" ? "12px" : "9999px",
                       transition: "width 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), border-radius 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), background-color 0.35s ease",
                     }}
-                    className={`flex items-center justify-center text-white font-medium text-sm overflow-hidden ${
+                    className={`overflow-hidden text-white font-medium text-sm ${
                       loginState === "success"
-                        ? "bg-emerald-500"
+                        ? "bg-emerald-500 hover:bg-emerald-500"
                         : loginState === "error"
-                        ? "bg-red-500"
+                        ? "bg-red-500 hover:bg-red-500"
                         : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
@@ -179,63 +189,65 @@ export function Login() {
                         <path d="M8 8l8 8M16 8l-8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="relative my-2">
                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100" /></div>
                   <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-slate-400">ou acesse como</span></div>
                 </div>
-                <Link to="/admin" className="w-full flex items-center justify-center gap-2 border border-violet-200 text-violet-600 hover:bg-violet-50 py-2.5 rounded-xl text-sm font-medium transition-colors">
-                  Painel Administrador →
+                <Link to="/admin">
+                  <Button variant="outline" className="w-full border-violet-200 text-violet-600 hover:bg-violet-50 hover:text-violet-700 rounded-xl py-2.5 h-auto">
+                    Painel Administrador →
+                  </Button>
                 </Link>
               </form>
             ) : (
               <form onSubmit={handleRegister} className="space-y-3.5">
                 <div className="form-field">
-                  <label className="text-sm text-slate-600 mb-1.5 block">Nome completo <span className="text-red-500">*</span></label>
+                  <Label className="text-slate-600 mb-1.5">Nome completo <span className="text-red-500">*</span></Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="text" value={registerForm.name} onChange={(e) => setRegisterForm((f) => ({ ...f, name: e.target.value }))} placeholder="Seu nome"
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                    <Input type="text" value={registerForm.name} onChange={(e) => setRegisterForm((f) => ({ ...f, name: e.target.value }))} placeholder="Seu nome"
+                      className="pl-9 rounded-xl bg-slate-50" />
                   </div>
                 </div>
                 <div className="form-field">
-                  <label className="text-sm text-slate-600 mb-1.5 block">E-mail <span className="text-red-500">*</span></label>
+                  <Label className="text-slate-600 mb-1.5">E-mail <span className="text-red-500">*</span></Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="email" value={registerForm.email} onChange={(e) => setRegisterForm((f) => ({ ...f, email: e.target.value }))} placeholder="seu@email.com"
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                    <Input type="email" value={registerForm.email} onChange={(e) => setRegisterForm((f) => ({ ...f, email: e.target.value }))} placeholder="seu@email.com"
+                      className="pl-9 rounded-xl bg-slate-50" />
                   </div>
                 </div>
                 <div className="form-field">
-                  <label className="text-sm text-slate-600 mb-1.5 block">Empresa / Organização</label>
+                  <Label className="text-slate-600 mb-1.5">Empresa / Organização</Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="text" value={registerForm.company} onChange={(e) => setRegisterForm((f) => ({ ...f, company: e.target.value }))} placeholder="Nome da empresa"
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                    <Input type="text" value={registerForm.company} onChange={(e) => setRegisterForm((f) => ({ ...f, company: e.target.value }))} placeholder="Nome da empresa"
+                      className="pl-9 rounded-xl bg-slate-50" />
                   </div>
                 </div>
                 <div className="form-field grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm text-slate-600 mb-1.5 block">Senha <span className="text-red-500">*</span></label>
+                    <Label className="text-slate-600 mb-1.5">Senha <span className="text-red-500">*</span></Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input type="password" value={registerForm.password} onChange={(e) => setRegisterForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••"
-                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                        <Input type="password" value={registerForm.password} onChange={(e) => setRegisterForm((f) => ({ ...f, password: e.target.value }))} placeholder="••••••"
+                          className="pl-9 rounded-xl bg-slate-50" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm text-slate-600 mb-1.5 block">Confirmar <span className="text-red-500">*</span></label>
+                    <Label className="text-slate-600 mb-1.5">Confirmar <span className="text-red-500">*</span></Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input type="password" value={registerForm.confirm} onChange={(e) => setRegisterForm((f) => ({ ...f, confirm: e.target.value }))} placeholder="••••••"
-                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
+                        <Input type="password" value={registerForm.confirm} onChange={(e) => setRegisterForm((f) => ({ ...f, confirm: e.target.value }))} placeholder="••••••"
+                          className="pl-9 rounded-xl bg-slate-50" />
                     </div>
                   </div>
                 </div>
                 <div className="form-field flex justify-center mt-1">
-                  <button
+                  <Button
                     type="submit"
                     disabled={registerState !== "idle"}
                     style={{
@@ -244,11 +256,11 @@ export function Login() {
                       borderRadius: registerState === "idle" ? "12px" : "9999px",
                       transition: "width 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), border-radius 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), background-color 0.35s ease",
                     }}
-                    className={`flex items-center justify-center text-white font-medium text-sm overflow-hidden ${
+                    className={`overflow-hidden text-white font-medium text-sm ${
                       registerState === "success"
-                        ? "bg-emerald-500"
+                        ? "bg-emerald-500 hover:bg-emerald-500"
                         : registerState === "error"
-                        ? "bg-red-500"
+                        ? "bg-red-500 hover:bg-red-500"
                         : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
@@ -269,7 +281,7 @@ export function Login() {
                         <path d="M8 8l8 8M16 8l-8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
                       </svg>
                     )}
-                  </button>
+                  </Button>
                 </div>
                 <p className="form-field text-xs text-slate-400 text-center">Ao criar uma conta, você concorda com os <span className="text-blue-600 cursor-pointer hover:underline">Termos de Uso</span>.</p>
               </form>
