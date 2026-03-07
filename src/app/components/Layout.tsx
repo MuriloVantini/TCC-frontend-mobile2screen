@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
+import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import {
   LayoutDashboard,
   Monitor,
@@ -33,7 +34,11 @@ export function Layout() {
   const location = useLocation();
   const sidebarNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
 
+  useDrawableAnimation(logoRef, { textSelector: "span" });
+  useDrawableAnimation(sidebarRef, { textSelector: "span" });
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       if (sidebarNavRef.current) {
@@ -73,6 +78,7 @@ export function Layout() {
 
       {/* Sidebar */}
       <aside
+        ref={sidebarRef}
         className={`fixed left-0 top-0 h-full w-64 bg-[#0f172a] z-50 flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
@@ -82,9 +88,9 @@ export function Layout() {
             <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <p className="text-white text-sm font-semibold leading-tight">AlertaTV</p>
-              <p className="text-slate-400 text-xs">Alertas em tempo real</p>
+            <div className="flex flex-col">
+              <span className="text-white text-sm font-semibold leading-tight">AlertaTV</span>
+              <span className="text-slate-400 text-xs">Alertas em tempo real</span>
             </div>
           </div>
           <button className="md:hidden text-slate-400 hover:text-white p-1" onClick={() => setSidebarOpen(false)}>
@@ -100,10 +106,9 @@ export function Layout() {
               end={end}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "text-slate-400 hover:bg-white/10 hover:text-white"
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${isActive
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-slate-400 hover:bg-white/10 hover:text-white"
                 }`
               }
             >
@@ -145,7 +150,7 @@ export function Layout() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="hidden md:flex items-center gap-2">
+            <div ref={logoRef} className="hidden md:flex items-center gap-2">
               <Zap className="w-5 h-5 text-blue-600" />
               <span className="text-slate-800 font-semibold">AlertaTV</span>
             </div>
@@ -202,8 +207,7 @@ export function Layout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors ${
-                  isActive ? "text-blue-600" : "text-slate-400"
+                `relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors ${isActive ? "text-blue-600" : "text-slate-400"
                 }`
               }
             >
