@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
-  BellRing,
   Monitor,
   Tag,
   Send,
@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   Zap,
   CheckCircle2,
-  X,
   Eye,
   ChevronDown,
   Clock,
@@ -65,6 +64,9 @@ export function EnviarAlerta() {
   const matchingDevices = selectAll
     ? allDevices
     : allDevices.filter((d) => d.tags.some((t) => selectedTags.includes(t)));
+
+  const devicesGridRef = useRef<HTMLDivElement>(null);
+  useGridAnimation(devicesGridRef, { effect: "hapi", deps: [matchingDevices.map((d) => d.id).join()] });
 
   const toggleTag = (tag: string) => {
     setSelectAll(false);
@@ -182,7 +184,7 @@ export function EnviarAlerta() {
                   ? `${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""} serão notificados`
                   : "Nenhum dispositivo selecionado"}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div ref={devicesGridRef} className="flex flex-wrap gap-2">
                 {matchingDevices.map((d) => (
                   <div key={d.id} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs border ${d.online ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-slate-100 border-slate-200 text-slate-500"}`}>
                     <Monitor className="w-3 h-3 shrink-0" />
@@ -254,7 +256,7 @@ export function EnviarAlerta() {
             </div>
 
             <div>
-              <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5 block">
+              <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> Duração na tela
               </label>
               <div className="relative">
