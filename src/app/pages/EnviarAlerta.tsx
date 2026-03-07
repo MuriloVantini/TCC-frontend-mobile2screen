@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
   Monitor,
@@ -68,6 +69,80 @@ export function EnviarAlerta() {
   const devicesGridRef = useRef<HTMLDivElement>(null);
   useGridAnimation(devicesGridRef, { effect: "hapi", deps: [matchingDevices.map((d) => d.id).join()] });
 
+  const stepCircleRefs = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+  const connectorRefs = useRef<(HTMLDivElement | null)[]>([null, null]);
+  const prevStepRef = useRef<Step>(1);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const previewCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const prev = prevStepRef.current;
+    prevStepRef.current = step;
+
+    const activeCircle = stepCircleRefs.current[step - 1];
+    if (activeCircle) {
+      animate(activeCircle, {
+        scale: [0.5, 1],
+        duration: 500,
+        ease: "spring(1, 80, 12, 0)",
+      });
+    }
+
+    if (step > prev) {
+      for (let idx = prev - 1; idx < step - 1; idx++) {
+        const connector = connectorRefs.current[idx];
+        if (connector) {
+          animate(connector, { scaleX: [0, 1], duration: 450, ease: "outExpo" });
+        }
+      }
+    } else if (step < prev) {
+      for (let idx = step - 1; idx < prev - 1; idx++) {
+        const connector = connectorRefs.current[idx];
+        if (connector) {
+          animate(connector, { scaleX: [1, 0], duration: 300, ease: "inExpo" });
+        }
+      }
+    }
+  }, [step]);
+
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    const card = previewCardRef.current;
+    if (!container || !card) return;
+
+    if (showPreview) {
+      container.style.display = "flex";
+      animate(container, {
+        scaleY: [0.03, 1],
+        opacity: [0.6, 1],
+        duration: 480,
+        ease: "outExpo",
+      });
+      animate(card, {
+        opacity: [0, 1],
+        scale: [0.88, 1],
+        duration: 420,
+        delay: 160,
+        ease: "outBack(1.4)",
+      });
+    } else {
+      animate(card, {
+        opacity: [1, 0],
+        scale: [1, 0.92],
+        duration: 180,
+        ease: "inExpo",
+      });
+      animate(container, {
+        scaleY: [1, 0.03],
+        opacity: [1, 0],
+        duration: 320,
+        delay: 100,
+        ease: "inExpo",
+        onComplete: () => { container.style.display = "none"; },
+      });
+    }
+  }, [showPreview]);
+
   const toggleTag = (tag: string) => {
     setSelectAll(false);
     setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
@@ -130,16 +205,27 @@ export function EnviarAlerta() {
               onClick={() => { if (s < step || (s === 2 && selectedTags.length > 0) || (s === 1)) setStep(s); }}
               className={`flex items-center gap-2 shrink-0 ${s <= step ? "cursor-pointer" : "cursor-default"}`}
             >
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                s < step ? "bg-blue-600 text-white" : s === step ? "bg-blue-600 text-white ring-4 ring-blue-100" : "bg-slate-200 text-slate-500"
-              }`}>
+              <div
+                ref={(el) => { stepCircleRefs.current[i] = el; }}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                  s < step ? "bg-blue-600 text-white" : s === step ? "bg-blue-600 text-white ring-4 ring-blue-100" : "bg-slate-200 text-slate-500"
+                }`}
+              >
                 {s < step ? <CheckCircle2 className="w-4 h-4" /> : s}
               </div>
               <span className={`text-xs hidden sm:block ${s === step ? "text-blue-600 font-medium" : "text-slate-400"}`}>
                 {["Destino", "Mensagem", "Enviar"][i]}
               </span>
             </button>
-            {i < 2 && <div className={`h-0.5 flex-1 rounded transition-colors ${s < step ? "bg-blue-600" : "bg-slate-200"}`} />}
+            {i < 2 && (
+              <div className="h-0.5 flex-1 rounded bg-slate-200 overflow-hidden">
+                <div
+                  ref={(el) => { connectorRefs.current[i] = el; }}
+                  className="h-full bg-blue-600 origin-left"
+                  style={{ transform: s < step ? "scaleX(1)" : "scaleX(0)" }}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -272,31 +358,44 @@ export function EnviarAlerta() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm text-slate-600">Prévia na TV</label>
-                <button onClick={() => setShowPreview(!showPreview)} className="text-xs text-blue-600 flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    const opening = !showPreview;
+                    setShowPreview(opening);
+                    if (opening) {
+                      setTimeout(() => {
+                        previewContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }, 80);
+                    }
+                  }}
+                  className="text-xs text-blue-600 flex items-center gap-1"
+                >
                   <Eye className="w-3.5 h-3.5" />
                   {showPreview ? "Ocultar" : "Visualizar"}
                 </button>
               </div>
-              {showPreview && (
-                <div className="bg-slate-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center shadow-lg">
-                  <div className={`w-[80%] max-w-xs rounded-xl p-4 sm:p-6 shadow-2xl border ${currentType.light}`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-8 h-8 sm:w-10 sm:h-10 ${currentType.color} rounded-lg flex items-center justify-center shadow`}>
-                        <TypeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] sm:text-xs uppercase tracking-wider opacity-60">{currentType.label}</p>
-                        <p className="font-bold text-sm sm:text-base leading-tight">{title || "Título do alerta"}</p>
-                      </div>
+              <div
+                ref={previewContainerRef}
+                className="bg-slate-900 rounded-xl overflow-hidden aspect-video items-center justify-center shadow-lg origin-center"
+                style={{ display: "none" }}
+              >
+                <div ref={previewCardRef} className={`w-[80%] max-w-xs rounded-xl p-4 sm:p-6 shadow-2xl border ${currentType.light}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 ${currentType.color} rounded-lg flex items-center justify-center shadow`}>
+                      <TypeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
-                    {message && <p className="text-xs sm:text-sm opacity-80 leading-relaxed">{message}</p>}
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-current/10">
-                      <Clock className="w-3 h-3 opacity-50" />
-                      <span className="text-[10px] opacity-50">{duration}</span>
+                    <div>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-wider opacity-60">{currentType.label}</p>
+                      <p className="font-bold text-sm sm:text-base leading-tight">{title || "Título do alerta"}</p>
                     </div>
                   </div>
+                  {message && <p className="text-xs sm:text-sm opacity-80 leading-relaxed">{message}</p>}
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-current/10">
+                    <Clock className="w-3 h-3 opacity-50" />
+                    <span className="text-[10px] opacity-50">{duration}</span>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
