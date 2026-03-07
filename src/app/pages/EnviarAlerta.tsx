@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
-import { useFormSubmitAnimation, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
+import { shake, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,7 +91,7 @@ export function EnviarAlerta() {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewCardRef = useRef<HTMLDivElement>(null);
   const stepContentRef = useRef<HTMLDivElement>(null);
-  const { shakeCard } = useFormSubmitAnimation(stepContentRef, String(step));
+  const { shakeCard } = shake(stepContentRef, String(step));
   const sendIdleContent = (
     <><Send />{`Enviar para ${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""}`}</>
   );

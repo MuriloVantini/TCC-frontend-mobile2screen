@@ -3,7 +3,7 @@ import { animate, stagger } from "animejs";
 
 export type SubmitState = "idle" | "loading" | "success" | "error";
 
-export function useFormSubmitAnimation(cardRef: RefObject<HTMLElement | null>, tab: string) {
+export function shake(cardRef: RefObject<HTMLElement | null>, tab: string) {
   useEffect(() => {
     animate(cardRef.current!, {
       translateY: [30, 0],

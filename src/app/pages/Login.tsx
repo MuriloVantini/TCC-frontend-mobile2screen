@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
-import { useFormSubmitAnimation, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
+import { shake, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
@@ -22,7 +22,7 @@ export function Login() {
   const navigate = useNavigate();
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
-  const { shakeCard } = useFormSubmitAnimation(cardRef, tab);
+  const { shakeCard } = shake(cardRef, tab);
   const { morphStyle: loginMorphStyle, morphContent: loginMorphContent } = useMorphButton(loginState, <span>Entrar</span>);
   const { morphStyle: registerMorphStyle, morphContent: registerMorphContent } = useMorphButton(registerState, <span>Criar Minha Conta</span>);
 
