@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
+import { useFormSubmitAnimation, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ import {
   Clock,
   Wifi,
   WifiOff,
+  MoveRight,
 } from "lucide-react";
 
 type AlertType = "info" | "warning" | "critical" | "success";
@@ -73,7 +75,7 @@ export function EnviarAlerta() {
   const [message, setMessage] = useState("");
   const [duration, setDuration] = useState("30 segundos");
   const [showPreview, setShowPreview] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [sendState, setSendState] = useState<SubmitState>("idle");
   const [sent, setSent] = useState(false);
 
   const matchingDevices = selectAll
@@ -88,6 +90,12 @@ export function EnviarAlerta() {
   const prevStepRef = useRef<Step>(1);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewCardRef = useRef<HTMLDivElement>(null);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  const { shakeCard } = useFormSubmitAnimation(stepContentRef, String(step));
+  const sendIdleContent = (
+    <><Send />{`Enviar para ${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""}`}</>
+  );
+  const { morphStyle: sendMorphStyle, morphContent: sendMorphContent } = useMorphButton(sendState, sendIdleContent);
 
   useEffect(() => {
     const prev = prevStepRef.current;
@@ -163,21 +171,24 @@ export function EnviarAlerta() {
   };
 
   const handleSend = async () => {
-    setSending(true);
+    setSendState("loading");
     await new Promise((r) => setTimeout(r, 1500));
-    setSending(false);
-    setSent(true);
+    setSendState("success");
+    setTimeout(() => setSent(true), 700);
   };
 
   const reset = () => {
-    setStep(1);
-    setSelectedTags([]);
-    setSelectAll(false);
-    setAlertType("info");
-    setTitle("");
-    setMessage("");
-    setDuration("30 segundos");
-    setSent(false);
+    setTimeout(() => {
+      setStep(1);
+      setSelectedTags([]);
+      setSelectAll(false);
+      setAlertType("info");
+      setTitle("");
+      setMessage("");
+      setDuration("30 segundos");
+      setSendState("idle");
+      setSent(false);
+    }, 800);
   };
 
   const currentType = alertTypes.find((t) => t.id === alertType)!;
@@ -244,6 +255,7 @@ export function EnviarAlerta() {
         ))}
       </div>
 
+      <div ref={stepContentRef}>
       {/* Step 1: Select tags */}
       {step === 1 && (
         <div className="space-y-4">
@@ -295,11 +307,10 @@ export function EnviarAlerta() {
           </div>
 
           <Button
-            onClick={() => setStep(2)}
-            disabled={matchingDevices.length === 0}
+            onClick={() => matchingDevices.length === 0 ? shakeCard() : setStep(2)}
             className="w-full rounded-xl"
           >
-            Próximo: Compor mensagem →
+            <>Próximo: Compor mensagem <MoveRight/></>
           </Button>
         </div>
       )}
@@ -308,7 +319,7 @@ export function EnviarAlerta() {
       {step === 2 && (
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-            <div>
+            <div className="form-field">
               <h3 className="text-slate-800 mb-1">Tipo de alerta</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {alertTypes.map(({ id, label, icon: Icon, color, border }) => (
@@ -327,7 +338,7 @@ export function EnviarAlerta() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="form-field space-y-1.5">
               <Label className="text-slate-600">Título <span className="text-red-500">*</span></Label>
               <Input
                 value={title}
@@ -339,7 +350,7 @@ export function EnviarAlerta() {
               <p className="text-xs text-slate-400 text-right">{title.length}/60</p>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="form-field space-y-1.5">
               <Label className="text-slate-600">Mensagem</Label>
               <Textarea
                 value={message}
@@ -352,7 +363,7 @@ export function EnviarAlerta() {
               <p className="text-xs text-slate-400 text-right">{message.length}/200</p>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="form-field space-y-1.5">
               <Label className="text-slate-600">
                 <Clock className="w-3.5 h-3.5" /> Duração na tela
               </Label>
@@ -374,7 +385,7 @@ export function EnviarAlerta() {
             </div>
 
             {/* Preview */}
-            <div>
+            <div className="form-field">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-slate-600">Prévia na TV</Label>
                 <Button
@@ -419,13 +430,9 @@ export function EnviarAlerta() {
               </div>
             </div>
           </div>
-
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl">
-              ← Voltar
-            </Button>
-            <Button onClick={() => setStep(3)} disabled={!title} className="flex-1 rounded-xl">
-              Próximo: Revisar e enviar →
+          <div className="flex">
+            <Button onClick={() => !title ? shakeCard() : setStep(3)} className="flex-1 rounded-xl">
+              <>Próximo: Revisar e enviar <MoveRight/></>
             </Button>
           </div>
         </div>
@@ -501,26 +508,22 @@ export function EnviarAlerta() {
             </Alert>
           )}
 
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(2)} className="rounded-xl">
-              ← Voltar
-            </Button>
+          <div className="flex justify-center">
             <Button
               onClick={handleSend}
-              disabled={sending}
-              variant={alertType === "critical" ? "destructive" : "default"}
-              className="flex-1 rounded-xl"
+              disabled={sendState !== "idle"}
+              style={sendMorphStyle}
+              className={`overflow-hidden ${
+                sendState === "success" ? "bg-emerald-500 hover:bg-emerald-500" :
+                sendState === "error"   ? "bg-red-500 hover:bg-red-500" : ""
+              }`}
             >
-              {sending ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              {sending ? "Enviando..." : `Enviar para ${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""}`}
+              {sendMorphContent}
             </Button>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

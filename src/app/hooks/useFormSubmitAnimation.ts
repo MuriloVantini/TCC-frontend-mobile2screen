@@ -33,7 +33,6 @@ export function useFormSubmitAnimation(cardRef: RefObject<HTMLElement | null>, t
 export function useMorphButton(state: SubmitState, idleContent: ReactNode) {
   const morphStyle: CSSProperties = {
     width: state === "idle" ? "100%" : "48px",
-    height: "48px",
     borderRadius: state === "idle" ? "12px" : "9999px",
     transition:
       "width 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), border-radius 0.5s cubic-bezier(0.68,-0.55,0.27,1.55), background-color 0.35s ease",
