@@ -12,8 +12,36 @@ import {
   Tag,
   CheckCircle,
   AlertCircle,
-  ChevronDown,
 } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 type DeviceType = "tv" | "rpi";
 
@@ -194,35 +222,40 @@ export function Dispositivos() {
             {devices.filter((d) => d.online).length} online · {devices.filter((d) => !d.online).length} offline · {devices.length} total
           </p>
         </div>
-        <button onClick={openNew} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors self-start sm:self-auto shadow-sm">
+        <Button onClick={openNew} className="self-start sm:self-auto rounded-xl">
           <Plus className="w-4 h-4" /> Adicionar Dispositivo
-        </button>
+        </Button>
       </div>
 
       {/* Feedback */}
       {feedback && (
-        <div className={`flex items-center gap-2 p-3 rounded-xl text-sm ${feedback.type === "success" ? "bg-emerald-50 border border-emerald-200 text-emerald-700" : "bg-red-50 border border-red-200 text-red-700"}`}>
-          {feedback.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
-          {feedback.msg}
-        </div>
+        <Alert variant={feedback.type === "success" ? "default" : "destructive"} className={feedback.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : ""}>
+          {feedback.type === "success" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <AlertDescription>{feedback.msg}</AlertDescription>
+        </Alert>
       )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar dispositivo..."
-            className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Pesquisar dispositivo..."
+            className="pl-9 rounded-xl"
+          />
         </div>
-        <div className="relative">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <select value={filterTag} onChange={(e) => setFilterTag(e.target.value)}
-            className="pl-9 pr-8 py-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-sm text-slate-600">
-            <option value="">Todas as tags</option>
-            {allTags.map((t) => <option key={t}>{t}</option>)}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        </div>
+        <Select value={filterTag} onValueChange={(v) => setFilterTag(v === "all" ? "" : v)}>
+          <SelectTrigger className="w-full sm:w-48 rounded-xl">
+            <Tag className="w-4 h-4 text-slate-400" />
+            <SelectValue placeholder="Todas as tags" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as tags</SelectItem>
+            {allTags.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Device Grid */}
@@ -246,18 +279,18 @@ export function Dispositivos() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => openEdit(device)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                <Button variant="ghost" size="icon" onClick={() => openEdit(device)} className="size-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
                   <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => setDeleteConfirm(device.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(device.id)} className="size-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
                   <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-3">
               {device.tags.map((tag) => (
-                <span key={tag} className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${getTagColor(tag)}`}>{tag}</span>
+                <Badge key={tag} variant="outline" className={`rounded-full text-[11px] border-0 font-medium ${getTagColor(tag)}`}>{tag}</Badge>
               ))}
             </div>
 
@@ -288,20 +321,16 @@ export function Dispositivos() {
       )}
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 className="text-slate-800">{editingId ? "Editar Dispositivo" : "Novo Dispositivo"}</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh] gap-0 p-0">
+          <DialogHeader className="px-5 py-4 border-b border-slate-100">
+            <DialogTitle className="text-slate-800">{editingId ? "Editar Dispositivo" : "Novo Dispositivo"}</DialogTitle>
+          </DialogHeader>
 
             <div className="p-5 space-y-4">
               {/* Type selector */}
               <div>
-                <label className="text-sm text-slate-600 mb-2 block">Tipo de dispositivo</label>
+                <Label className="text-slate-600 mb-2">Tipo de dispositivo</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {(["tv", "rpi"] as DeviceType[]).map((t) => (
                     <button
@@ -319,31 +348,31 @@ export function Dispositivos() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm text-slate-600 mb-1.5 block">Nome do dispositivo <span className="text-red-500">*</span></label>
-                <input
+              <div className="space-y-1.5">
+                <Label className="text-slate-600">Nome do dispositivo <span className="text-red-500">*</span></Label>
+                <Input
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="Ex: TV Sala de Reunião B"
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-xl"
                 />
               </div>
 
-              <div>
-                <label className="text-sm text-slate-600 mb-1.5 block">Localização</label>
-                <input
+              <div className="space-y-1.5">
+                <Label className="text-slate-600">Localização</Label>
+                <Input
                   value={form.location}
                   onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
                   placeholder="Ex: 2º Andar, Ala Norte"
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-xl"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5">
+                <Label className="text-slate-600 mb-1.5">
                   <Tag className="w-3.5 h-3.5" />
                   Tags de segmentação
-                </label>
+                </Label>
                 <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
                 <p className="text-xs text-slate-400 mt-1.5">Digite e pressione Enter para adicionar. As tags agrupam os dispositivos para envio de alertas.</p>
               </div>
@@ -356,34 +385,40 @@ export function Dispositivos() {
               )}
             </div>
 
-            <div className="flex gap-3 px-5 py-4 border-t border-slate-100">
-              <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50 transition-colors">
-                Cancelar
-              </button>
-              <button onClick={handleSave} className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors">
-                {editingId ? "Salvar" : "Cadastrar"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          <DialogFooter className="px-5 py-4 border-t border-slate-100 sm:flex-row gap-3">
+            <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1 rounded-xl">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="flex-1 rounded-xl">
+              {editingId ? "Salvar" : "Cadastrar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete confirm */}
-      {deleteConfirm !== null && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <AlertDialog open={deleteConfirm !== null} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent className="max-w-sm text-center">
+          <AlertDialogHeader className="items-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
               <Trash2 className="w-6 h-6 text-red-500" />
             </div>
-            <h3 className="text-slate-800 mb-2">Remover dispositivo?</h3>
-            <p className="text-slate-500 text-sm">O dispositivo perderá a conexão e não receberá mais alertas.</p>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50">Cancelar</button>
-              <button onClick={() => void handleDelete(deleteConfirm)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium">Remover</button>
-            </div>
-          </div>
-        </div>
-      )}
+            <AlertDialogTitle>Remover dispositivo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O dispositivo perderá a conexão e não receberá mais alertas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:flex-row gap-3">
+            <AlertDialogCancel className="flex-1 rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConfirm !== null && void handleDelete(deleteConfirm)}
+              className="flex-1 rounded-xl bg-red-500 hover:bg-red-600"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
