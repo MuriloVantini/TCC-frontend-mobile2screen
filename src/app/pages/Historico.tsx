@@ -12,8 +12,23 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
-  X,
 } from "lucide-react";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Card } from "../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "../components/ui/dialog";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -128,42 +143,47 @@ export function Historico() {
       {/* Summary */}
       <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", sub: "alertas", icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Entregues", numericValue: totalDelivered, suffix: "", sub: "notificações", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Falhas", numericValue: totalFailed, suffix: "", sub: "não entregues", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
-          { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", sub: "sucesso", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Entregues", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Falhas", numericValue: totalFailed, suffix: "", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
+          { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
         ].map(({ label, numericValue, suffix, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-            <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
+          <Card key={label} className="p-4 gap-2 border-slate-100 shadow-sm">
+            <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
             <AnimatedCounter value={numericValue} suffix={suffix} />
-            <p className="text-xs text-slate-500 mt-0.5">{label}</p>
-          </div>
+            <p className="text-xs text-slate-500">{label}</p>
+          </Card>
         ))}
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+          <Input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Pesquisar por título ou tag..."
-            className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            className="pl-9"
           />
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-slate-600"
+        <Select
+          value={typeFilter || "all"}
+          onValueChange={(v) => { setTypeFilter(v === "all" ? "" : v); setPage(1); }}
         >
-          <option value="">Todos os tipos</option>
-          {Object.entries({ info: "Informativo", warning: "Aviso", critical: "Crítico", success: "Sucesso" }).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
+          <SelectTrigger className="sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="info">Informativo</SelectItem>
+            <SelectItem value="warning">Aviso</SelectItem>
+            <SelectItem value="critical">Crítico</SelectItem>
+            <SelectItem value="success">Sucesso</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Alert list */}
@@ -174,10 +194,11 @@ export function Historico() {
             const Icon = cfg.icon;
             const deliveryPct = Math.round((alert.delivered / alert.devices) * 100);
             return (
-              <button
+              <Button
                 key={alert.id}
+                variant="ghost"
                 onClick={() => setSelected(alert)}
-                className={`w-full flex items-start gap-3 sm:gap-4 p-4 sm:p-5 text-left border-l-4 ${cfg.border} hover:bg-slate-50/50 transition-colors`}
+                className={`w-full flex items-start gap-3 sm:gap-4 p-4 sm:p-5 h-auto text-left justify-start border-l-4 ${cfg.border} hover:bg-slate-50/50 rounded-none`}
               >
                 <div className={`w-9 h-9 ${cfg.bg} rounded-xl flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4.5 h-4.5 ${cfg.color}`} />
@@ -185,11 +206,11 @@ export function Historico() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-800 leading-tight">{alert.title}</p>
-                    <span className={`shrink-0 text-[11px] px-2 py-0.5 rounded-full font-medium ${cfg.badgeCls}`}>{cfg.label}</span>
+                    <Badge variant="outline" className={`shrink-0 text-[11px] rounded-full border-0 ${cfg.badgeCls}`}>{cfg.label}</Badge>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-1.5 mb-2">
                     {alert.tags.map((tag) => (
-                      <span key={tag} className={`text-[10px] px-1.5 py-0.5 rounded-full ${getTagColor(tag)}`}>{tag}</span>
+                      <Badge key={tag} variant="outline" className={`text-[10px] rounded-full border-0 ${getTagColor(tag)}`}>{tag}</Badge>
                     ))}
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
@@ -205,7 +226,7 @@ export function Historico() {
                     </span>
                   </div>
                 </div>
-              </button>
+              </Button>
             );
           })}
           {filtered.length === 0 && (
@@ -222,44 +243,56 @@ export function Historico() {
               {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
             </p>
             <div className="flex items-center gap-1">
-              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="size-8"
+              >
                 <ChevronLeft className="w-4 h-4" />
-              </button>
+              </Button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button key={p} onClick={() => setPage(p)}
-                  className={`w-7 h-7 text-xs rounded-lg ${page === p ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+                <Button
+                  key={p}
+                  variant={page === p ? "default" : "ghost"}
+                  size="icon"
+                  onClick={() => setPage(p)}
+                  className="size-7 text-xs"
+                >
                   {p}
-                </button>
+                </Button>
               ))}
-              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="size-8"
+              >
                 <ChevronRight className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Detail modal */}
-      {selected && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Top bar */}
-            <div className={`border-l-4 ${alertTypeConfig[selected.type].border} px-5 py-4 flex items-start justify-between gap-3 bg-slate-50`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 ${alertTypeConfig[selected.type].bg} rounded-xl flex items-center justify-center shrink-0`}>
-                  {(() => { const Icon = alertTypeConfig[selected.type].icon; return <Icon className={`w-4.5 h-4.5 ${alertTypeConfig[selected.type].color}`} />; })()}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">{selected.title}</p>
-                  <p className="text-xs text-slate-400">{selected.sentAt}</p>
+      {/* Detail Dialog */}
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh] gap-0">
+          {selected && (
+            <>
+              <div className={`border-l-4 ${alertTypeConfig[selected.type].border} px-5 py-4 flex items-start gap-3 bg-slate-50 pr-12`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 ${alertTypeConfig[selected.type].bg} rounded-xl flex items-center justify-center shrink-0`}>
+                    {(() => { const Icon = alertTypeConfig[selected.type].icon; return <Icon className={`w-4.5 h-4.5 ${alertTypeConfig[selected.type].color}`} />; })()}
+                  </div>
+                  <div>
+                    <DialogTitle className="text-sm font-semibold text-slate-800 leading-tight">{selected.title}</DialogTitle>
+                    <p className="text-xs text-slate-400 mt-0.5">{selected.sentAt}</p>
+                  </div>
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-slate-600 shrink-0 p-1">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
             <div className="overflow-y-auto p-5 space-y-4">
               {selected.message && (
@@ -288,7 +321,7 @@ export function Historico() {
                 <p className="text-xs text-slate-400 mb-2">Tags utilizadas</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selected.tags.map((tag) => (
-                    <span key={tag} className={`text-xs px-2.5 py-1 rounded-full font-medium ${getTagColor(tag)}`}>{tag}</span>
+                    <Badge key={tag} variant="outline" className={`text-xs rounded-full border-0 font-medium ${getTagColor(tag)}`}>{tag}</Badge>
                   ))}
                 </div>
               </div>
@@ -299,14 +332,15 @@ export function Historico() {
               </div>
             </div>
 
-            <div className="px-5 py-4 border-t border-slate-100">
-              <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-medium transition-colors">
-                <RotateCcw className="w-4 h-4" /> Reenviar este alerta
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="px-5 py-4 border-t border-slate-100">
+                <Button className="w-full">
+                  <RotateCcw className="w-4 h-4" /> Reenviar este alerta
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
