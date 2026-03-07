@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import {
   Monitor,
   Tag,
   Send,
@@ -345,13 +352,21 @@ export function EnviarAlerta() {
               <label className="text-sm text-slate-600 mb-1.5 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> Duração na tela
               </label>
-              <div className="relative">
-                <select value={duration} onChange={(e) => setDuration(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white text-slate-700">
-                  {durations.map((d) => <option key={d}>{d}</option>)}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-full flex items-center justify-between px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    {duration}
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                  <DropdownMenuRadioGroup value={duration} onValueChange={setDuration}>
+                    {durations.map((d) => (
+                      <DropdownMenuRadioItem key={d} value={d}>{d}</DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Preview */}
