@@ -19,6 +19,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
 import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useUserContext } from "../contexts/UserContextProvider";
 
 type DashboardDevice = {
   id: number;
@@ -119,6 +120,7 @@ const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.len
 
 export function Dashboard() {
   const api = useMemo(() => useLaravelApi(), []);
+  const { user } = useUserContext();
   const [devices, setDevices] = useState<DashboardDevice[]>([]);
   const [recentAlerts, setRecentAlerts] = useState<DashboardAlert[]>([]);
   const [activityData, setActivityData] = useState<Array<{ hora: string; alertas: number }>>([]);
@@ -126,6 +128,7 @@ export function Dashboard() {
   const [deliveryRate, setDeliveryRate] = useState(0);
   const onlineCount = devices.filter((d) => d.online).length;
   const offlineCount = devices.length - onlineCount;
+  const displayName = user?.name ?? "Usuario";
   const metricsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -220,7 +223,7 @@ export function Dashboard() {
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-blue-600/20">
         <div>
           <p className="text-blue-100 text-sm">Bem-vindo de volta,</p>
-          <h1 className="text-white text-xl mt-0.5">João Silva 👋</h1>
+          <h1 className="text-white text-xl mt-0.5">{displayName} 👋</h1>
           <p className="text-blue-200 text-sm mt-1">{devices.length} dispositivos · {onlineCount} online</p>
         </div>
         <Link

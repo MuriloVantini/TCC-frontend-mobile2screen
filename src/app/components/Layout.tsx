@@ -3,7 +3,8 @@ import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useAuthApi } from "../hooks/api/entities";
+import { useUserContext } from "../contexts/UserContextProvider";
 import {
   LayoutDashboard,
   Monitor,
@@ -44,16 +45,16 @@ const logoDarkInline = LogoDarkMarkup
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [authUser, setAuthUser] = useState<{ name: string; email: string } | null>(null);
+  const { user, clearUser } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const api = useMemo(() => useLaravelApi(), []);
+  const authApi = useMemo(() => useAuthApi(), []);
   const sidebarNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
-  const displayName = authUser?.name ?? "Usuario";
-  const displayEmail = authUser?.email ?? "-";
+  const displayName = user?.name ?? "Usuario";
+  const displayEmail = user?.email ?? "-";
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -63,38 +64,16 @@ export function Layout() {
 
   const handleLogout = async () => {
     try {
-      await api.auth.logout();
+      await authApi.logout();
     } catch {
       // Even if logout fails on the server, clear local auth flow.
     } finally {
+      clearUser();
       navigate("/");
     }
   };
 
   useDrawableAnimation(logoRef, {duration: 1500, staggerMs: 80});
-
-  useEffect(() => {
-    let isMounted = true;
-
-    api.auth
-      .user()
-      .then((user) => {
-        if (!isMounted) return;
-
-        setAuthUser({
-          name: user.name,
-          email: user.email,
-        });
-      })
-      .catch(() => {
-        if (!isMounted) return;
-        setAuthUser(null);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [api]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {

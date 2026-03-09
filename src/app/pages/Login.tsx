@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs"
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import { useLaravelApi } from "../hooks/api/useLaravelApi";
 import { ApiError } from "../hooks/api/config/httpClient";
+import { useUserContext } from "../contexts/UserContextProvider";
 
 function extractApiErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) {
@@ -59,6 +60,7 @@ export function Login() {
 
   const navigate = useNavigate();
   const api = useLaravelApi();
+  const { setUser } = useUserContext();
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const { shakeCard } = shake(cardRef, tab);
@@ -85,10 +87,11 @@ export function Login() {
 
     try {
       await api.sanctum.csrfCookie();
-      await api.auth.login({
+      const response = await api.auth.login({
         email: loginForm.email,
         password: loginForm.password,
       });
+      setUser(response.user);
 
       setLoginState("success");
       setSuccess("Login realizado com sucesso!");
@@ -125,12 +128,13 @@ export function Login() {
 
     try {
       await api.sanctum.csrfCookie();
-      await api.auth.register({
+      const response = await api.auth.register({
         name: registerForm.name,
         email: registerForm.email,
         password: registerForm.password,
         password_confirmation: registerForm.confirm,
       });
+      setUser(response.user);
 
       setRegisterState("success");
       setSuccess("Conta criada! Redirecionando...");
