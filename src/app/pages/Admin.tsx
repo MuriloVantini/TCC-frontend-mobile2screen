@@ -86,10 +86,10 @@ const topUsers = [
 ];
 
 const metrics = [
-  { label: "Usuários cadastrados", numericValue: 94, change: "+18%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-  { label: "Dispositivos ativos", numericValue: 428, change: "+24%", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
-  { label: "Alertas este mês", numericValue: 2841, format: (v: number) => Math.round(v).toLocaleString("pt-BR"), change: "+31%", icon: BellRing, color: "text-red-500", bg: "bg-red-50" },
-  { label: "Média TV / usuário", numericValue: 4.6, format: (v: number) => v.toFixed(1).replace(".", ","), change: "+0,8", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+  { label: "Usuários cadastrados", numericValue: 94, change: "+18%", icon: Users, color: "text-primary", bg: "bg-accent" },
+  { label: "Dispositivos ativos", numericValue: 428, change: "+24%", icon: Monitor, color: "text-primary", bg: "bg-accent" },
+  { label: "Alertas este mês", numericValue: 2841, format: (v: number) => Math.round(v).toLocaleString("pt-BR"), change: "+31%", icon: BellRing, color: "text-destructive", bg: "bg-destructive/10" },
+  { label: "Média TV / usuário", numericValue: 4.6, format: (v: number) => v.toFixed(1).replace(".", ","), change: "+0,8", icon: TrendingUp, color: "text-success", bg: "bg-secondary" },
 ];
 
 const weeklyChartConfig = {
@@ -112,24 +112,24 @@ export function Admin() {
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-slate-800">Painel Administrativo</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Visão geral do sistema AlertaTV · Fevereiro 2026</p>
+        <h1 className="text-foreground">Painel Administrativo</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Visão geral do sistema AlertaTV · Fevereiro 2026</p>
       </div>
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {metrics.map(({ label, numericValue, format, change, icon: Icon, color, bg }) => (
-          <Card key={label} className="gap-0 border-slate-100 shadow-sm p-4 bg-white">
+          <Card key={label} className="gap-0 border-border shadow-sm p-4 bg-card">
             <div className="flex items-start justify-between mb-3">
               <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center`}>
                 <Icon className={`w-4.5 h-4.5 ${color}`} />
               </div>
-              <Badge variant="outline" className="gap-0.5 border-emerald-200 bg-emerald-50 text-emerald-700">
+              <Badge variant="outline" className="gap-0.5 border-border bg-secondary text-success">
                 <ArrowUpRight className="w-3 h-3" /> {change}
               </Badge>
             </div>
-            <AnimatedCounter value={numericValue} format={format} className="text-2xl font-bold text-slate-800" />
-            <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
+            <AnimatedCounter value={numericValue} format={format} className="text-2xl font-bold text-foreground" />
+            <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{label}</p>
           </Card>
         ))}
       </div>
@@ -137,10 +137,10 @@ export function Admin() {
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Alertas por dia */}
-        <Card className="lg:col-span-2 gap-0 bg-white border-slate-100 shadow-sm">
+        <Card className="lg:col-span-2 gap-0 bg-card border-border shadow-sm">
           <CardHeader className="px-5 pt-5 pb-3">
-            <CardTitle className="text-slate-800">Atividade semanal</CardTitle>
-            <CardDescription className="text-slate-500 text-xs">Alertas e usuários ativos por dia</CardDescription>
+            <CardTitle className="text-foreground">Atividade semanal</CardTitle>
+            <CardDescription className="text-muted-foreground text-xs">Alertas e usuários ativos por dia</CardDescription>
           </CardHeader>
           <CardContent className="px-5 pb-5">
           <ChartContainer config={weeklyChartConfig} className="h-[200px] w-full">
@@ -158,10 +158,10 @@ export function Admin() {
         </Card>
 
         {/* Alert types distribution */}
-        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+        <Card className="gap-0 bg-card border-border shadow-sm">
           <CardHeader className="px-5 pt-5 pb-3">
-            <CardTitle className="text-slate-800">Tipos de alertas</CardTitle>
-            <CardDescription className="text-slate-500 text-xs">Distribuição no mês</CardDescription>
+            <CardTitle className="text-foreground">Tipos de alertas</CardTitle>
+            <CardDescription className="text-muted-foreground text-xs">Distribuição no mês</CardDescription>
           </CardHeader>
           <CardContent className="px-5 pb-5">
           <ChartContainer config={alertTypesChartConfig} className="h-[200px] w-full">
@@ -180,10 +180,10 @@ export function Admin() {
       {/* User growth + top users */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Growth chart */}
-        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+        <Card className="gap-0 bg-card border-border shadow-sm">
           <CardHeader className="px-5 pt-5 pb-3">
-            <CardTitle className="text-slate-800">Crescimento de usuários</CardTitle>
-            <CardDescription className="text-slate-500 text-xs">Últimos 6 meses</CardDescription>
+            <CardTitle className="text-foreground">Crescimento de usuários</CardTitle>
+            <CardDescription className="text-muted-foreground text-xs">Últimos 6 meses</CardDescription>
           </CardHeader>
           <CardContent className="px-5 pb-5">
           <ChartContainer config={userGrowthChartConfig} className="h-[180px] w-full">
@@ -199,30 +199,30 @@ export function Admin() {
         </Card>
 
         {/* Alert type breakdown */}
-        <Card className="gap-0 bg-white border-slate-100 shadow-sm">
+        <Card className="gap-0 bg-card border-border shadow-sm">
           <CardHeader className="px-5 pt-5 pb-3">
-            <CardTitle className="text-slate-800">Distribuição por tipo</CardTitle>
+            <CardTitle className="text-foreground">Distribuição por tipo</CardTitle>
           </CardHeader>
           <CardContent className="px-5 pb-5">
           <div className="space-y-4">
             {[
-              { label: "Informativo", count: 1192, pct: 42, color: "bg-blue-500", icon: Info, textColor: "text-blue-600" },
-              { label: "Aviso", count: 795, pct: 28, color: "bg-amber-500", icon: AlertTriangle, textColor: "text-amber-600" },
-              { label: "Crítico", count: 511, pct: 18, color: "bg-red-500", icon: Zap, textColor: "text-red-500" },
-              { label: "Sucesso", count: 341, pct: 12, color: "bg-emerald-500", icon: CheckCircle2, textColor: "text-emerald-600" },
+              { label: "Informativo", count: 1192, pct: 42, color: "bg-primary", icon: Info, textColor: "text-primary" },
+              { label: "Aviso", count: 795, pct: 28, color: "bg-warning", icon: AlertTriangle, textColor: "text-warning" },
+              { label: "Crítico", count: 511, pct: 18, color: "bg-destructive", icon: Zap, textColor: "text-destructive" },
+              { label: "Sucesso", count: 341, pct: 12, color: "bg-success", icon: CheckCircle2, textColor: "text-success" },
             ].map(({ label, count, pct, icon: Icon, textColor }) => (
               <div key={label}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <Icon className={`w-3.5 h-3.5 ${textColor}`} />
-                    <span className="text-sm text-slate-600">{label}</span>
+                    <span className="text-sm text-muted-foreground">{label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">{count.toLocaleString("pt-BR")}</span>
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-slate-200 text-slate-600">{pct}%</Badge>
+                    <span className="text-sm font-medium text-foreground">{count.toLocaleString("pt-BR")}</span>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border text-muted-foreground">{pct}%</Badge>
                   </div>
                 </div>
-                <Progress value={pct} className="h-1.5 bg-slate-100" />
+                <Progress value={pct} className="h-1.5 bg-muted" />
               </div>
             ))}
           </div>
@@ -231,11 +231,11 @@ export function Admin() {
       </div>
 
       {/* Top users table */}
-      <Card className="gap-0 bg-white border-slate-100 shadow-sm overflow-hidden">
-        <CardHeader className="px-5 py-4 border-b border-slate-100">
+      <Card className="gap-0 bg-card border-border shadow-sm overflow-hidden">
+        <CardHeader className="px-5 py-4 border-b border-border">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-slate-800">Top usuários</CardTitle>
-            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs text-violet-600 hover:text-violet-700 hover:bg-violet-50">
+            <CardTitle className="text-foreground">Top usuários</CardTitle>
+            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary hover:text-primary hover:bg-accent">
               <Link to="/admin/usuarios">
                 Ver todos <ChevronRight className="w-3 h-3" />
               </Link>
@@ -247,38 +247,38 @@ export function Admin() {
         <div className="hidden sm:block">
           <Table>
             <TableHeader>
-              <TableRow className="border-slate-100 bg-slate-50 hover:bg-slate-50">
+              <TableRow className="border-border bg-muted hover:bg-muted">
                 {["Usuário", "Dispositivos", "Alertas enviados", "Taxa entrega"].map((h) => (
-                  <TableHead key={h} className="px-5 py-3 text-xs text-slate-500 uppercase tracking-wider">{h}</TableHead>
+                  <TableHead key={h} className="px-5 py-3 text-xs text-muted-foreground uppercase tracking-wider">{h}</TableHead>
                 ))}
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-slate-50">
+            <TableBody className="divide-y divide-border">
               {topUsers.map((u, i) => (
-                <TableRow key={i} className="hover:bg-slate-50/50 border-slate-50">
+                <TableRow key={i} className="hover:bg-muted/50 border-border">
                   <TableCell className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary to-chart-2 rounded-lg flex items-center justify-center shrink-0">
                         <span className="text-white text-xs font-bold">{u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-800">{u.name}</p>
-                        <p className="text-xs text-slate-400">{u.email}</p>
+                        <p className="text-sm font-medium text-foreground">{u.name}</p>
+                        <p className="text-xs text-muted-foreground">{u.email}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-3">
-                    <div className="flex items-center gap-1.5 text-sm text-slate-700">
-                      <Monitor className="w-3.5 h-3.5 text-slate-400" /> {u.devices}
+                    <div className="flex items-center gap-1.5 text-sm text-foreground">
+                      <Monitor className="w-3.5 h-3.5 text-muted-foreground" /> {u.devices}
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-3">
-                    <div className="flex items-center gap-1.5 text-sm text-slate-700">
-                      <BellRing className="w-3.5 h-3.5 text-slate-400" /> {u.alerts}
+                    <div className="flex items-center gap-1.5 text-sm text-foreground">
+                      <BellRing className="w-3.5 h-3.5 text-muted-foreground" /> {u.alerts}
                     </div>
                   </TableCell>
                   <TableCell className="px-5 py-3">
-                    <span className={`text-sm font-medium ${parseInt(u.rate, 10) === 100 ? "text-emerald-600" : parseInt(u.rate, 10) >= 95 ? "text-blue-600" : "text-amber-600"}`}>
+                    <span className={`text-sm font-medium ${parseInt(u.rate, 10) === 100 ? "text-success" : parseInt(u.rate, 10) >= 95 ? "text-primary" : "text-warning"}`}>
                       {u.rate}
                     </span>
                   </TableCell>
@@ -289,19 +289,19 @@ export function Admin() {
         </div>
 
         {/* Mobile cards */}
-        <div className="sm:hidden divide-y divide-slate-100">
+        <div className="sm:hidden divide-y divide-border">
           {topUsers.map((u, i) => (
             <div key={i} className="p-4 flex items-start gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-violet-600 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center shrink-0">
                 <span className="text-white text-xs font-bold">{u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{u.name}</p>
-                <p className="text-xs text-slate-400 truncate mb-2">{u.email}</p>
-                <div className="flex gap-4 text-xs text-slate-600">
+                <p className="text-sm font-medium text-foreground truncate">{u.name}</p>
+                <p className="text-xs text-muted-foreground truncate mb-2">{u.email}</p>
+                <div className="flex gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><Monitor className="w-3 h-3" /> {u.devices} disp.</span>
                   <span className="flex items-center gap-1"><BellRing className="w-3 h-3" /> {u.alerts} alertas</span>
-                  <span className={`font-medium ${parseInt(u.rate, 10) >= 95 ? "text-emerald-600" : "text-amber-600"}`}>{u.rate}</span>
+                  <span className={`font-medium ${parseInt(u.rate, 10) >= 95 ? "text-success" : "text-warning"}`}>{u.rate}</span>
                 </div>
               </div>
             </div>

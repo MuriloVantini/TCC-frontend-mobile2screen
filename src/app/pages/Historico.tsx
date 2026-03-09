@@ -69,19 +69,19 @@ function formatDuration(secondsValue: unknown): string {
 }
 
 const alertTypeConfig = {
-  info: { icon: Info, color: "text-blue-600", bg: "bg-blue-100", border: "border-l-blue-500", label: "Informativo", badgeCls: "bg-blue-100 text-blue-700" },
-  warning: { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-100", border: "border-l-amber-500", label: "Aviso", badgeCls: "bg-amber-100 text-amber-700" },
-  critical: { icon: Zap, color: "text-red-600", bg: "bg-red-100", border: "border-l-red-500", label: "Crítico", badgeCls: "bg-red-100 text-red-700" },
-  success: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100", border: "border-l-emerald-500", label: "Sucesso", badgeCls: "bg-emerald-100 text-emerald-700" },
+  info: { icon: Info, color: "text-primary", bg: "bg-secondary", border: "border-l-primary", label: "Informativo", badgeCls: "bg-secondary text-primary" },
+  warning: { icon: AlertTriangle, color: "text-warning", bg: "bg-secondary", border: "border-l-warning", label: "Aviso", badgeCls: "bg-secondary text-warning" },
+  critical: { icon: Zap, color: "text-destructive", bg: "bg-destructive/10", border: "border-l-destructive", label: "Crítico", badgeCls: "bg-destructive/10 text-destructive" },
+  success: { icon: CheckCircle2, color: "text-success", bg: "bg-secondary", border: "border-l-success", label: "Sucesso", badgeCls: "bg-secondary text-success" },
 };
 
 const tagColors = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
+  "bg-secondary text-primary",
+  "bg-secondary text-primary",
+  "bg-secondary text-success",
+  "bg-secondary text-warning",
+  "bg-accent text-accent-foreground",
+  "bg-accent text-accent-foreground",
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
@@ -102,7 +102,7 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
     return () => { anim.pause(); };
   }, [value, suffix]);
   return (
-    <p ref={ref} className="text-lg font-semibold text-slate-800">
+    <p ref={ref} className="text-lg font-semibold text-foreground">
       0{suffix}
     </p>
   );
@@ -217,24 +217,24 @@ export function Historico() {
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-slate-800">Histórico de Alertas</h1>
-        <p className="text-slate-500 text-sm mt-0.5">{alertHistory.length} alertas enviados</p>
+        <h1 className="text-foreground">Histórico de Alertas</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">{alertHistory.length} alertas enviados</p>
       </div>
 
       {/* Summary */}
       <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Entregues", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Falhas", numericValue: totalFailed, suffix: "", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
-          { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", icon: Monitor, color: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-primary", bg: "bg-accent" },
+          { label: "Entregues", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-success", bg: "bg-secondary" },
+          { label: "Falhas", numericValue: totalFailed, suffix: "", icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
+          { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", icon: Monitor, color: "text-primary", bg: "bg-accent" },
         ].map(({ label, numericValue, suffix, icon: Icon, color, bg }) => (
-          <Card key={label} className="p-4 gap-2 border-slate-100 shadow-sm">
+          <Card key={label} className="p-4 gap-2 border-border shadow-sm">
             <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
             <AnimatedCounter value={numericValue} suffix={suffix} />
-            <p className="text-xs text-slate-500">{label}</p>
+            <p className="text-xs text-muted-foreground">{label}</p>
           </Card>
         ))}
       </div>
@@ -242,7 +242,7 @@ export function Historico() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
           <Input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -268,8 +268,8 @@ export function Historico() {
       </div>
 
       {/* Alert list */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div ref={listRef} className="divide-y divide-slate-50">
+      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div ref={listRef} className="divide-y divide-border">
           {paginated.map((alert) => {
             const cfg = alertTypeConfig[alert.type];
             const Icon = cfg.icon;
@@ -279,14 +279,14 @@ export function Historico() {
                 key={alert.id}
                 variant="ghost"
                 onClick={() => setSelected(alert)}
-                className={`w-full flex items-start gap-3 sm:gap-4 p-4 sm:p-5 h-auto text-left justify-start border-l-4 ${cfg.border} hover:bg-slate-50/50 rounded-none`}
+                className={`w-full flex items-start gap-3 sm:gap-4 p-4 sm:p-5 h-auto text-left justify-start border-l-4 ${cfg.border} hover:bg-muted/50 rounded-none`}
               >
                 <div className={`w-9 h-9 ${cfg.bg} rounded-xl flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4.5 h-4.5 ${cfg.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-800 leading-tight">{alert.title}</p>
+                    <p className="text-sm font-semibold text-foreground leading-tight">{alert.title}</p>
                     <Badge variant="outline" className={`shrink-0 text-[11px] rounded-full border-0 ${cfg.badgeCls}`}>{cfg.label}</Badge>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-1.5 mb-2">
@@ -294,12 +294,12 @@ export function Historico() {
                       <Badge key={tag} variant="outline" className={`text-[10px] rounded-full border-0 ${getTagColor(tag)}`}>{tag}</Badge>
                     ))}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Monitor className="w-3 h-3" /> {alert.devices} disp.
                     </span>
                     <span className="flex items-center gap-1">
-                      <CheckCircle2 className={`w-3 h-3 ${deliveryPct === 100 ? "text-emerald-500" : "text-amber-400"}`} />
+                      <CheckCircle2 className={`w-3 h-3 ${deliveryPct === 100 ? "text-success" : "text-warning"}`} />
                       {deliveryPct}% entregues
                     </span>
                     <span className="flex items-center gap-1">
@@ -311,7 +311,7 @@ export function Historico() {
             );
           })}
           {filtered.length === 0 && (
-            <div className="py-12 text-center text-slate-400 text-sm">
+            <div className="py-12 text-center text-muted-foreground text-sm">
               Nenhum alerta encontrado.
             </div>
           )}
@@ -319,8 +319,8 @@ export function Historico() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">
-            <p className="text-xs text-slate-400">
+          <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
+            <p className="text-xs text-muted-foreground">
               {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
             </p>
             <div className="flex items-center gap-1">
@@ -363,14 +363,14 @@ export function Historico() {
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh] gap-0">
           {selected && (
             <>
-              <div className={`border-l-4 ${alertTypeConfig[selected.type].border} px-5 py-4 flex items-start gap-3 bg-slate-50 pr-12`}>
+              <div className={`border-l-4 ${alertTypeConfig[selected.type].border} px-5 py-4 flex items-start gap-3 bg-muted pr-12`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 ${alertTypeConfig[selected.type].bg} rounded-xl flex items-center justify-center shrink-0`}>
                     {(() => { const Icon = alertTypeConfig[selected.type].icon; return <Icon className={`w-4.5 h-4.5 ${alertTypeConfig[selected.type].color}`} />; })()}
                   </div>
                   <div>
-                    <DialogTitle className="text-sm font-semibold text-slate-800 leading-tight">{selected.title}</DialogTitle>
-                    <p className="text-xs text-slate-400 mt-0.5">{selected.sentAt}</p>
+                    <DialogTitle className="text-sm font-semibold text-foreground leading-tight">{selected.title}</DialogTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">{selected.sentAt}</p>
                   </div>
                 </div>
               </div>
@@ -378,28 +378,28 @@ export function Historico() {
             <div className="overflow-y-auto p-5 space-y-4">
               {selected.message && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-1">Mensagem</p>
-                  <p className="text-sm text-slate-700 bg-slate-50 rounded-xl p-3">{selected.message}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Mensagem</p>
+                  <p className="text-sm text-foreground bg-muted rounded-xl p-3">{selected.message}</p>
                 </div>
               )}
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-lg font-bold text-slate-800">{selected.devices}</p>
-                  <p className="text-xs text-slate-400">Dispositivos</p>
+                <div className="bg-muted rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-foreground">{selected.devices}</p>
+                  <p className="text-xs text-muted-foreground">Dispositivos</p>
                 </div>
-                <div className="bg-emerald-50 rounded-xl p-3 text-center">
-                  <p className="text-lg font-bold text-emerald-700">{selected.delivered}</p>
-                  <p className="text-xs text-emerald-500">Entregues</p>
+                <div className="bg-secondary rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-success">{selected.delivered}</p>
+                  <p className="text-xs text-success">Entregues</p>
                 </div>
-                <div className={`rounded-xl p-3 text-center ${selected.failed > 0 ? "bg-red-50" : "bg-slate-50"}`}>
-                  <p className={`text-lg font-bold ${selected.failed > 0 ? "text-red-600" : "text-slate-400"}`}>{selected.failed}</p>
-                  <p className={`text-xs ${selected.failed > 0 ? "text-red-400" : "text-slate-400"}`}>Falhas</p>
+                <div className={`rounded-xl p-3 text-center ${selected.failed > 0 ? "bg-destructive/10" : "bg-muted"}`}>
+                  <p className={`text-lg font-bold ${selected.failed > 0 ? "text-destructive" : "text-muted-foreground"}`}>{selected.failed}</p>
+                  <p className={`text-xs ${selected.failed > 0 ? "text-destructive" : "text-muted-foreground"}`}>Falhas</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-slate-400 mb-2">Tags utilizadas</p>
+                <p className="text-xs text-muted-foreground mb-2">Tags utilizadas</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selected.tags.map((tag) => (
                     <Badge key={tag} variant="outline" className={`text-xs rounded-full border-0 font-medium ${getTagColor(tag)}`}>{tag}</Badge>
@@ -407,13 +407,13 @@ export function Historico() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted rounded-xl p-3">
                 <Clock className="w-3.5 h-3.5" />
                 Duração na tela: <strong>{selected.duration}</strong>
               </div>
             </div>
 
-              <div className="px-5 py-4 border-t border-slate-100 flex justify-center">
+              <div className="px-5 py-4 border-t border-border flex justify-center">
                 <Button
                   onClick={handleResend}
                   disabled={resendState !== "idle"}

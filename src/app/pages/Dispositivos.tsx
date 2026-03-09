@@ -46,14 +46,14 @@ import {
 } from "../components/ui/select";
 
 const tagColors = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
-  "bg-pink-100 text-pink-700",
-  "bg-indigo-100 text-indigo-700",
+  "bg-secondary text-primary",
+  "bg-secondary text-primary",
+  "bg-secondary text-success",
+  "bg-secondary text-warning",
+  "bg-accent text-accent-foreground",
+  "bg-accent text-accent-foreground",
+  "bg-accent text-accent-foreground",
+  "bg-accent text-accent-foreground",
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
@@ -113,7 +113,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 
   return (
     <div
-      className="flex flex-wrap gap-1.5 p-2 border border-slate-200 rounded-xl bg-slate-50 min-h-[44px] cursor-text"
+      className="flex flex-wrap gap-1.5 p-2 border border-border rounded-xl bg-muted min-h-[44px] cursor-text"
       onClick={() => inputRef.current?.focus()}
     >
       {tags.map((tag) => (
@@ -136,7 +136,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
           if (e.key === "Backspace" && !input && tags.length) removeTag(tags[tags.length - 1]);
         }}
         placeholder={tags.length === 0 ? "Digite uma tag e pressione Enter..." : ""}
-        className="flex-1 min-w-24 bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none"
+        className="flex-1 min-w-24 bg-transparent text-sm text-foreground placeholder-muted-foreground focus:outline-none"
       />
     </div>
   );
@@ -257,8 +257,8 @@ export function Dispositivos() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-slate-800">Meus Dispositivos</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
+          <h1 className="text-foreground">Meus Dispositivos</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
             {devices.filter((d) => d.online).length} online · {devices.filter((d) => !d.online).length} offline · {devices.length} total
           </p>
         </div>
@@ -269,7 +269,7 @@ export function Dispositivos() {
 
       {/* Feedback */}
       {feedback && (
-        <Alert variant={feedback.type === "success" ? "default" : "destructive"} className={feedback.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : ""}>
+        <Alert variant={feedback.type === "success" ? "default" : "destructive"} className={feedback.type === "success" ? "border-border bg-secondary text-success" : ""}>
           {feedback.type === "success" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
           <AlertDescription>{feedback.msg}</AlertDescription>
         </Alert>
@@ -278,7 +278,7 @@ export function Dispositivos() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -288,7 +288,7 @@ export function Dispositivos() {
         </div>
         <Select value={filterTag} onValueChange={(v) => setFilterTag(v === "all" ? "" : v)}>
           <SelectTrigger className="w-full sm:w-48 rounded-xl">
-            <Tag className="w-4 h-4 text-slate-400" />
+            <Tag className="w-4 h-4 text-muted-foreground" />
             <SelectValue placeholder="Todas as tags" />
           </SelectTrigger>
           <SelectContent>
@@ -306,23 +306,23 @@ export function Dispositivos() {
             ref={(el) => {
               deviceRefs.current[device.id] = el;
             }}
-            className={`bg-white border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow ${device.online ? "border-slate-100" : "border-slate-100 opacity-80"}`}
+            className={`bg-card border rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow ${device.online ? "border-border" : "border-border opacity-80"}`}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${device.online ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${device.online ? "bg-secondary text-success" : "bg-muted text-muted-foreground"}`}>
                   <DeviceIcon type={device.type} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800 leading-tight">{device.name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{device.type === "tv" ? "Television" : "Raspberry Pi"}</p>
+                  <p className="text-sm font-semibold text-foreground leading-tight">{device.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{device.type === "tv" ? "Television" : "Raspberry Pi"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={() => openEdit(device)} className="size-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                <Button variant="ghost" size="icon" onClick={() => openEdit(device)} className="size-7 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg">
                   <Edit2 className="w-3.5 h-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(device.id)} className="size-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(device.id)} className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg">
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -334,19 +334,19 @@ export function Dispositivos() {
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-              <div className={`flex items-center gap-1.5 ${device.online ? "text-emerald-600" : "text-slate-400"}`}>
+            <div className="flex items-center justify-between pt-3 border-t border-border text-xs">
+              <div className={`flex items-center gap-1.5 ${device.online ? "text-success" : "text-muted-foreground"}`}>
                 {device.online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
                 <span>{device.online ? "Online" : "Offline"}</span>
               </div>
-              <span className="text-slate-400">{device.ip}</span>
-              <span className="text-slate-400">{device.lastSeen}</span>
+              <span className="text-muted-foreground">{device.ip}</span>
+              <span className="text-muted-foreground">{device.lastSeen}</span>
             </div>
           </div>
         ))}
 
         {/* Add device card */}
-        <button onClick={openNew} className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/30 transition-all min-h-[160px]">
+        <button onClick={openNew} className="border-2 border-dashed border-border rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-muted-foreground hover:border-ring hover:text-primary hover:bg-accent transition-all min-h-[160px]">
           <div className="w-10 h-10 border-2 border-current rounded-xl flex items-center justify-center">
             <Plus className="w-5 h-5" />
           </div>
@@ -355,7 +355,7 @@ export function Dispositivos() {
       </div>
 
       {filtered.length === 0 && search && (
-        <div className="text-center py-12 text-slate-400 bg-white rounded-2xl border border-slate-100">
+        <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-border">
           Nenhum dispositivo encontrado para "{search}"
         </div>
       )}
@@ -363,14 +363,14 @@ export function Dispositivos() {
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh] gap-0 p-0">
-          <DialogHeader className="px-5 py-4 border-b border-slate-100">
-            <DialogTitle className="text-slate-800">{editingId ? "Editar Dispositivo" : "Novo Dispositivo"}</DialogTitle>
+          <DialogHeader className="px-5 py-4 border-b border-border">
+            <DialogTitle className="text-foreground">{editingId ? "Editar Dispositivo" : "Novo Dispositivo"}</DialogTitle>
           </DialogHeader>
 
             <div className="p-5 space-y-4">
               {/* Type selector */}
               <div>
-                <Label className="text-slate-600 mb-2">Tipo de dispositivo</Label>
+                <Label className="text-muted-foreground mb-2">Tipo de dispositivo</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {(["tv", "rpi"] as DeviceType[]).map((t) => (
                     <button
@@ -378,7 +378,7 @@ export function Dispositivos() {
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, type: t }))}
                       className={`flex items-center gap-2.5 p-3.5 border-2 rounded-xl text-sm transition-all ${
-                        form.type === t ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                        form.type === t ? "border-primary bg-accent text-primary" : "border-border text-muted-foreground hover:bg-muted"
                       }`}
                     >
                       <DeviceIcon type={t} />
@@ -389,7 +389,7 @@ export function Dispositivos() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-slate-600">Nome do dispositivo <span className="text-red-500">*</span></Label>
+                <Label className="text-muted-foreground">Nome do dispositivo <span className="text-destructive">*</span></Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -399,7 +399,7 @@ export function Dispositivos() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-slate-600">Localização</Label>
+                <Label className="text-muted-foreground">Localização</Label>
                 <Input
                   value={form.location}
                   onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
@@ -409,23 +409,23 @@ export function Dispositivos() {
               </div>
 
               <div>
-                <Label className="text-slate-600 mb-1.5">
+                <Label className="text-muted-foreground mb-1.5">
                   <Tag className="w-3.5 h-3.5" />
                   Tags de segmentação
                 </Label>
                 <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
-                <p className="text-xs text-slate-400 mt-1.5">Digite e pressione Enter para adicionar. As tags agrupam os dispositivos para envio de alertas.</p>
+                <p className="text-xs text-muted-foreground mt-1.5">Digite e pressione Enter para adicionar. As tags agrupam os dispositivos para envio de alertas.</p>
               </div>
 
               {!editingId && (
-                <div className="p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-700">
+                <div className="p-3.5 bg-accent border border-border rounded-xl text-sm text-primary">
                   <p className="font-medium mb-1">Como conectar</p>
-                  <p className="text-xs text-blue-600">Após cadastrar, acesse <code className="bg-blue-100 px-1 py-0.5 rounded">alertatv.io/connect</code> no dispositivo e insira o código de pareamento.</p>
+                  <p className="text-xs text-primary">Após cadastrar, acesse <code className="bg-secondary px-1 py-0.5 rounded">alertatv.io/connect</code> no dispositivo e insira o código de pareamento.</p>
                 </div>
               )}
             </div>
 
-          <DialogFooter className="px-5 py-4 border-t border-slate-100 sm:flex-row gap-3">
+          <DialogFooter className="px-5 py-4 border-t border-border sm:flex-row gap-3">
             <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1 rounded-xl">
               Cancelar
             </Button>
@@ -440,8 +440,8 @@ export function Dispositivos() {
       <AlertDialog open={deleteConfirm !== null} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
         <AlertDialogContent className="max-w-sm text-center">
           <AlertDialogHeader className="items-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
-              <Trash2 className="w-6 h-6 text-red-500" />
+            <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mb-2">
+              <Trash2 className="w-6 h-6 text-destructive" />
             </div>
             <AlertDialogTitle>Remover dispositivo?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -452,7 +452,7 @@ export function Dispositivos() {
             <AlertDialogCancel className="flex-1 rounded-xl">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteConfirm !== null && void handleDelete(deleteConfirm)}
-              className="flex-1 rounded-xl bg-red-500 hover:bg-red-600"
+              className="flex-1 rounded-xl bg-destructive hover:bg-destructive/90"
             >
               Remover
             </AlertDialogAction>

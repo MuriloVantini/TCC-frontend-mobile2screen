@@ -152,15 +152,15 @@ export function MapaInterativo() {
   return (
     <div className="flex flex-col md:flex-row overflow-hidden" style={{ height: "100%" }}>
       {/* Mobile toggle */}
-      <div className="md:hidden flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+      <div className="md:hidden flex items-center gap-2 px-4 py-2 bg-card border-b border-border shrink-0">
         <button
           onClick={() => setShowPanel(!showPanel)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm"
+          className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm"
         >
           <Filter className="w-4 h-4" />
           {showPanel ? "Ocultar Filtros" : "Filtros e Resultados"}
         </button>
-        <span className="text-xs text-gray-500">{filtered.length} pontos encontrados</span>
+        <span className="text-xs text-muted-foreground">{filtered.length} pontos encontrados</span>
       </div>
 
       {/* Left panel */}
@@ -168,27 +168,27 @@ export function MapaInterativo() {
         ref={panelRef}
         className={`
           ${showPanel ? "flex" : "hidden"} md:flex
-          flex-col w-full md:w-72 lg:w-80 bg-white border-b md:border-b-0 md:border-r border-gray-200
+          flex-col w-full md:w-72 lg:w-80 bg-card border-b md:border-b-0 md:border-r border-border
           overflow-y-auto shrink-0 md:h-full
           max-h-72 md:max-h-full
         `}
       >
         {/* Search */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-border">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Pesquisar pontos..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Layers */}
-        <div className="p-4 border-b border-gray-100">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+        <div className="p-4 border-b border-border">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-3.5 h-3.5" />
             Camadas
           </p>
@@ -197,11 +197,11 @@ export function MapaInterativo() {
               <div key={id} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Icon className={`w-4 h-4 ${color}`} />
-                  <span className="text-sm text-gray-700">{label}</span>
+                  <span className="text-sm text-foreground">{label}</span>
                 </div>
                 <button
                   onClick={() => toggleLayer(id)}
-                  className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors ${activeLayers[id] ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
+                  className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors ${activeLayers[id] ? "bg-secondary text-primary" : "bg-muted text-muted-foreground"
                     }`}
                 >
                   {activeLayers[id] ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -215,7 +215,7 @@ export function MapaInterativo() {
         {/* Results */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4 pb-2">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Resultados ({filtered.length})</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Resultados ({filtered.length})</p>
           </div>
           <div className="space-y-1 px-2 pb-4">
             {filtered.map((point) => {
@@ -225,7 +225,7 @@ export function MapaInterativo() {
                 <button
                   key={point.id}
                   onClick={() => { setSelectedPoint(point); setShowPanel(false); }}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors hover:bg-gray-50 ${selectedPoint?.id === point.id ? "bg-blue-50 border border-blue-200" : ""
+                  className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors hover:bg-muted ${selectedPoint?.id === point.id ? "bg-accent border border-border" : ""
                     }`}
                 >
                   <div
@@ -235,13 +235,13 @@ export function MapaInterativo() {
                     <Icon className="w-3.5 h-3.5" style={{ color: typeColor[point.type] }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-tight truncate">{point.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 leading-tight">{point.desc}</p>
+                    <p className="text-sm text-foreground leading-tight truncate">{point.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{point.desc}</p>
                     <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${status.cls}`}>
                       {status.label}
                     </span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 mt-1" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                 </button>
               );
             })}
@@ -256,35 +256,35 @@ export function MapaInterativo() {
 
         {/* Custom zoom / nav controls */}
         <div className="absolute top-4 right-4 flex flex-col gap-2" style={{ zIndex: 1001 }}>
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+          <div className="bg-card rounded-xl shadow-md overflow-hidden border border-border">
             <button
               onClick={() => mapRef.current?.zoomIn()}
-              className="flex items-center justify-center w-9 h-9 hover:bg-gray-50 border-b border-gray-100"
+              className="flex items-center justify-center w-9 h-9 hover:bg-muted border-b border-border"
             >
-              <ZoomIn className="w-4 h-4 text-gray-600" />
+              <ZoomIn className="w-4 h-4 text-muted-foreground" />
             </button>
             <button
               onClick={() => mapRef.current?.zoomOut()}
-              className="flex items-center justify-center w-9 h-9 hover:bg-gray-50"
+              className="flex items-center justify-center w-9 h-9 hover:bg-muted"
             >
-              <ZoomOut className="w-4 h-4 text-gray-600" />
+              <ZoomOut className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
           <button
             onClick={() => mapRef.current?.flyTo(MAP_CENTER, INITIAL_ZOOM, { animate: true, duration: 0.8 })}
-            className="w-9 h-9 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+            className="w-9 h-9 bg-card rounded-xl shadow-md border border-border flex items-center justify-center hover:bg-muted"
           >
-            <LocateFixed className="w-4 h-4 text-blue-600" />
+            <LocateFixed className="w-4 h-4 text-primary" />
           </button>
-          <button className="w-9 h-9 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50">
-            <Navigation className="w-4 h-4 text-gray-600" />
+          <button className="w-9 h-9 bg-card rounded-xl shadow-md border border-border flex items-center justify-center hover:bg-muted">
+            <Navigation className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
         {/* Point detail card */}
         {selectedPoint && (
           <div
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 md:bottom-auto md:top-4 md:left-4 md:translate-x-0 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 md:bottom-auto md:top-4 md:left-4 md:translate-x-0 w-72 bg-card rounded-xl shadow-xl border border-border overflow-hidden"
             style={{ zIndex: 1001 }}
           >
             <div className="h-1.5" style={{ background: typeColor[selectedPoint.type] }} />
@@ -295,35 +295,35 @@ export function MapaInterativo() {
                     const Icon = typeIcon[selectedPoint.type as keyof typeof typeIcon];
                     return <Icon className="w-4 h-4" style={{ color: typeColor[selectedPoint.type] }} />;
                   })()}
-                  <h4 className="text-gray-800 text-sm leading-tight">{selectedPoint.label}</h4>
+                  <h4 className="text-foreground text-sm leading-tight">{selectedPoint.label}</h4>
                 </div>
                 <button
                   onClick={() => setSelectedPoint(null)}
-                  className="text-gray-400 hover:text-gray-600 ml-2 shrink-0"
+                  className="text-muted-foreground hover:text-foreground ml-2 shrink-0"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mb-3">{selectedPoint.desc}</p>
+              <p className="text-xs text-muted-foreground mb-3">{selectedPoint.desc}</p>
               <div className="flex items-center justify-between">
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge[selectedPoint.status as keyof typeof statusBadge].cls}`}>
                   {statusBadge[selectedPoint.status as keyof typeof statusBadge].label}
                 </span>
-                <button className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                <button className="flex items-center gap-1 text-xs text-primary hover:underline">
                   <Info className="w-3 h-3" />
                   Ver detalhes
                 </button>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-xs text-gray-500">
+              <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                 <div>
-                  <p className="text-gray-400">Coordenadas</p>
-                  <p className="text-gray-700">
+                  <p className="text-muted-foreground">Coordenadas</p>
+                  <p className="text-foreground">
                     {Math.abs(selectedPoint.lat).toFixed(4)}°S, {Math.abs(selectedPoint.lng).toFixed(4)}°O
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-400">ID</p>
-                  <p className="text-gray-700">PT-{String(selectedPoint.id).padStart(4, "0")}</p>
+                  <p className="text-muted-foreground">ID</p>
+                  <p className="text-foreground">PT-{String(selectedPoint.id).padStart(4, "0")}</p>
                 </div>
               </div>
             </div>

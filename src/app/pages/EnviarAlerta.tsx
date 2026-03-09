@@ -36,19 +36,19 @@ import { useAlertsApi, useDevicesApi, useTagsApi } from "../hooks/api/entities";
 type AlertType = "info" | "warning" | "critical" | "success";
 
 const alertTypes = [
-  { id: "info" as AlertType, label: "Informativo", icon: Info, color: "bg-blue-500", border: "border-blue-500", light: "bg-blue-50 border-blue-200 text-blue-700", textColor: "text-blue-500" },
-  { id: "warning" as AlertType, label: "Aviso", icon: AlertTriangle, color: "bg-amber-500", border: "border-amber-500", light: "bg-amber-50 border-amber-200 text-amber-700", textColor: "text-amber-500" },
-  { id: "critical" as AlertType, label: "Crítico", icon: Zap, color: "bg-red-500", border: "border-red-500", light: "bg-red-50 border-red-200 text-red-700", textColor: "text-red-500" },
-  { id: "success" as AlertType, label: "Sucesso", icon: CheckCircle2, color: "bg-emerald-500", border: "border-emerald-500", light: "bg-emerald-50 border-emerald-200 text-emerald-700", textColor: "text-emerald-500" },
+  { id: "info" as AlertType, label: "Informativo", icon: Info, color: "bg-primary", border: "border-primary", light: "bg-accent border-border text-primary", textColor: "text-primary" },
+  { id: "warning" as AlertType, label: "Aviso", icon: AlertTriangle, color: "bg-warning", border: "border-warning", light: "bg-secondary border-border text-warning", textColor: "text-warning" },
+  { id: "critical" as AlertType, label: "Crítico", icon: Zap, color: "bg-destructive", border: "border-destructive", light: "bg-destructive/10 border-destructive/30 text-destructive", textColor: "text-destructive" },
+  { id: "success" as AlertType, label: "Sucesso", icon: CheckCircle2, color: "bg-success", border: "border-success", light: "bg-secondary border-border text-success", textColor: "text-success" },
 ];
 
 const tagColors = [
-  "bg-blue-100 text-blue-700",
-  "bg-violet-100 text-violet-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
+  "bg-secondary text-primary",
+  "bg-secondary text-primary",
+  "bg-secondary text-success",
+  "bg-secondary text-warning",
+  "bg-accent text-accent-foreground",
+  "bg-accent text-accent-foreground",
 ];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
@@ -300,15 +300,15 @@ export function EnviarAlerta() {
   if (sent) {
     return (
       <div className="p-4 sm:p-6 max-w-lg mx-auto flex flex-col items-center justify-center min-h-96 text-center">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-5 shadow-lg shadow-emerald-100">
-          <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+        <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mb-5 shadow-lg shadow-secondary">
+          <CheckCircle2 className="w-10 h-10 text-success" />
         </div>
-        <h2 className="text-slate-800 text-xl mb-2">Alerta enviado!</h2>
-        <p className="text-slate-500 text-sm mb-2">
+        <h2 className="text-foreground text-xl mb-2">Alerta enviado!</h2>
+        <p className="text-muted-foreground text-sm mb-2">
           <strong>"{title}"</strong> foi enviado para{" "}
           <strong>{matchingDevices.length} dispositivo{matchingDevices.length !== 1 ? "s" : ""}</strong>.
         </p>
-        <p className="text-slate-400 text-sm mb-8">{matchingDevices.filter((d) => d.online).length} online · {matchingDevices.filter((d) => !d.online).length} offline</p>
+        <p className="text-muted-foreground text-sm mb-8">{matchingDevices.filter((d) => d.online).length} online · {matchingDevices.filter((d) => !d.online).length} offline</p>
         <div className="flex gap-3 w-full">
           <Button onClick={reset} className="flex-1 rounded-xl">
             Enviar outro alerta
@@ -321,8 +321,8 @@ export function EnviarAlerta() {
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-slate-800">Enviar Alerta</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Envie mensagens para grupos de televisores por tags</p>
+        <h1 className="text-foreground">Enviar Alerta</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Envie mensagens para grupos de televisores por tags</p>
       </div>
 
       {/* Step indicator */}
@@ -335,21 +335,21 @@ export function EnviarAlerta() {
             >
               <div
                 ref={(el) => { stepCircleRefs.current[i] = el; }}
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${s < step ? "bg-blue-600 text-white" : s === step ? "bg-blue-600 text-white ring-4 ring-blue-100" : "bg-slate-200 text-slate-500"
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${s < step ? "bg-primary text-primary-foreground" : s === step ? "bg-primary text-primary-foreground ring-4 ring-ring/20" : "bg-muted text-muted-foreground"
                   }`}
               >
                 {s < step ? <Check className="w-4 h-4" /> : s}
               </div>
-              <span className={`text-xs hidden sm:block ${s === step ? "text-blue-600 font-medium" : "text-slate-400"}`}>
+              <span className={`text-xs hidden sm:block ${s === step ? "text-primary font-medium" : "text-muted-foreground"}`}>
                 {["Destino", "Mensagem", "Enviar"][i]}
               </span>
             </button>
 
             {i < 2 && (
-              <div className="h-0.5 flex-1 mx-2 rounded bg-slate-200 overflow-hidden">
+              <div className="h-0.5 flex-1 mx-2 rounded bg-muted overflow-hidden">
                 <div
                   ref={(el) => { connectorRefs.current[i] = el; }}
-                  className="h-full bg-blue-600 origin-left"
+                  className="h-full bg-primary origin-left"
                   style={{ transform: s < step ? "scaleX(1)" : "scaleX(0)" }}
                 />
               </div>
@@ -362,14 +362,14 @@ export function EnviarAlerta() {
       {/* Step 1: Select tags */}
       {step === 1 && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-            <h3 className="text-slate-800 mb-1">Selecionar destino por Tags</h3>
-            <p className="text-slate-500 text-sm mb-4">Os alertas serão enviados para todos os dispositivos com as tags selecionadas.</p>
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
+            <h3 className="text-foreground mb-1">Selecionar destino por Tags</h3>
+            <p className="text-muted-foreground text-sm mb-4">Os alertas serão enviados para todos os dispositivos com as tags selecionadas.</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
               <button
                 onClick={() => { setSelectAll(true); setSelectedTags(allTags.map((tag) => tag.name)); }}
-                className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${selectAll ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${selectAll ? "border-primary bg-accent text-primary" : "border-border text-muted-foreground hover:bg-muted"
                   }`}
               >
                 <Monitor className="w-4 h-4 shrink-0" />
@@ -380,8 +380,8 @@ export function EnviarAlerta() {
                   key={tag.id}
                   onClick={() => toggleTag(tag.name)}
                   className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all text-left ${selectedTags.includes(tag.name) && !selectAll
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      ? "border-primary bg-accent text-primary"
+                      : "border-border text-muted-foreground hover:bg-muted"
                     }`}
                 >
                   <Tag className="w-3.5 h-3.5 shrink-0" />
@@ -391,15 +391,15 @@ export function EnviarAlerta() {
             </div>
 
             {/* Matching devices preview */}
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">
+            <div className="border-t border-border pt-4">
+              <p className="text-sm font-medium text-foreground mb-2">
                 {matchingDevices.length > 0
                   ? `${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""} serão notificados`
                   : "Nenhum dispositivo selecionado"}
               </p>
               <div ref={devicesGridRef} className="flex flex-wrap gap-2">
                 {matchingDevices.map((d) => (
-                  <div key={d.id} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs border ${d.online ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-slate-100 border-slate-200 text-slate-500"}`}>
+                  <div key={d.id} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs border ${d.online ? "bg-secondary border-border text-success" : "bg-muted border-border text-muted-foreground"}`}>
                     <Monitor className="w-3 h-3 shrink-0" />
                     {d.name}
                     {d.online ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
@@ -421,15 +421,15 @@ export function EnviarAlerta() {
       {/* Step 2: Compose */}
       {step === 2 && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-4">
             <div className="form-field">
-              <h3 className="text-slate-800 mb-1">Tipo de alerta</h3>
+              <h3 className="text-foreground mb-1">Tipo de alerta</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {alertTypes.map(({ id, label, icon: Icon, color, border }) => (
                   <button
                     key={id}
                     onClick={() => setAlertType(id)}
-                    className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${alertType === id ? `${border} bg-slate-50 text-slate-800` : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                    className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${alertType === id ? `${border} bg-muted text-foreground` : "border-border text-muted-foreground hover:bg-muted"
                       }`}
                   >
                     <div className={`w-5 h-5 ${color} rounded-md flex items-center justify-center`}>
@@ -442,7 +442,7 @@ export function EnviarAlerta() {
             </div>
 
             <div className="form-field space-y-1.5">
-              <Label className="text-slate-600">Título <span className="text-red-500">*</span></Label>
+              <Label className="text-muted-foreground">Título <span className="text-destructive">*</span></Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -450,11 +450,11 @@ export function EnviarAlerta() {
                 maxLength={60}
                 className="rounded-xl"
               />
-              <p className="text-xs text-slate-400 text-right">{title.length}/60</p>
+              <p className="text-xs text-muted-foreground text-right">{title.length}/60</p>
             </div>
 
             <div className="form-field space-y-1.5">
-              <Label className="text-slate-600">Mensagem</Label>
+              <Label className="text-muted-foreground">Mensagem</Label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -463,18 +463,18 @@ export function EnviarAlerta() {
                 maxLength={200}
                 className="rounded-xl"
               />
-              <p className="text-xs text-slate-400 text-right">{message.length}/200</p>
+              <p className="text-xs text-muted-foreground text-right">{message.length}/200</p>
             </div>
 
             <div className="form-field space-y-1.5">
-              <Label className="text-slate-600">
+              <Label className="text-muted-foreground">
                 <Clock className="w-3.5 h-3.5" /> Duração na tela
               </Label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full justify-between rounded-xl font-normal">
                     {duration}
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
@@ -490,7 +490,7 @@ export function EnviarAlerta() {
             {/* Preview */}
             <div className="form-field">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-slate-600">Prévia na TV</Label>
+                <Label className="text-muted-foreground">Prévia na TV</Label>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -503,7 +503,7 @@ export function EnviarAlerta() {
                       }, 80);
                     }
                   }}
-                  className="text-blue-600 h-auto p-0 hover:bg-transparent"
+                  className="text-primary h-auto p-0 hover:bg-transparent"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   {showPreview ? "Ocultar" : "Visualizar"}
@@ -511,7 +511,7 @@ export function EnviarAlerta() {
               </div>
               <div
                 ref={previewContainerRef}
-                className="bg-slate-900 rounded-xl overflow-hidden aspect-video items-center justify-center shadow-lg origin-center"
+                className="bg-sidebar rounded-xl overflow-hidden aspect-video items-center justify-center shadow-lg origin-center"
                 style={{ display: "none" }}
               >
                 <div ref={previewCardRef} className={`w-[80%] max-w-xs rounded-xl p-4 sm:p-6 shadow-2xl border ${currentType.light}`}>
@@ -544,7 +544,7 @@ export function EnviarAlerta() {
       {/* Step 3: Review & Send */}
       {step === 3 && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
             {/* Alert preview */}
             <div className={`p-5 border-l-4 ${currentType.border} ${currentType.light}`}>
               <div className="flex items-start gap-3">
@@ -555,46 +555,46 @@ export function EnviarAlerta() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-semibold uppercase tracking-wide ${currentType.textColor}`}>{currentType.label}</span>
                   </div>
-                  <p className="font-semibold text-slate-800 text-base">{title}</p>
-                  {message && <p className="text-slate-600 text-sm mt-1">{message}</p>}
+                  <p className="font-semibold text-foreground text-base">{title}</p>
+                  {message && <p className="text-muted-foreground text-sm mt-1">{message}</p>}
                 </div>
               </div>
             </div>
 
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-400 mb-1">Dispositivos</p>
-                  <p className="font-semibold text-slate-800">{matchingDevices.length}</p>
+                <div className="bg-muted rounded-xl p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Dispositivos</p>
+                  <p className="font-semibold text-foreground">{matchingDevices.length}</p>
                 </div>
-                <div className="bg-emerald-50 rounded-xl p-3">
-                  <p className="text-xs text-emerald-600 mb-1">Online agora</p>
-                  <p className="font-semibold text-emerald-700">{matchingDevices.filter((d) => d.online).length}</p>
+                <div className="bg-secondary rounded-xl p-3">
+                  <p className="text-xs text-success mb-1">Online agora</p>
+                  <p className="font-semibold text-success">{matchingDevices.filter((d) => d.online).length}</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs text-slate-400 mb-1">Duração</p>
-                  <p className="font-semibold text-slate-800 text-sm">{duration}</p>
+                <div className="bg-muted rounded-xl p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Duração</p>
+                  <p className="font-semibold text-foreground text-sm">{duration}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-slate-400 mb-2">Tags selecionadas</p>
+                <p className="text-xs text-muted-foreground mb-2">Tags selecionadas</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedTags.map((tag) => (
                     <Badge key={tag} variant="outline" className={`rounded-full border-0 font-medium ${getTagColor(tag)}`}>{tag}</Badge>
                   ))}
-                  {selectAll && <Badge variant="outline" className="rounded-full border-0 font-medium bg-blue-100 text-blue-700">todos os dispositivos</Badge>}
+                  {selectAll && <Badge variant="outline" className="rounded-full border-0 font-medium bg-secondary text-primary">todos os dispositivos</Badge>}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-slate-400 mb-2">Dispositivos que receberão</p>
+                <p className="text-xs text-muted-foreground mb-2">Dispositivos que receberão</p>
                 <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto">
                   {matchingDevices.map((d) => (
                     <div key={d.id} className="flex items-center gap-2 text-sm">
-                      <Monitor className={`w-3.5 h-3.5 shrink-0 ${d.online ? "text-emerald-500" : "text-slate-400"}`} />
-                      <span className={d.online ? "text-slate-700" : "text-slate-400"}>{d.name}</span>
-                      {!d.online && <span className="text-xs text-slate-400">(offline)</span>}
+                      <Monitor className={`w-3.5 h-3.5 shrink-0 ${d.online ? "text-success" : "text-muted-foreground"}`} />
+                      <span className={d.online ? "text-foreground" : "text-muted-foreground"}>{d.name}</span>
+                      {!d.online && <span className="text-xs text-muted-foreground">(offline)</span>}
                     </div>
                   ))}
                 </div>
@@ -603,7 +603,7 @@ export function EnviarAlerta() {
           </div>
 
           {matchingDevices.some((d) => !d.online) && (
-            <Alert className="border-amber-200 bg-amber-50 text-amber-700">
+            <Alert className="border-border bg-secondary text-warning">
               <AlertTriangle className="w-4 h-4" />
               <AlertDescription>
                 {matchingDevices.filter((d) => !d.online).length} dispositivo(s) estão offline e receberão o alerta quando reconectarem.

@@ -166,8 +166,8 @@ export function Configuracoes() {
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
       <div>
-        <h1 className="text-slate-800">Configuracoes</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
+        <h1 className="text-foreground">Configuracoes</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">
           Gerencie sua conta e preferencias
         </p>
       </div>
@@ -188,14 +188,14 @@ export function Configuracoes() {
 
         <TabsContent value="perfil" className="mt-4">
           <div ref={perfilRef} className="js-settings-section">
-            <Card className="rounded-2xl border-slate-100 shadow-sm gap-0">
-              <CardHeader className="border-b border-slate-100">
+            <Card className="rounded-2xl border-border shadow-sm gap-0">
+              <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-md">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-chart-2 rounded-2xl flex items-center justify-center shadow-md">
                     <span className="text-white text-xl font-bold">JS</span>
                   </div>
                   <div>
-                    <CardTitle className="text-slate-800">{profile.name}</CardTitle>
+                    <CardTitle className="text-foreground">{profile.name}</CardTitle>
                     <CardDescription className="text-sm">{profile.email}</CardDescription>
                     <Button variant="link" className="h-auto p-0 text-xs mt-0.5">
                       Alterar foto
@@ -240,7 +240,7 @@ export function Configuracoes() {
                     <div key={key} className="space-y-1.5 form-field">
                       <Label htmlFor={key}>{label}</Label>
                       <div className="relative">
-                        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                           id={key}
                           value={profile[key as keyof typeof profile]}
@@ -255,7 +255,7 @@ export function Configuracoes() {
                   ))}
                 </div>
               </CardContent>
-              <CardFooter className="justify-center border-t border-slate-100 mt-6">
+              <CardFooter className="justify-center border-t border-border mt-6">
                 <Button
                   onClick={() =>
                     runSubmit(
@@ -284,9 +284,9 @@ export function Configuracoes() {
 
         <TabsContent value="notificacoes" className="mt-4">
           <div ref={notificacoesRef} className="js-settings-section">
-            <Card className="rounded-2xl border-slate-100 shadow-sm gap-0">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-slate-800">Notificacoes</CardTitle>
+            <Card className="rounded-2xl border-border shadow-sm gap-0">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-foreground">Notificacoes</CardTitle>
                 <CardDescription>
                   Quando voce quer ser notificado por e-mail
                 </CardDescription>
@@ -327,8 +327,8 @@ export function Configuracoes() {
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-start justify-between gap-3 py-3 form-field">
                     <div>
-                      <p className="text-sm text-slate-800">{label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                      <p className="text-sm text-foreground">{label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
                     </div>
                     <Switch
                       checked={notifs[key as keyof typeof notifs]}
@@ -339,7 +339,7 @@ export function Configuracoes() {
                   </div>
                 ))}
               </CardContent>
-              <CardFooter className="justify-center border-t border-slate-100 mt-2">
+              <CardFooter className="justify-center border-t border-border mt-2">
                 <Button
                   onClick={() =>
                     runSubmit("notificacoes", () => null, shakeNotificacoes)
@@ -359,9 +359,9 @@ export function Configuracoes() {
 
         <TabsContent value="seguranca" className="mt-4">
           <div ref={segurancaRef} className="js-settings-section">
-            <Card className="rounded-2xl border-slate-100 shadow-sm gap-0">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-slate-800">Alterar Senha</CardTitle>
+            <Card className="rounded-2xl border-border shadow-sm gap-0">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-foreground">Alterar Senha</CardTitle>
                 <CardDescription>
                   Recomendamos uma senha forte com 8+ caracteres
                 </CardDescription>
@@ -377,7 +377,7 @@ export function Configuracoes() {
                 <div className="space-y-1.5 form-field">
                   <Label htmlFor="current-password">Senha atual</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="current-password"
                       type="password"
@@ -397,7 +397,7 @@ export function Configuracoes() {
                 <div className="space-y-1.5 form-field">
                   <Label htmlFor="new-password">Nova senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="new-password"
                       type={showPassword ? "text" : "password"}
@@ -416,7 +416,7 @@ export function Configuracoes() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-slate-500"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -430,7 +430,7 @@ export function Configuracoes() {
                 <div className="space-y-1.5 form-field">
                   <Label htmlFor="confirm-password">Confirmar nova senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="confirm-password"
                       type="password"
@@ -447,7 +447,7 @@ export function Configuracoes() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="justify-center border-t border-slate-100 mt-2">
+              <CardFooter className="justify-center border-t border-border mt-2">
                 <Button
                   onClick={() =>
                     runSubmit(
@@ -480,18 +480,18 @@ export function Configuracoes() {
 
         <TabsContent value="api" className="mt-4">
           <div ref={apiRef} className="js-settings-section">
-            <Card className="rounded-2xl border-slate-100 shadow-sm gap-0">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-slate-800">API e Integracao</CardTitle>
+            <Card className="rounded-2xl border-border shadow-sm gap-0">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-foreground">API e Integracao</CardTitle>
                 <CardDescription>
                   Use a API para integrar o AlertaTV com seus sistemas
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6 space-y-5">
-                <div className="p-4 bg-slate-900 rounded-xl">
-                  <p className="text-xs text-slate-400 mb-2 font-mono">Sua chave de API</p>
+                <div className="p-4 bg-sidebar rounded-xl">
+                  <p className="text-xs text-muted-foreground mb-2 font-mono">Sua chave de API</p>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 text-emerald-400 text-xs font-mono break-all">
+                    <code className="flex-1 text-success text-xs font-mono break-all">
                       {showApiKey
                         ? fakeApiKey
                         : fakeApiKey.replace(/./g, "*").slice(0, 48)}
@@ -501,7 +501,7 @@ export function Configuracoes() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="text-slate-400 hover:text-white"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
@@ -510,10 +510,10 @@ export function Configuracoes() {
                       variant="ghost"
                       size="icon"
                       onClick={copyApiKey}
-                      className="text-slate-400 hover:text-white"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       {copied ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
+                        <Check className="w-4 h-4 text-success" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -521,7 +521,7 @@ export function Configuracoes() {
                   </div>
                 </div>
 
-                <Alert className="border-amber-200 bg-amber-50 text-amber-700">
+                <Alert className="border-border bg-secondary text-warning">
                   <KeyRound className="h-4 w-4" />
                   <AlertTitle>Chave sensivel</AlertTitle>
                   <AlertDescription>
@@ -530,8 +530,8 @@ export function Configuracoes() {
                 </Alert>
 
                 <div className="space-y-3">
-                  <h4 className="text-slate-700">Exemplo de uso</h4>
-                  <pre className="bg-slate-900 text-slate-300 p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
+                  <h4 className="text-foreground">Exemplo de uso</h4>
+                  <pre className="bg-sidebar text-sidebar-foreground p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
                     {`POST https://api.alertatv.io/v1/alerts
 Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
 
@@ -557,7 +557,7 @@ Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
                 <Separator />
 
                 <div className="space-y-3">
-                  <h4 className="text-slate-700">Webhooks</h4>
+                  <h4 className="text-foreground">Webhooks</h4>
                   {formError.api && (
                     <Alert variant="destructive" className="mb-2">
                       <AlertTitle>Erro no formulario</AlertTitle>

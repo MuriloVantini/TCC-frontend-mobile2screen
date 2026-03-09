@@ -54,18 +54,18 @@ const pieData = [
 ];
 
 const statusBadge: Record<string, string> = {
-  "Concluído": "bg-emerald-100 text-emerald-700",
-  "Em Andamento": "bg-blue-100 text-blue-700",
-  "Pendente": "bg-amber-100 text-amber-700",
+  "Concluído": "bg-secondary text-success",
+  "Em Andamento": "bg-secondary text-primary",
+  "Pendente": "bg-secondary text-warning",
 };
 
 const PAGE_SIZE = 5;
 
 const summaryMetrics = [
-  { label: "Total de Relatórios", value: "8", icon: FileText, change: "+3", up: true, color: "text-blue-600", bg: "bg-blue-50" },
-  { label: "Registros Totais", value: "1.060", icon: BarChart2, change: "+18,4%", up: true, color: "text-emerald-600", bg: "bg-emerald-50" },
-  { label: "Concluídos", value: "4", icon: TrendingUp, change: "50%", up: null, color: "text-violet-600", bg: "bg-violet-50" },
-  { label: "Em Andamento", value: "2", icon: Minus, change: "25%", up: null, color: "text-amber-600", bg: "bg-amber-50" },
+  { label: "Total de Relatórios", value: "8", icon: FileText, change: "+3", up: true, color: "text-primary", bg: "bg-accent" },
+  { label: "Registros Totais", value: "1.060", icon: BarChart2, change: "+18,4%", up: true, color: "text-success", bg: "bg-secondary" },
+  { label: "Concluídos", value: "4", icon: TrendingUp, change: "50%", up: null, color: "text-primary", bg: "bg-accent" },
+  { label: "Em Andamento", value: "2", icon: Minus, change: "25%", up: null, color: "text-warning", bg: "bg-secondary" },
 ];
 
 export function Relatorios() {
@@ -89,15 +89,15 @@ export function Relatorios() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-gray-800">Relatórios</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Análise e exportação de dados</p>
+          <h1 className="text-foreground">Relatórios</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Análise e exportação de dados</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+          <button className="flex items-center gap-2 px-4 py-2.5 border border-border text-muted-foreground rounded-lg text-sm hover:bg-muted transition-colors">
+            <FileSpreadsheet className="w-4 h-4 text-success" />
             <span className="hidden sm:inline">Exportar</span> Excel
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-medium transition-colors">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Exportar</span> PDF
           </button>
@@ -107,15 +107,15 @@ export function Relatorios() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {summaryMetrics.map(({ label, value, icon: Icon, change, up, color, bg }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div key={label} className="bg-card rounded-xl border border-border shadow-sm p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center`}>
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
             </div>
-            <p className="text-xl font-semibold text-gray-800">{value}</p>
-            <p className="text-xs text-gray-500 leading-tight mt-0.5">{label}</p>
-            <span className={`text-xs mt-1 inline-block font-medium ${up === true ? "text-emerald-600" : up === false ? "text-red-500" : "text-gray-500"}`}>
+            <p className="text-xl font-semibold text-foreground">{value}</p>
+            <p className="text-xs text-muted-foreground leading-tight mt-0.5">{label}</p>
+            <span className={`text-xs mt-1 inline-block font-medium ${up === true ? "text-success" : up === false ? "text-destructive" : "text-muted-foreground"}`}>
               {up === true && <TrendingUp className="w-3 h-3 inline mr-0.5" />}
               {up === false && <TrendingDown className="w-3 h-3 inline mr-0.5" />}
               {change}
@@ -126,9 +126,9 @@ export function Relatorios() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
-          <h3 className="text-gray-800 mb-1">Volume de Registros</h3>
-          <p className="text-gray-500 text-xs mb-4">Últimos 6 meses</p>
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm p-4 sm:p-5">
+          <h3 className="text-foreground mb-1">Volume de Registros</h3>
+          <p className="text-muted-foreground text-xs mb-4">Últimos 6 meses</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={barData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -139,9 +139,9 @@ export function Relatorios() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sm:p-5">
-          <h3 className="text-gray-800 mb-1">Por Categoria</h3>
-          <p className="text-gray-500 text-xs mb-4">Distribuição percentual</p>
+        <div className="bg-card rounded-xl border border-border shadow-sm p-4 sm:p-5">
+          <h3 className="text-foreground mb-1">Por Categoria</h3>
+          <p className="text-muted-foreground text-xs mb-4">Distribuição percentual</p>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
@@ -157,23 +157,23 @@ export function Relatorios() {
       </div>
 
       {/* Filters + Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         {/* Filters */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Pesquisar relatório..."
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
             <select
               value={periodo}
               onChange={(e) => { setPeriodo(e.target.value); setPage(1); }}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-muted focus:outline-none focus:ring-2 focus:ring-ring text-muted-foreground"
             >
               <option value="">Todos os períodos</option>
               {["Dez/2025", "Jan/2026", "Fev/2026", "Mar/2026"].map((p) => (
@@ -183,7 +183,7 @@ export function Relatorios() {
             <select
               value={categoria}
               onChange={(e) => { setCategoria(e.target.value); setPage(1); }}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
+              className="px-3 py-2 border border-border rounded-lg text-sm bg-muted focus:outline-none focus:ring-2 focus:ring-ring text-muted-foreground"
             >
               <option value="">Todas as categorias</option>
               {["Ambiental", "Comercial", "Residencial", "Rural", "Infraestrutura"].map((c) => (
@@ -197,24 +197,24 @@ export function Relatorios() {
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Código</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Título</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Categoria</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Período</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Registros</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider">Ações</th>
+              <tr className="border-b border-border bg-muted">
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Código</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Título</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Categoria</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Período</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Registros</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-xs text-muted-foreground uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {paginated.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 text-xs font-mono text-gray-500">{r.codigo}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 font-medium">{r.titulo}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{r.categoria}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{r.periodo}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 font-medium">{r.registros}</td>
+                <tr key={r.id} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-4 py-3 text-xs font-mono text-muted-foreground">{r.codigo}</td>
+                  <td className="px-4 py-3 text-sm text-foreground font-medium">{r.titulo}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{r.categoria}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{r.periodo}</td>
+                  <td className="px-4 py-3 text-sm text-foreground font-medium">{r.registros}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusBadge[r.status]}`}>
                       {r.status}
@@ -222,10 +222,10 @@ export function Relatorios() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Baixar PDF">
+                      <button className="p-1.5 text-primary hover:bg-accent rounded-lg transition-colors" title="Baixar PDF">
                         <FileText className="w-4 h-4" />
                       </button>
-                      <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Exportar Excel">
+                      <button className="p-1.5 text-success hover:bg-secondary rounded-lg transition-colors" title="Exportar Excel">
                         <FileSpreadsheet className="w-4 h-4" />
                       </button>
                     </div>
@@ -235,28 +235,28 @@ export function Relatorios() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="py-10 text-center text-gray-400 text-sm">Nenhum relatório encontrado.</div>
+            <div className="py-10 text-center text-muted-foreground text-sm">Nenhum relatório encontrado.</div>
           )}
         </div>
 
         {/* Cards Mobile */}
-        <div className="sm:hidden divide-y divide-gray-100">
+        <div className="sm:hidden divide-y divide-border">
           {paginated.map((r) => (
             <div key={r.id} className="p-4">
               <div className="flex items-start justify-between mb-1">
-                <p className="text-sm font-medium text-gray-800">{r.titulo}</p>
+                <p className="text-sm font-medium text-foreground">{r.titulo}</p>
                 <span className={`ml-2 shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge[r.status]}`}>
                   {r.status}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mb-2">{r.codigo} · {r.categoria} · {r.periodo}</p>
+              <p className="text-xs text-muted-foreground mb-2">{r.codigo} · {r.categoria} · {r.periodo}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600">{r.registros} registros</span>
+                <span className="text-xs text-muted-foreground">{r.registros} registros</span>
                 <div className="flex items-center gap-2">
-                  <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg">
+                  <button className="p-1.5 text-primary hover:bg-accent rounded-lg">
                     <FileText className="w-4 h-4" />
                   </button>
-                  <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg">
+                  <button className="p-1.5 text-success hover:bg-secondary rounded-lg">
                     <FileSpreadsheet className="w-4 h-4" />
                   </button>
                 </div>
@@ -264,21 +264,21 @@ export function Relatorios() {
             </div>
           ))}
           {filtered.length === 0 && (
-            <div className="py-10 text-center text-gray-400 text-sm">Nenhum relatório encontrado.</div>
+            <div className="py-10 text-center text-muted-foreground text-sm">Nenhum relatório encontrado.</div>
           )}
         </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">
               {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
             </p>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                className="p-1.5 text-muted-foreground hover:bg-muted rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -287,7 +287,7 @@ export function Relatorios() {
                   key={p}
                   onClick={() => setPage(p)}
                   className={`w-7 h-7 text-xs rounded-lg transition-colors ${
-                    page === p ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
+                    page === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   {p}
@@ -296,7 +296,7 @@ export function Relatorios() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                className="p-1.5 text-muted-foreground hover:bg-muted rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
