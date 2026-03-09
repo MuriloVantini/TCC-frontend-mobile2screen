@@ -64,7 +64,7 @@ export function useDrawableAnimation(
                     opacity: [0, 1],
                     translateY: ["0.5em", 0],
                     duration: 400,
-                    delay: (_: unknown, i: number) => textDelay + i * 5,
+                    delay: (_: unknown, i: number) => textDelay + i * 80,
                     ease,
                 });
             }
