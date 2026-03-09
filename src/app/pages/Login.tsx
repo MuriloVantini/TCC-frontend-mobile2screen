@@ -8,7 +8,7 @@ import { Label } from "../components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import { useLaravelApi } from "../hooks/api/useLaravelApi";
-import { ApiError } from "../hooks/api/httpClient";
+import { ApiError } from "../hooks/api/config/httpClient";
 
 function extractApiErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) {
