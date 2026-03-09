@@ -1,15 +1,18 @@
-import { useState, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
+import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle, Moon, Sun } from "lucide-react";
 import { shake, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
+import { Switch } from "../components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import { useAuthApi, useSanctumApi } from "../hooks/api/entities";
 import { ApiError } from "../hooks/api/config/httpClient";
 import { useUserContext } from "../contexts/UserContextProvider";
+
+const THEME_STORAGE_KEY = "m2s.theme";
 
 function extractApiErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) {
@@ -49,6 +52,7 @@ function extractApiErrorMessage(error: unknown, fallback: string): string {
 
 export function Login() {
   const [tab, setTab] = useState<"login" | "register">("login");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginState, setLoginState] = useState<SubmitState>("idle");
   const [registerState, setRegisterState] = useState<SubmitState>("idle");
@@ -69,6 +73,21 @@ export function Login() {
   const { morphStyle: registerMorphStyle, morphContent: registerMorphContent } = useMorphButton(registerState, <span>Criar Minha Conta</span>);
 
   useDrawableAnimation(logoRef, { textSelector: "span" });
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldUseDark = storedTheme ? storedTheme === "dark" : prefersDark;
+
+    document.documentElement.classList.toggle("dark", shouldUseDark);
+    setIsDarkMode(shouldUseDark);
+  }, []);
+
+  const handleThemeChange = (checked: boolean) => {
+    setIsDarkMode(checked);
+    document.documentElement.classList.toggle("dark", checked);
+    window.localStorage.setItem(THEME_STORAGE_KEY, checked ? "dark" : "light");
+  };
 
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -150,6 +169,14 @@ export function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-sidebar to-background flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 right-4 z-20">
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card/80 px-3 py-2 backdrop-blur">
+          <Sun className={`h-4 w-4 ${isDarkMode ? "text-muted-foreground" : "text-warning"}`} />
+          <Switch checked={isDarkMode} onCheckedChange={handleThemeChange} aria-label="Alternar tema" />
+          <Moon className={`h-4 w-4 ${isDarkMode ? "text-primary" : "text-muted-foreground"}`} />
+        </div>
+      </div>
+
       {/* Decorative blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-chart-2/10 rounded-full blur-3xl pointer-events-none" />
