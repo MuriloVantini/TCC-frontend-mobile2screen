@@ -4,14 +4,13 @@ export interface ApiRecord {
   [key: string]: ApiPrimitive | ApiPrimitive[] | ApiRecord | ApiRecord[] | null | undefined;
 }
 
-export interface ApiEnvelope<T> {
-  data?: T;
+export interface ApiSuccessResponse<T> {
+  success: boolean;
+  data: T;
   message?: string;
-  token?: string;
-  errors?: Record<string, string[]>;
 }
 
-export interface PaginationEnvelope<T> {
+export interface PaginationData<T> {
   data: T[];
   current_page?: number;
   per_page?: number;
@@ -24,6 +23,13 @@ export interface AuthUser {
   name: string;
   email: string;
   [key: string]: unknown;
+}
+
+export interface AuthResponse {
+  message: string;
+  user: AuthUser;
+  token: string;
+  token_type: string;
 }
 
 export interface RegisterPayload {
@@ -71,6 +77,11 @@ export interface HeartbeatPayload {
   [key: string]: unknown;
 }
 
+export interface HeartbeatResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface DeviceResource extends ApiRecord {
   id?: number;
   name?: string;
@@ -106,7 +117,28 @@ export interface DeliveryResource extends ApiRecord {
   status?: string;
 }
 
+export interface AlertDetailsData extends ApiRecord {
+  alert: AlertResource;
+  stats?: ApiRecord;
+}
+
 export interface DashboardStatistics extends ApiRecord {}
-export interface DailyStatistics extends ApiRecord {}
-export interface AlertsByTypeStatistics extends ApiRecord {}
-export interface TopDevicesStatistics extends ApiRecord {}
+export interface DailyStatistics extends ApiRecord {
+  date?: string;
+  alerts_sent?: number;
+  alerts_delivered?: number;
+  alerts_failed?: number;
+  devices_online_avg?: string;
+  delivery_rate?: string;
+}
+export interface AlertsByTypeStatistics extends ApiRecord {
+  type?: string;
+  count?: number;
+}
+export interface TopDevicesStatistics extends ApiRecord {
+  id?: number;
+  name?: string;
+  type?: string;
+  location?: string;
+  total_alerts?: number;
+}

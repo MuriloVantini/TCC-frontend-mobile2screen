@@ -1,11 +1,13 @@
 import { defaultApiClient, type ApiClient } from "./httpClient";
 import type {
   AlertsByTypeStatistics,
+  AlertDetailsData,
   AlertPayload,
   AlertResource,
-  ApiEnvelope,
+  ApiSuccessResponse,
   ApiKeyPayload,
   ApiKeyResource,
+  AuthResponse,
   AuthUser,
   DailyStatistics,
   DashboardStatistics,
@@ -14,8 +16,9 @@ import type {
   DevicePayload,
   DeviceResource,
   HeartbeatPayload,
+  HeartbeatResponse,
   LoginPayload,
-  PaginationEnvelope,
+  PaginationData,
   PlanResource,
   RegisterPayload,
   SettingsPayload,
@@ -26,15 +29,86 @@ import type {
   WebhookResource,
 } from "./laravel-api.types";
 
-function unwrapData<T>(response: T | ApiEnvelope<T> | PaginationEnvelope<T>): T {
-  if (response && typeof response === "object" && "data" in response) {
-    const dataValue = (response as { data?: T }).data;
-    if (dataValue !== undefined) {
-      return dataValue;
-    }
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === "object" && value !== null;
+}
+
+function extractData<T>(response: unknown): T {
+  if (isRecord(response) && "data" in response) {
+    return response.data as T;
   }
 
   return response as T;
+}
+
+function extractEntity<T>(response: unknown): T {
+  return extractData<T>(response);
+}
+
+function extractCollection<T>(response: unknown): T[] {
+  const data = extractData<unknown>(response);
+
+  if (Array.isArray(data)) {
+    return data as T[];
+  }
+
+  if (isRecord(data) && Array.isArray(data.data)) {
+    return data.data as T[];
+  }
+
+  return [];
+}
+
+function extractNestedEntity<T>(response: unknown, key: string): T {
+  const data = extractData<unknown>(response);
+
+  if (isRecord(data) && key in data) {
+    return data[key] as T;
+  }
+
+  return data as T;
+}
+
+function saveToken(client: ApiClient, token?: string) {
+  if (token) {
+    client.setAuthToken(token);
+  }
+}
+
+function clearToken(client: ApiClient) {
+  client.setAuthToken(null);
+}
+
+export interface AlertsListResult {
+  items: AlertResource[];
+  pagination?: PaginationData<AlertResource>;
+}
+
+function parseAlertsList(response: unknown): AlertsListResult {
+  const data = extractData<unknown>(response);
+
+  if (isRecord(data) && Array.isArray(data.data)) {
+    const pagination: PaginationData<AlertResource> = {
+      data: data.data as AlertResource[],
+      current_page: typeof data.current_page === "number" ? data.current_page : undefined,
+      per_page: typeof data.per_page === "number" ? data.per_page : undefined,
+      total: typeof data.total === "number" ? data.total : undefined,
+      last_page: typeof data.last_page === "number" ? data.last_page : undefined,
+    };
+
+    return {
+      items: pagination.data,
+      pagination,
+    };
+  }
+
+  if (Array.isArray(data)) {
+    return { items: data as AlertResource[] };
+  }
+
+  return { items: [] };
 }
 
 export function useSanctumApi(client: ApiClient = defaultApiClient) {
@@ -46,30 +120,36 @@ export function useSanctumApi(client: ApiClient = defaultApiClient) {
 export function useAuthApi(client: ApiClient = defaultApiClient) {
   return {
     register: async (payload: RegisterPayload) => {
-      const response = await client.post<ApiEnvelope<AuthUser>>("/api/register", payload, { asFormData: true });
-      return unwrapData(response);
+      const response = await client.post<AuthResponse>("/api/register", payload, { asFormData: true });
+      saveToken(client, response.token);
+      return response;
     },
     login: async (payload: LoginPayload) => {
-      const response = await client.post<ApiEnvelope<AuthUser>>("/api/login", payload, { asFormData: true });
-      return unwrapData(response);
+      const response = await client.post<AuthResponse>("/api/login", payload, { asFormData: true });
+      saveToken(client, response.token);
+      return response;
     },
     user: async () => {
-      const response = await client.get<ApiEnvelope<AuthUser>>("/api/user");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<AuthUser>>("/api/user");
+      return extractEntity<AuthUser>(response);
     },
-    logout: () => client.post<unknown>("/api/logout"),
+    logout: async () => {
+      const response = await client.post<unknown>("/api/logout");
+      clearToken(client);
+      return response;
+    },
   };
 }
 
 export function usePlansApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<PlanResource[] | ApiEnvelope<PlanResource[]> | PaginationEnvelope<PlanResource>>("/api/plans");
-      return unwrapData(response) as PlanResource[];
+      const response = await client.get<ApiSuccessResponse<PlanResource[]>>("/api/plans");
+      return extractCollection<PlanResource>(response);
     },
     getById: async (planId: number | string) => {
-      const response = await client.get<PlanResource | ApiEnvelope<PlanResource>>(`/api/plans/${planId}`);
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<PlanResource>>(`/api/plans/${planId}`);
+      return extractEntity<PlanResource>(response);
     },
   };
 }
@@ -77,12 +157,12 @@ export function usePlansApi(client: ApiClient = defaultApiClient) {
 export function useSettingsApi(client: ApiClient = defaultApiClient) {
   return {
     get: async () => {
-      const response = await client.get<SettingsPayload | ApiEnvelope<SettingsPayload>>("/api/settings");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<SettingsPayload>>("/api/settings");
+      return extractEntity<SettingsPayload>(response);
     },
     update: async (payload: SettingsPayload) => {
-      const response = await client.put<SettingsPayload | ApiEnvelope<SettingsPayload>>("/api/settings", payload);
-      return unwrapData(response);
+      const response = await client.put<ApiSuccessResponse<SettingsPayload> | SettingsPayload>("/api/settings", payload);
+      return extractEntity<SettingsPayload>(response);
     },
   };
 }
@@ -90,29 +170,38 @@ export function useSettingsApi(client: ApiClient = defaultApiClient) {
 export function useDevicesApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<DeviceResource[] | ApiEnvelope<DeviceResource[]> | PaginationEnvelope<DeviceResource>>("/api/devices");
-      return unwrapData(response) as DeviceResource[];
+      const response = await client.get<ApiSuccessResponse<DeviceResource[]>>("/api/devices");
+      return extractCollection<DeviceResource>(response);
     },
     create: async (payload: DevicePayload) => {
-      const response = await client.post<DeviceResource | ApiEnvelope<DeviceResource>>("/api/devices", payload);
-      return unwrapData(response);
+      const response = await client.post<ApiSuccessResponse<DeviceResource> | DeviceResource>("/api/devices", payload);
+      return extractEntity<DeviceResource>(response);
     },
     getById: async (deviceId: number | string) => {
-      const response = await client.get<DeviceResource | ApiEnvelope<DeviceResource>>(`/api/devices/${deviceId}`);
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<DeviceResource>>(`/api/devices/${deviceId}`);
+      return extractEntity<DeviceResource>(response);
     },
     update: async (deviceId: number | string, payload: DevicePayload) => {
-      const response = await client.put<DeviceResource | ApiEnvelope<DeviceResource>>(`/api/devices/${deviceId}`, payload);
-      return unwrapData(response);
+      const response = await client.put<ApiSuccessResponse<DeviceResource> | DeviceResource>(`/api/devices/${deviceId}`, payload);
+      return extractEntity<DeviceResource>(response);
     },
     remove: (deviceId: number | string) => client.delete<unknown>(`/api/devices/${deviceId}`),
     heartbeat: async (deviceId: number | string, payload?: HeartbeatPayload) => {
-      const response = await client.post<DeviceResource | ApiEnvelope<DeviceResource>>(`/api/devices/${deviceId}/heartbeat`, payload ?? {});
-      return unwrapData(response);
+      const response = await client.post<HeartbeatResponse>(`/api/devices/${deviceId}/heartbeat`, payload ?? {});
+      return response;
     },
     regenerateToken: async (deviceId: number | string) => {
-      const response = await client.post<ApiEnvelope<{ token: string }> | { token: string }>(`/api/devices/${deviceId}/regenerate-token`);
-      return unwrapData(response);
+      const response = await client.post<unknown>(`/api/devices/${deviceId}/regenerate-token`);
+      if (isRecord(response) && typeof response.token === "string") {
+        return { token: response.token };
+      }
+
+      const data = extractData<UnknownRecord>(response);
+      if (isRecord(data) && typeof data.token === "string") {
+        return { token: data.token };
+      }
+
+      return {};
     },
   };
 }
@@ -120,25 +209,25 @@ export function useDevicesApi(client: ApiClient = defaultApiClient) {
 export function useTagsApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<TagResource[] | ApiEnvelope<TagResource[]> | PaginationEnvelope<TagResource>>("/api/tags");
-      return unwrapData(response) as TagResource[];
+      const response = await client.get<ApiSuccessResponse<TagResource[]>>("/api/tags");
+      return extractCollection<TagResource>(response);
     },
     create: async (payload: TagPayload) => {
-      const response = await client.post<TagResource | ApiEnvelope<TagResource>>("/api/tags", payload);
-      return unwrapData(response);
+      const response = await client.post<ApiSuccessResponse<TagResource> | TagResource>("/api/tags", payload);
+      return extractEntity<TagResource>(response);
     },
     getById: async (tagId: number | string) => {
-      const response = await client.get<TagResource | ApiEnvelope<TagResource>>(`/api/tags/${tagId}`);
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<TagResource>>(`/api/tags/${tagId}`);
+      return extractEntity<TagResource>(response);
     },
     update: async (tagId: number | string, payload: TagPayload) => {
-      const response = await client.put<TagResource | ApiEnvelope<TagResource>>(`/api/tags/${tagId}`, payload);
-      return unwrapData(response);
+      const response = await client.put<ApiSuccessResponse<TagResource> | TagResource>(`/api/tags/${tagId}`, payload);
+      return extractEntity<TagResource>(response);
     },
     remove: (tagId: number | string) => client.delete<unknown>(`/api/tags/${tagId}`),
     devices: async (tagId: number | string) => {
-      const response = await client.get<DeviceResource[] | ApiEnvelope<DeviceResource[]> | PaginationEnvelope<DeviceResource>>(`/api/tags/${tagId}/devices`);
-      return unwrapData(response) as DeviceResource[];
+      const response = await client.get<ApiSuccessResponse<DeviceResource[]>>(`/api/tags/${tagId}/devices`);
+      return extractCollection<DeviceResource>(response);
     },
   };
 }
@@ -146,20 +235,23 @@ export function useTagsApi(client: ApiClient = defaultApiClient) {
 export function useAlertsApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<AlertResource[] | ApiEnvelope<AlertResource[]> | PaginationEnvelope<AlertResource>>("/api/alerts");
-      return unwrapData(response) as AlertResource[];
+      const response = await client.get<ApiSuccessResponse<PaginationData<AlertResource>> | ApiSuccessResponse<AlertResource[]>>("/api/alerts");
+      return parseAlertsList(response);
     },
     create: async (payload: AlertPayload) => {
-      const response = await client.post<AlertResource | ApiEnvelope<AlertResource>>("/api/alerts", payload);
-      return unwrapData(response);
+      const response = await client.post<ApiSuccessResponse<AlertResource> | AlertResource>("/api/alerts", payload);
+      return extractEntity<AlertResource>(response);
     },
     getById: async (alertId: number | string) => {
-      const response = await client.get<AlertResource | ApiEnvelope<AlertResource>>(`/api/alerts/${alertId}`);
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<AlertDetailsData>>(`/api/alerts/${alertId}`);
+      return {
+        details: extractEntity<AlertDetailsData>(response),
+        alert: extractNestedEntity<AlertResource>(response, "alert"),
+      };
     },
     deliveries: async (alertId: number | string) => {
-      const response = await client.get<DeliveryResource[] | ApiEnvelope<DeliveryResource[]> | PaginationEnvelope<DeliveryResource>>(`/api/alerts/${alertId}/deliveries`);
-      return unwrapData(response) as DeliveryResource[];
+      const response = await client.get<ApiSuccessResponse<DeliveryResource[]>>(`/api/alerts/${alertId}/deliveries`);
+      return extractCollection<DeliveryResource>(response);
     },
     retry: async (alertId: number | string) => {
       const response = await client.post<unknown>(`/api/alerts/${alertId}/retry`);
@@ -171,8 +263,8 @@ export function useAlertsApi(client: ApiClient = defaultApiClient) {
 export function useDeliveriesApi(client: ApiClient = defaultApiClient) {
   return {
     updateStatus: async (deliveryId: number | string, payload: DeliveryStatusPayload) => {
-      const response = await client.patch<DeliveryResource | ApiEnvelope<DeliveryResource>>(`/api/deliveries/${deliveryId}/status`, payload);
-      return unwrapData(response);
+      const response = await client.patch<ApiSuccessResponse<DeliveryResource> | DeliveryResource>(`/api/deliveries/${deliveryId}/status`, payload);
+      return extractEntity<DeliveryResource>(response);
     },
   };
 }
@@ -180,16 +272,16 @@ export function useDeliveriesApi(client: ApiClient = defaultApiClient) {
 export function useApiKeysApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<ApiKeyResource[] | ApiEnvelope<ApiKeyResource[]> | PaginationEnvelope<ApiKeyResource>>("/api/api-keys");
-      return unwrapData(response) as ApiKeyResource[];
+      const response = await client.get<ApiSuccessResponse<ApiKeyResource[]>>("/api/api-keys");
+      return extractCollection<ApiKeyResource>(response);
     },
     create: async (payload: ApiKeyPayload) => {
-      const response = await client.post<ApiKeyResource | ApiEnvelope<ApiKeyResource>>("/api/api-keys", payload);
-      return unwrapData(response);
+      const response = await client.post<ApiSuccessResponse<ApiKeyResource> | ApiKeyResource>("/api/api-keys", payload);
+      return extractEntity<ApiKeyResource>(response);
     },
     update: async (apiKeyId: number | string, payload: ApiKeyPayload) => {
-      const response = await client.put<ApiKeyResource | ApiEnvelope<ApiKeyResource>>(`/api/api-keys/${apiKeyId}`, payload);
-      return unwrapData(response);
+      const response = await client.put<ApiSuccessResponse<ApiKeyResource> | ApiKeyResource>(`/api/api-keys/${apiKeyId}`, payload);
+      return extractEntity<ApiKeyResource>(response);
     },
     remove: (apiKeyId: number | string) => client.delete<unknown>(`/api/api-keys/${apiKeyId}`),
   };
@@ -198,20 +290,20 @@ export function useApiKeysApi(client: ApiClient = defaultApiClient) {
 export function useWebhooksApi(client: ApiClient = defaultApiClient) {
   return {
     list: async () => {
-      const response = await client.get<WebhookResource[] | ApiEnvelope<WebhookResource[]> | PaginationEnvelope<WebhookResource>>("/api/webhooks");
-      return unwrapData(response) as WebhookResource[];
+      const response = await client.get<ApiSuccessResponse<WebhookResource[]>>("/api/webhooks");
+      return extractCollection<WebhookResource>(response);
     },
     create: async (payload: WebhookPayload) => {
-      const response = await client.post<WebhookResource | ApiEnvelope<WebhookResource>>("/api/webhooks", payload);
-      return unwrapData(response);
+      const response = await client.post<ApiSuccessResponse<WebhookResource> | WebhookResource>("/api/webhooks", payload);
+      return extractEntity<WebhookResource>(response);
     },
     getById: async (webhookId: number | string) => {
-      const response = await client.get<WebhookResource | ApiEnvelope<WebhookResource>>(`/api/webhooks/${webhookId}`);
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<WebhookResource>>(`/api/webhooks/${webhookId}`);
+      return extractEntity<WebhookResource>(response);
     },
     update: async (webhookId: number | string, payload: WebhookPayload) => {
-      const response = await client.put<WebhookResource | ApiEnvelope<WebhookResource>>(`/api/webhooks/${webhookId}`, payload);
-      return unwrapData(response);
+      const response = await client.put<ApiSuccessResponse<WebhookResource> | WebhookResource>(`/api/webhooks/${webhookId}`, payload);
+      return extractEntity<WebhookResource>(response);
     },
     remove: (webhookId: number | string) => client.delete<unknown>(`/api/webhooks/${webhookId}`),
     logs: async (webhookId: number | string) => {
@@ -228,20 +320,20 @@ export function useWebhooksApi(client: ApiClient = defaultApiClient) {
 export function useStatisticsApi(client: ApiClient = defaultApiClient) {
   return {
     dashboard: async () => {
-      const response = await client.get<DashboardStatistics | ApiEnvelope<DashboardStatistics>>("/api/statistics/dashboard");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<DashboardStatistics>>("/api/statistics/dashboard");
+      return extractEntity<DashboardStatistics>(response);
     },
     daily: async () => {
-      const response = await client.get<DailyStatistics | ApiEnvelope<DailyStatistics>>("/api/statistics/daily");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<DailyStatistics[]>>("/api/statistics/daily");
+      return extractCollection<DailyStatistics>(response);
     },
     alertsByType: async () => {
-      const response = await client.get<AlertsByTypeStatistics | ApiEnvelope<AlertsByTypeStatistics>>("/api/statistics/alerts-by-type");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<AlertsByTypeStatistics[]>>("/api/statistics/alerts-by-type");
+      return extractCollection<AlertsByTypeStatistics>(response);
     },
     topDevices: async () => {
-      const response = await client.get<TopDevicesStatistics | ApiEnvelope<TopDevicesStatistics>>("/api/statistics/top-devices");
-      return unwrapData(response);
+      const response = await client.get<ApiSuccessResponse<TopDevicesStatistics[]>>("/api/statistics/top-devices");
+      return extractCollection<TopDevicesStatistics>(response);
     },
   };
 }

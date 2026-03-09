@@ -7,6 +7,44 @@ import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
+import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { ApiError } from "../hooks/api/httpClient";
+
+function extractApiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) {
+    const data = error.data;
+
+    if (typeof data === "string" && data.trim().length > 0) {
+      return data;
+    }
+
+    if (data && typeof data === "object") {
+      const record = data as Record<string, unknown>;
+
+      if (typeof record.message === "string" && record.message.trim().length > 0) {
+        return record.message;
+      }
+
+      const errors = record.errors;
+      if (errors && typeof errors === "object") {
+        const firstError = Object.values(errors as Record<string, unknown>).find((value) => {
+          if (typeof value === "string") return true;
+          return Array.isArray(value) && typeof value[0] === "string";
+        });
+
+        if (typeof firstError === "string") {
+          return firstError;
+        }
+
+        if (Array.isArray(firstError) && typeof firstError[0] === "string") {
+          return firstError[0];
+        }
+      }
+    }
+  }
+
+  return fallback;
+}
 
 export function Login() {
   const [tab, setTab] = useState<"login" | "register">("login");
@@ -20,6 +58,7 @@ export function Login() {
   const [registerForm, setRegisterForm] = useState({ name: "", email: "", company: "", password: "", confirm: "" });
 
   const navigate = useNavigate();
+  const api = useLaravelApi();
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const { shakeCard } = shake(cardRef, tab);
@@ -32,8 +71,8 @@ export function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoginState("loading");
-    await new Promise((r) => setTimeout(r, 1200));
+    setSuccess("");
+
     if (!loginForm.email || !loginForm.password) {
       setError("Preencha todos os campos.");
       setLoginState("error");
@@ -41,32 +80,67 @@ export function Login() {
       setTimeout(() => setLoginState("idle"), 1500);
       return;
     }
-    setLoginState("success");
-    setTimeout(() => navigate("/app"), 1000);
+
+    setLoginState("loading");
+
+    try {
+      await api.sanctum.csrfCookie();
+      await api.auth.login({
+        email: loginForm.email,
+        password: loginForm.password,
+      });
+
+      setLoginState("success");
+      setSuccess("Login realizado com sucesso!");
+      setTimeout(() => navigate("/app"), 700);
+    } catch (err) {
+      setError(extractApiErrorMessage(err, "Nao foi possivel entrar. Verifique seus dados."));
+      setLoginState("error");
+      shakeCard();
+      setTimeout(() => setLoginState("idle"), 1500);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setRegisterState("loading");
-    await new Promise((r) => setTimeout(r, 1200));
+
     if (!registerForm.name || !registerForm.email || !registerForm.password) {
-      setError("Preencha todos os campos obrigatórios.");
+      setError("Preencha todos os campos obrigatorios.");
       setRegisterState("error");
       shakeCard();
       setTimeout(() => setRegisterState("idle"), 1500);
       return;
     }
+
     if (registerForm.password !== registerForm.confirm) {
-      setError("As senhas não coincidem.");
+      setError("As senhas nao coincidem.");
       setRegisterState("error");
       shakeCard();
       setTimeout(() => setRegisterState("idle"), 1500);
       return;
     }
-    setRegisterState("success");
-    setSuccess("Conta criada! Redirecionando...");
-    setTimeout(() => navigate("/app"), 1200);
+
+    setRegisterState("loading");
+
+    try {
+      await api.sanctum.csrfCookie();
+      await api.auth.register({
+        name: registerForm.name,
+        email: registerForm.email,
+        password: registerForm.password,
+        password_confirmation: registerForm.confirm,
+      });
+
+      setRegisterState("success");
+      setSuccess("Conta criada! Redirecionando...");
+      setTimeout(() => navigate("/app"), 900);
+    } catch (err) {
+      setError(extractApiErrorMessage(err, "Nao foi possivel criar a conta."));
+      setRegisterState("error");
+      shakeCard();
+      setTimeout(() => setRegisterState("idle"), 1500);
+    }
   };
 
   return (

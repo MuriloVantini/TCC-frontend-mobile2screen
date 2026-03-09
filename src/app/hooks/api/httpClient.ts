@@ -42,6 +42,32 @@ export class ApiError extends Error {
 }
 
 const DEFAULT_BASE_URL = "http://localhost:8000";
+const AUTH_TOKEN_STORAGE_KEY = "m2s.auth_token";
+
+function readStoredAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistAuthToken(token: string | null): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    if (token) {
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+      return;
+    }
+
+    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch {
+    // Ignore storage write errors (private mode, quota exceeded, etc.).
+  }
+}
 
 function resolveBaseUrl(customBaseUrl?: string): string {
   if (customBaseUrl) return customBaseUrl;
@@ -90,7 +116,7 @@ function headersToRecord(headers?: HeadersInit): Record<string, string> | undefi
 
 export function createApiClient(config?: ApiClientConfig): ApiClient {
   const baseUrl = resolveBaseUrl(config?.baseUrl);
-  let authToken: string | null = config?.getAuthToken?.() ?? null;
+  let authToken: string | null = config?.getAuthToken?.() ?? readStoredAuthToken();
   let unauthorizedHandler = config?.onUnauthorized;
 
   const axiosInstance = axios.create({
@@ -170,6 +196,7 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     axios: axiosInstance,
     setAuthToken: (token: string | null) => {
       authToken = token;
+      persistAuthToken(token);
     },
     setUnauthorizedHandler: (handler?: (error: AxiosError) => void) => {
       unauthorizedHandler = handler;

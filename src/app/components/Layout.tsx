@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
+import { useLaravelApi } from "../hooks/api/useLaravelApi";
 import {
   LayoutDashboard,
   Monitor,
@@ -43,13 +44,58 @@ const logoDarkInline = LogoDarkMarkup
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<{ name: string; email: string } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const api = useMemo(() => useLaravelApi(), []);
   const sidebarNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
+  const displayName = authUser?.name ?? "Usuario";
+  const displayEmail = authUser?.email ?? "-";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "US";
+
+  const handleLogout = async () => {
+    try {
+      await api.auth.logout();
+    } catch {
+      // Even if logout fails on the server, clear local auth flow.
+    } finally {
+      navigate("/");
+    }
+  };
+
   useDrawableAnimation(logoRef, {duration: 1500, staggerMs: 80});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    api.auth
+      .user()
+      .then((user) => {
+        if (!isMounted) return;
+
+        setAuthUser({
+          name: user.name,
+          email: user.email,
+        });
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setAuthUser(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [api]);
+
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       if (sidebarNavRef.current) {
@@ -122,7 +168,7 @@ export function Layout() {
             </Link>
             <Button
               variant="ghost"
-              onClick={() => navigate("/")}
+              onClick={handleLogout}
               className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white"
             >
               <LogOut className="w-4 h-4 shrink-0" />
@@ -171,7 +217,7 @@ export function Layout() {
           </Link>
           <Button
             variant="ghost"
-            onClick={() => navigate("/")}
+            onClick={handleLogout}
             className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white"
           >
             <LogOut className="w-4 h-4 shrink-0" />
@@ -215,22 +261,22 @@ export function Layout() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-xl">
                   <Avatar className="size-7 rounded-lg">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-bold rounded-lg">JS</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-bold rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:block text-sm text-slate-700">João Silva</span>
+                  <span className="hidden sm:block text-sm text-slate-700">{displayName}</span>
                   <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-xl">
                 <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium text-slate-800">João Silva</p>
-                  <p className="text-xs text-slate-500">joao@empresa.com.br</p>
+                  <p className="text-sm font-medium text-slate-800">{displayName}</p>
+                  <p className="text-xs text-slate-500">{displayEmail}</p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/app/configuracoes">Configurações</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onClick={() => navigate("/")}>
+                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
                   <LogOut className="w-4 h-4" /> Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
