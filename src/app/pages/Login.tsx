@@ -201,15 +201,23 @@ export function Login() {
             <TabsList className="w-full h-auto rounded-none border-b border-border bg-card p-0">
               <TabsTrigger
                 value="login"
-                className="flex-1 h-auto py-3.5 rounded-none border-b-2 border-transparent text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-accent data-[state=active]:shadow-none"
+                className="flex-1 h-auto py-3.5 rounded-none border-0 border-b-2 border-transparent text-muted-foreground
+                data-[state=active]:border-primary
+                data-[state=active]:text-primary
+                data-[state=active]:bg-accent
+                data-[state=active]:shadow-none"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger
                 value="register"
-                className="flex-1 h-auto py-3.5 rounded-none border-b-2 border-transparent text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-accent data-[state=active]:shadow-none"
+                className="flex-1 h-auto py-3.5 rounded-none border-0 border-b-2 border-transparent text-muted-foreground
+                data-[state=active]:border-primary
+                data-[state=active]:text-primary
+                data-[state=active]:bg-accent
+                data-[state=active]:shadow-none"
               >
-                Criar Conta
+                Criar conta
               </TabsTrigger>
             </TabsList>
 
