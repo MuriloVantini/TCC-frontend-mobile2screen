@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
-import LogoLightMarkup from "../assets/LogoLight.svg?raw";
+import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
 import {
   LayoutDashboard,
   Monitor,
@@ -13,7 +13,6 @@ import {
   Menu,
   Bell,
   ChevronDown,
-  Zap,
   ShieldCheck,
   Map,
 } from "lucide-react";
@@ -38,7 +37,9 @@ const navItems = [
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-const logoLightInline = LogoLightMarkup.replace("<svg ", '<svg class="h-8 w-auto" ');
+const logoDarkInline = LogoDarkMarkup
+  .replace(/<path /g, '<path vector-effect="non-scaling-stroke" ')
+  .replace("<svg ", '<svg class="h-5 w-auto" ');
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -83,14 +84,13 @@ export function Layout() {
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-64 p-0 bg-[#0f172a] border-white/10 flex flex-col gap-0">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
-          <div className="flex items-center gap-2.5 px-5 py-5 border-b border-white/10">
-            <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white text-sm font-semibold leading-tight">AlertaTV</span>
-              <span className="text-slate-400 text-xs">Alertas em tempo real</span>
-            </div>
+          <div className="px-4 py-2 border-b border-white/10">
+            <div
+              className="px-3 py-2.5 flex items-center"
+              aria-label="Mobile2Screen"
+              role="img"
+              dangerouslySetInnerHTML={{ __html: logoDarkInline }}
+            />
           </div>
           <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
             {navItems.map(({ to, label, icon: Icon, end }) => (
@@ -134,14 +134,14 @@ export function Layout() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-[#0f172a]">
-        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-white/10">
-          <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-white text-sm font-semibold leading-tight">AlertaTV</span>
-            <span className="text-slate-400 text-xs">Alertas em tempo real</span>
-          </div>
+        <div className="px-4 py-2 border-b border-white/10">
+          <div
+            ref={logoRef}
+            className="px-3 py-2.5 flex items-center"
+            aria-label="Mobile2Screen"
+            role="img"
+            dangerouslySetInnerHTML={{ __html: logoDarkInline }}
+          />
         </div>
         <nav ref={sidebarNavRef} className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
           {navItems.map(({ to, label, icon: Icon, end }) => (
@@ -193,13 +193,6 @@ export function Layout() {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div
-              ref={logoRef}
-              className="hidden md:flex items-center"
-              aria-label="AlertaTV"
-              role="img"
-              dangerouslySetInnerHTML={{ __html: logoLightInline }}
-            />
           </div>
 
           <div className="flex items-center gap-2">
