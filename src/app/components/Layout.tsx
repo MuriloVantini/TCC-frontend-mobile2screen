@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
+import LogoLightMarkup from "../assets/LogoLight.svg?raw";
 import {
   LayoutDashboard,
   Monitor,
@@ -37,6 +38,8 @@ const navItems = [
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 
+const logoLightInline = LogoLightMarkup.replace("<svg ", '<svg class="h-8 w-auto" ');
+
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -45,17 +48,17 @@ export function Layout() {
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
-  useDrawableAnimation(logoRef, { textSelector: "span" });
+  useDrawableAnimation(logoRef, {duration: 1500, staggerMs: 80});
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       if (sidebarNavRef.current) {
         const activeLink = sidebarNavRef.current.querySelector<HTMLElement>(".bg-blue-600");
         if (activeLink) {
           animate(activeLink, {
-            scale: [0.92, 1],
+            scale: [0.6, 1],
             opacity: [0.6, 1],
             duration: 380,
-            ease: "outBack(1.6)",
+            ease: "outBack(6.4)",
           });
         }
       }
@@ -63,7 +66,7 @@ export function Layout() {
         const activeMobile = mobileNavRef.current.querySelector<HTMLElement>(".text-blue-600");
         if (activeMobile) {
           animate(activeMobile, {
-            scale: [0.88, 1],
+            scale: [0.70, 1],
             opacity: [0.5, 1],
             duration: 320,
             ease: "outBack(1.8)",
@@ -164,7 +167,7 @@ export function Layout() {
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
           >
             <ShieldCheck className="w-4 h-4 shrink-0" />
-            <span>Painel Admin</span>
+            <span>{'Painel Admin'}</span>
           </Link>
           <Button
             variant="ghost"
@@ -190,10 +193,13 @@ export function Layout() {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div ref={logoRef} className="hidden md:flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-600" />
-              <span className="text-slate-800 font-semibold">AlertaTV</span>
-            </div>
+            <div
+              ref={logoRef}
+              className="hidden md:flex items-center"
+              aria-label="AlertaTV"
+              role="img"
+              dangerouslySetInnerHTML={{ __html: logoLightInline }}
+            />
           </div>
 
           <div className="flex items-center gap-2">
