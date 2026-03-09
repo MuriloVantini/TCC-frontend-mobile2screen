@@ -181,3 +181,52 @@
     line-height: 1.5;
   }
 }
+
+@layer utilities {
+  /*
+   * Compatibility layer:
+   * Pages ainda usam utilitarios fixos (slate/gray/white). Estas regras
+   * mapeiam essas classes para os tokens de tema e mantem light/dark coerente.
+   */
+  .bg-white {
+    background-color: var(--card) !important;
+  }
+
+  .bg-slate-50,
+  .bg-slate-100,
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color: var(--muted) !important;
+  }
+
+  .text-slate-800,
+  .text-slate-700,
+  .text-gray-800,
+  .text-gray-700 {
+    color: var(--foreground) !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400,
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400 {
+    color: var(--muted-foreground) !important;
+  }
+
+  .border-slate-50,
+  .border-slate-100,
+  .border-slate-200,
+  .border-gray-100,
+  .border-gray-200 {
+    border-color: var(--border) !important;
+  }
+
+  .hover\:bg-slate-50:hover,
+  .hover\:bg-slate-100:hover,
+  .hover\:bg-gray-50:hover,
+  .hover\:bg-gray-100:hover {
+    background-color: var(--muted) !important;
+  }
+}
