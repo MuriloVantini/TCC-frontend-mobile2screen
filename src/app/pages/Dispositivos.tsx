@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import type { Device, DeviceType } from "../interfaces/types/device";
-import { useMockDevicesApi } from "../hooks/api/useMockDevicesApi";
+import { useLaravelApi } from "../hooks/api/useLaravelApi";
 import {
   Plus,
   Monitor,
@@ -58,6 +58,31 @@ const tagColors = [
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
 type Feedback = { type: "success" | "error"; msg: string } | null;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function extractTagNames(source: unknown): string[] {
+  if (!Array.isArray(source)) return [];
+
+  return source
+    .map((item) => (isRecord(item) && typeof item.name === "string" ? item.name : null))
+    .filter((item): item is string => typeof item === "string");
+}
+
+function mapApiDevice(resource: Record<string, unknown>, index: number): Device {
+  return {
+    id: typeof resource.id === "number" ? resource.id : index + 1,
+    name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
+    type: resource.type === "rpi" ? "rpi" : "tv",
+    online: Boolean(resource.is_online),
+    tags: extractTagNames(resource.tags),
+    location: typeof resource.location === "string" ? resource.location : "",
+    lastSeen: typeof resource.last_seen === "string" ? resource.last_seen : "nunca",
+    ip: typeof resource.ip_address === "string" ? resource.ip_address : "-",
+  };
+}
 
 function DeviceIcon({ type, size = "md" }: { type: DeviceType; size?: "sm" | "md" }) {
   const s = size === "sm" ? "w-3.5 h-3.5" : "w-5 h-5";
@@ -118,8 +143,8 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 }
 
 export function Dispositivos() {
-  const { devices: mockedDevices } = useMockDevicesApi();
-  const [devices, setDevices] = useState<Device[]>(mockedDevices);
+  const api = useMemo(() => useLaravelApi(), []);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [search, setSearch] = useState("");
   const [filterTag, setFilterTag] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -133,6 +158,18 @@ export function Dispositivos() {
   const [form, setForm] = useState<{ name: string; type: DeviceType; location: string; tags: string[] }>({
     name: "", type: "tv", location: "", tags: [],
   });
+
+  const loadDevices = async () => {
+    const resources = await api.devices.list();
+    const mapped = resources.map((resource, index) => mapApiDevice(resource as Record<string, unknown>, index));
+    setDevices(mapped);
+  };
+
+  useEffect(() => {
+    loadDevices().catch(() => {
+      showFeedback({ type: "error", msg: "Nao foi possivel carregar os dispositivos." });
+    });
+  }, [api]);
 
   const allTags = Array.from(new Set(devices.flatMap((d) => d.tags)));
 
@@ -172,25 +209,47 @@ export function Dispositivos() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name) { showFeedback({ type: "error", msg: "O nome do dispositivo é obrigatório." }); return; }
-    if (editingId !== null) {
-      setDevices((prev) => prev.map((d) => d.id === editingId ? { ...d, name: form.name, type: form.type, location: form.location, tags: form.tags } : d));
-      showFeedback({ type: "success", msg: "Dispositivo atualizado com sucesso!" });
-    } else {
-      const id = Math.max(0, ...devices.map((d) => d.id)) + 1;
-      pendingEnterId.current = id;
-      setDevices((prev) => [...prev, { id, name: form.name, type: form.type, location: form.location, tags: form.tags, online: false, lastSeen: "nunca", ip: `192.168.1.${100 + id}` }]);
-      showFeedback({ type: "success", msg: "Dispositivo cadastrado! Aguardando conexão." });
+
+    try {
+      if (editingId !== null) {
+        await api.devices.update(editingId, {
+          name: form.name,
+          type: form.type,
+          location: form.location,
+          tags: form.tags,
+        });
+        showFeedback({ type: "success", msg: "Dispositivo atualizado com sucesso!" });
+      } else {
+        await api.devices.create({
+          name: form.name,
+          type: form.type,
+          location: form.location,
+          tags: form.tags,
+        });
+        showFeedback({ type: "success", msg: "Dispositivo cadastrado!" });
+      }
+
+      await loadDevices();
+      const latestId = devices.length > 0 ? Math.max(...devices.map((d) => d.id)) : null;
+      pendingEnterId.current = latestId;
+      setShowModal(false);
+    } catch {
+      showFeedback({ type: "error", msg: "Nao foi possivel salvar o dispositivo." });
     }
-    setShowModal(false);
   };
 
   const handleDelete = async (id: number) => {
     setDeleteConfirm(null);
 
-    setDevices((prev) => prev.filter((d) => d.id !== id));
-    showFeedback({ type: "success", msg: "Dispositivo removido." });
+    try {
+      await api.devices.remove(id);
+      await loadDevices();
+      showFeedback({ type: "success", msg: "Dispositivo removido." });
+    } catch {
+      showFeedback({ type: "error", msg: "Nao foi possivel remover o dispositivo." });
+    }
   };
 
   return (

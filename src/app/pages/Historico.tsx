@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { animate, stagger } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import {
@@ -30,6 +30,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "../components/ui/dialog";
+import { useLaravelApi } from "../hooks/api/useLaravelApi";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -46,16 +47,26 @@ interface AlertRecord {
   sentAt: string;
 }
 
-const alertHistory: AlertRecord[] = [
-  { id: 1, title: "Reunião em 10 minutos — Sala A", message: "Confirme sua presença com o organizador.", type: "info", tags: ["sala-reuniao", "diretoria"], devices: 3, delivered: 3, failed: 0, duration: "1 minuto", sentAt: "28/02/2026 14:52" },
-  { id: 2, title: "EMERGÊNCIA: Saída bloqueada", message: "A saída da Linha 1 está bloqueada. Evacuar imediatamente.", type: "critical", tags: ["producao", "seguranca"], devices: 6, delivered: 5, failed: 1, duration: "Indefinido", sentAt: "28/02/2026 13:30" },
-  { id: 3, title: "Sistema em manutenção às 18h", message: "O sistema ficará indisponível das 18h às 19h.", type: "warning", tags: ["ti", "todos"], devices: 12, delivered: 10, failed: 2, duration: "10 minutos", sentAt: "28/02/2026 11:00" },
-  { id: 4, title: "Bem-vindo, Rafael!", message: "Nosso novo colega Rafael inicia hoje no setor de TI.", type: "success", tags: ["recepcao"], devices: 2, delivered: 2, failed: 0, duration: "5 minutos", sentAt: "28/02/2026 09:15" },
-  { id: 5, title: "Cardápio do refeitório", message: "Hoje: Frango grelhado, arroz, feijão, salada verde.", type: "info", tags: ["refeitorio", "todos"], devices: 8, delivered: 6, failed: 2, duration: "1 hora", sentAt: "28/02/2026 08:00" },
-  { id: 6, title: "Entrega de EPI obrigatória", message: "Todos os colaboradores devem retirar EPI até sexta.", type: "warning", tags: ["producao", "seguranca", "rh"], devices: 9, delivered: 9, failed: 0, duration: "30 minutos", sentAt: "27/02/2026 16:00" },
-  { id: 7, title: "Aviso de chuva forte", message: "Atenção: previsão de chuva forte às 15h.", type: "warning", tags: ["portaria", "todos"], devices: 12, delivered: 11, failed: 1, duration: "2 horas", sentAt: "27/02/2026 13:00" },
-  { id: 8, title: "Meta do mês atingida!", message: "Parabéns equipe! Meta de produção atingida.", type: "success", tags: ["producao", "todos"], devices: 12, delivered: 12, failed: 0, duration: "5 minutos", sentAt: "26/02/2026 17:30" },
-];
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function formatDateTime(value: unknown): string {
+  if (typeof value !== "string") return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("pt-BR") + " " + date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatDuration(secondsValue: unknown): string {
+  const seconds = typeof secondsValue === "number" ? secondsValue : Number(secondsValue);
+  if (!Number.isFinite(seconds) || seconds <= 0) return "Indefinido";
+  if (seconds < 60) return `${seconds} segundos`;
+  if (seconds % 60 === 0) return `${seconds / 60} minutos`;
+  return `${seconds} segundos`;
+}
 
 const alertTypeConfig = {
   info: { icon: Info, color: "text-blue-600", bg: "bg-blue-100", border: "border-l-blue-500", label: "Informativo", badgeCls: "bg-blue-100 text-blue-700" },
@@ -100,17 +111,69 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 const PAGE_SIZE = 5;
 
 export function Historico() {
+  const api = useMemo(() => useLaravelApi(), []);
+  const [alertHistory, setAlertHistory] = useState<AlertRecord[]>([]);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AlertRecord | null>(null);
   const [resendState, setResendState] = useState<SubmitState>("idle");
 
+  useEffect(() => {
+    let isMounted = true;
+
+    api.alerts
+      .list()
+      .then((result) => {
+        if (!isMounted) return;
+
+        const mapped: AlertRecord[] = result.items.map((item, index) => {
+          const deliveries = Array.isArray(item.deliveries) ? item.deliveries : [];
+          const delivered = deliveries.filter((delivery) => isRecord(delivery) && delivery.status === "delivered").length;
+          const failed = deliveries.filter((delivery) => isRecord(delivery) && delivery.status === "failed").length;
+
+          return {
+            id: typeof item.id === "number" ? item.id : index + 1,
+            title: typeof item.title === "string" ? item.title : `Alerta ${index + 1}`,
+            message: typeof item.message === "string" ? item.message : "",
+            type: item.type === "warning" || item.type === "critical" || item.type === "success" ? item.type : "info",
+            tags: Array.isArray(item.tags)
+              ? item.tags
+                  .map((tag) => (isRecord(tag) && typeof tag.name === "string" ? tag.name : null))
+                  .filter((tag): tag is string => typeof tag === "string")
+              : [],
+            devices: deliveries.length,
+            delivered,
+            failed,
+            duration: formatDuration(item.duration_seconds),
+            sentAt: formatDateTime(item.sent_at ?? item.created_at),
+          };
+        });
+
+        setAlertHistory(mapped);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setAlertHistory([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [api]);
+
   const handleResend = async () => {
+    if (!selected) return;
+
     setResendState("loading");
-    await new Promise((r) => setTimeout(r, 1500));
-    setResendState("success");
-    setTimeout(() => setResendState("idle"), 1500);
+    try {
+      await api.alerts.retry(selected.id);
+      setResendState("success");
+      setTimeout(() => setResendState("idle"), 1500);
+    } catch {
+      setResendState("error");
+      setTimeout(() => setResendState("idle"), 1500);
+    }
   };
 
   const handleDialogClose = (open: boolean) => {

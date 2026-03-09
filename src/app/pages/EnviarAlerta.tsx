@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "animejs";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import { shake, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
@@ -31,7 +31,7 @@ import {
   WifiOff,
   MoveRight,
 } from "lucide-react";
-import { useMockDevicesApi } from "../hooks/api/useMockDevicesApi";
+import { useLaravelApi } from "../hooks/api/useLaravelApi";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -56,8 +56,29 @@ const durations = ["10 segundos", "30 segundos", "1 minuto", "5 minutos", "10 mi
 
 type Step = 1 | 2 | 3;
 
+type AlertDevice = {
+  id: number;
+  name: string;
+  type: "tv" | "rpi";
+  online: boolean;
+  tags: string[];
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function extractTagNames(source: unknown): string[] {
+  if (!Array.isArray(source)) return [];
+
+  return source
+    .map((item) => (isRecord(item) && typeof item.name === "string" ? item.name : null))
+    .filter((item): item is string => typeof item === "string");
+}
+
 export function EnviarAlerta() {
-  const { devices: allDevices } = useMockDevicesApi();
+  const api = useMemo(() => useLaravelApi(), []);
+  const [allDevices, setAllDevices] = useState<AlertDevice[]>([]);
   const allTags = Array.from(new Set(allDevices.flatMap((d) => d.tags)));
   const [step, setStep] = useState<Step>(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -88,6 +109,34 @@ export function EnviarAlerta() {
     <><Send />{`Enviar para ${matchingDevices.length} dispositivo${matchingDevices.length !== 1 ? "s" : ""}`}</>
   );
   const { morphStyle: sendMorphStyle, morphContent: sendMorphContent } = useMorphButton(sendState, sendIdleContent);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    api.devices
+      .list()
+      .then((resources) => {
+        if (!isMounted) return;
+
+        const mapped = resources.map((resource, index) => ({
+          id: typeof resource.id === "number" ? resource.id : index + 1,
+          name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
+          type: (resource.type === "rpi" ? "rpi" : "tv") as AlertDevice["type"],
+          online: Boolean(resource.is_online),
+          tags: extractTagNames(resource.tags),
+        }));
+
+        setAllDevices(mapped);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setAllDevices([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [api]);
 
   useEffect(() => {
     const prev = prevStepRef.current;
