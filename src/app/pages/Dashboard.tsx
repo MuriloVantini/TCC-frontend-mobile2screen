@@ -138,7 +138,7 @@ export function Dashboard() {
 
     const load = async () => {
       const [devicesResult, alertsResult, dailyResult, dashboardResult] = await Promise.allSettled([
-        devicesApi.list(),
+        devicesApi.latest(),
         alertsApi.list(),
         statisticsApi.daily(),
         statisticsApi.dashboard(),

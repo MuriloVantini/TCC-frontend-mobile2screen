@@ -14,6 +14,10 @@ export function useDevicesApi(client: ApiClient = defaultApiClient) {
       const response = await client.get<ApiSuccessResponse<DeviceResource[]>>("/api/devices");
       return extractCollection<DeviceResource>(response);
     },
+    latest: async () => {
+      const response = await client.get<ApiSuccessResponse<DeviceResource[]>>("/api/devices/latest");
+      return extractCollection<DeviceResource>(response);
+    },
     create: async (payload: DevicePayload) => {
       const response = await client.post<ApiSuccessResponse<DeviceResource> | DeviceResource>("/api/devices", payload);
       return extractEntity<DeviceResource>(response);
