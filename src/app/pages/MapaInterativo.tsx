@@ -15,51 +15,28 @@ import {
   ZoomOut,
   LocateFixed,
   Info,
-  Building2,
-  TreePine,
-  Zap,
-  Droplets,
+  Cpu,
+  Tv,
 } from "lucide-react";
+import { useMockMapApi } from "../hooks/api/useMockMapApi";
+import type { MapPoint } from "../interfaces/types/map";
 
 const MAP_CENTER: [number, number] = [-22.6604, -50.4188];
 const INITIAL_ZOOM = 14;
 
-const mapPoints = [
-  { id: 1, lat: -22.6574, lng: -50.4176, type: "building", label: "Lote Comercial #1082", desc: "Área: 450m² · Zona Comercial", status: "active" },
-  { id: 2, lat: -22.6521, lng: -50.4230, type: "park", label: "Área Verde Setor B", desc: "Área: 2.300m² · Preservação", status: "active" },
-  { id: 3, lat: -22.6648, lng: -50.4105, type: "building", label: "Edifício Residencial #205", desc: "Área: 1.200m² · Zona Residencial", status: "alert" },
-  { id: 4, lat: -22.6710, lng: -50.4252, type: "infrastructure", label: "Estação de Energia #14", desc: "Capacidade: 500kW · Ativo", status: "active" },
-  { id: 5, lat: -22.6583, lng: -50.4320, type: "water", label: "Reservatório Municipal", desc: "Volume: 50.000m³ · Normal", status: "active" },
-  { id: 6, lat: -22.6690, lng: -50.4050, type: "building", label: "Lote Residencial #3301", desc: "Área: 280m² · Zona Residencial", status: "inactive" },
-  { id: 7, lat: -22.6750, lng: -50.4140, type: "park", label: "Parque Ecológico Central", desc: "Área: 8.500m² · Conservação", status: "active" },
-];
-
-const layerDefs = [
-  { id: "edificacoes", label: "Edificações", icon: Building2, color: "text-blue-600", active: true },
-  { id: "areas_verdes", label: "Áreas Verdes", icon: TreePine, color: "text-emerald-600", active: true },
-  { id: "infraestrutura", label: "Infraestrutura", icon: Zap, color: "text-amber-600", active: false },
-  { id: "hidrografia", label: "Hidrografia", icon: Droplets, color: "text-cyan-600", active: true },
-];
-
 const typeIcon = {
-  building: Building2,
-  park: TreePine,
-  infrastructure: Zap,
-  water: Droplets,
+  rpi: Cpu,
+  tv: Tv,
 };
 
 const typeColor: Record<string, string> = {
-  building: "#2563eb",
-  park: "#16a34a",
-  infrastructure: "#d97706",
-  water: "#0891b2",
+  rpi: "#16a34a",
+  tv: "#2563eb",
 };
 
 const typeLayerKey: Record<string, string> = {
-  building: "edificacoes",
-  park: "areas_verdes",
-  infrastructure: "infraestrutura",
-  water: "hidrografia",
+  rpi: "rpi",
+  tv: "tv",
 };
 
 const statusBadge = {
@@ -84,9 +61,8 @@ function makeMarkerIcon(color: string, isAlert: boolean): L.DivIcon {
   });
 }
 
-type MapPoint = (typeof mapPoints)[0];
-
 export function MapaInterativo() {
+  const { mapPoints, layerDefs } = useMockMapApi();
   const [search, setSearch] = useState("");
   const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>(
     Object.fromEntries(layerDefs.map((l) => [l.id, l.active]))
@@ -114,12 +90,7 @@ export function MapaInterativo() {
       maxZoom: 19,
     }).addTo(map);
 
-    const groups: Record<string, L.LayerGroup> = {
-      edificacoes: L.layerGroup(),
-      areas_verdes: L.layerGroup(),
-      infraestrutura: L.layerGroup(),
-      hidrografia: L.layerGroup(),
-    };
+    const groups: Record<string, L.LayerGroup> = { rpi: L.layerGroup(), tv: L.layerGroup() };
 
     mapPoints.forEach((point) => {
       const marker = L.marker([point.lat, point.lng], {

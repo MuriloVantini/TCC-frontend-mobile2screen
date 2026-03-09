@@ -18,33 +18,8 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
-
-const activityData = [
-  { hora: "08h", alertas: 2 },
-  { hora: "09h", alertas: 5 },
-  { hora: "10h", alertas: 3 },
-  { hora: "11h", alertas: 8 },
-  { hora: "12h", alertas: 1 },
-  { hora: "13h", alertas: 4 },
-  { hora: "14h", alertas: 6 },
-  { hora: "15h", alertas: 9 },
-  { hora: "16h", alertas: 3 },
-  { hora: "17h", alertas: 7 },
-];
-
-const recentAlerts = [
-  { id: 1, title: "Reunião em 10 minutos", type: "info", tags: ["sala-reuniao", "diretoria"], devices: 3, status: "delivered", time: "há 5 min" },
-  { id: 2, title: "ALERTA: Saída de emergência bloqueada", type: "critical", tags: ["producao", "seguranca"], devices: 8, status: "delivered", time: "há 23 min" },
-  { id: 3, title: "Sistema em manutenção às 18h", type: "warning", tags: ["ti", "todos"], devices: 12, status: "delivered", time: "há 1h" },
-  { id: 4, title: "Bem-vindo ao novo colaborador!", type: "success", tags: ["recepcao"], devices: 2, status: "failed", time: "há 2h" },
-];
-
-const devices = [
-  { id: 1, name: "TV Recepção Principal", type: "tv", online: true, tags: ["recepcao", "todos"] },
-  { id: 2, name: "RPi Sala Reunião A", type: "rpi", online: true, tags: ["sala-reuniao", "diretoria"] },
-  { id: 3, name: "TV Produção Linha 1", type: "tv", online: false, tags: ["producao"] },
-  { id: 4, name: "TV RH", type: "tv", online: true, tags: ["rh", "todos"] },
-];
+import { useMockAlertsApi } from "../hooks/api/useMockAlertsApi";
+import { useMockDevicesApi } from "../hooks/api/useMockDevicesApi";
 
 const alertTypeConfig = {
   info: { icon: Info, color: "text-blue-600", bg: "bg-blue-100", label: "Info" },
@@ -68,6 +43,8 @@ const tagColors = [
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
 export function Dashboard() {
+  const { devices } = useMockDevicesApi();
+  const { activityData, recentAlerts } = useMockAlertsApi();
   const onlineCount = devices.filter((d) => d.online).length;
   const offlineCount = devices.length - onlineCount;
   const metricsRef = useRef<HTMLDivElement>(null);

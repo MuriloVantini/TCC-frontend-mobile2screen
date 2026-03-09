@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
+import type { Device, DeviceType } from "../interfaces/types/device";
+import { useMockDevicesApi } from "../hooks/api/useMockDevicesApi";
 import {
   Plus,
   Monitor,
@@ -42,28 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-
-type DeviceType = "tv" | "rpi";
-
-interface Device {
-  id: number;
-  name: string;
-  type: DeviceType;
-  location: string;
-  tags: string[];
-  online: boolean;
-  lastSeen: string;
-  ip: string;
-}
-
-const initialDevices: Device[] = [
-  { id: 1, name: "TV Recepção Principal", type: "tv", location: "Térreo", tags: ["recepcao", "todos"], online: true, lastSeen: "agora", ip: "192.168.1.101" },
-  { id: 2, name: "RPi Sala Reunião A", type: "rpi", location: "2º Andar", tags: ["sala-reuniao", "diretoria"], online: true, lastSeen: "há 2 min", ip: "192.168.1.102" },
-  { id: 3, name: "TV Produção Linha 1", type: "tv", location: "Galpão", tags: ["producao", "seguranca"], online: false, lastSeen: "há 3h", ip: "192.168.1.103" },
-  { id: 4, name: "TV RH", type: "tv", location: "3º Andar", tags: ["rh", "todos"], online: true, lastSeen: "há 1 min", ip: "192.168.1.104" },
-  { id: 5, name: "RPi Portaria", type: "rpi", location: "Entrada", tags: ["portaria", "seguranca", "todos"], online: true, lastSeen: "agora", ip: "192.168.1.105" },
-  { id: 6, name: "TV Refeitório", type: "tv", location: "Subsolo", tags: ["refeitorio", "todos"], online: false, lastSeen: "há 1 dia", ip: "192.168.1.106" },
-];
 
 const tagColors = [
   "bg-blue-100 text-blue-700",
@@ -138,7 +118,8 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 }
 
 export function Dispositivos() {
-  const [devices, setDevices] = useState(initialDevices);
+  const { devices: mockedDevices } = useMockDevicesApi();
+  const [devices, setDevices] = useState<Device[]>(mockedDevices);
   const [search, setSearch] = useState("");
   const [filterTag, setFilterTag] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -167,7 +148,7 @@ export function Dispositivos() {
   }, [devices]);
 
   const filtered = devices.filter((d) => {
-    const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) || d.location.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) || (d.location ?? "").toLowerCase().includes(search.toLowerCase());
     const matchTag = !filterTag || d.tags.includes(filterTag);
     return matchSearch && matchTag;
   });
@@ -181,7 +162,7 @@ export function Dispositivos() {
   };
 
   const openEdit = (d: Device) => {
-    setForm({ name: d.name, type: d.type, location: d.location, tags: [...d.tags] });
+    setForm({ name: d.name, type: d.type, location: d.location ?? "", tags: [...d.tags] });
     setEditingId(d.id);
     setShowModal(true);
   };

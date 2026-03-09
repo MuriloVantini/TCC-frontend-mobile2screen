@@ -31,6 +31,7 @@ import {
   WifiOff,
   MoveRight,
 } from "lucide-react";
+import { useMockDevicesApi } from "../hooks/api/useMockDevicesApi";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -40,17 +41,6 @@ const alertTypes = [
   { id: "critical" as AlertType, label: "Crítico", icon: Zap, color: "bg-red-500", border: "border-red-500", light: "bg-red-50 border-red-200 text-red-700", textColor: "text-red-500" },
   { id: "success" as AlertType, label: "Sucesso", icon: CheckCircle2, color: "bg-emerald-500", border: "border-emerald-500", light: "bg-emerald-50 border-emerald-200 text-emerald-700", textColor: "text-emerald-500" },
 ];
-
-const allDevices = [
-  { id: 1, name: "TV Recepção Principal", type: "tv", online: true, tags: ["recepcao", "todos"] },
-  { id: 2, name: "RPi Sala Reunião A", type: "rpi", online: true, tags: ["sala-reuniao", "diretoria"] },
-  { id: 3, name: "TV Produção Linha 1", type: "tv", online: false, tags: ["producao", "seguranca"] },
-  { id: 4, name: "TV RH", type: "tv", online: true, tags: ["rh", "todos"] },
-  { id: 5, name: "RPi Portaria", type: "rpi", online: true, tags: ["portaria", "seguranca", "todos"] },
-  { id: 6, name: "TV Refeitório", type: "tv", online: false, tags: ["refeitorio", "todos"] },
-];
-
-const allTags = Array.from(new Set(allDevices.flatMap((d) => d.tags)));
 
 const tagColors = [
   "bg-blue-100 text-blue-700",
@@ -67,6 +57,8 @@ const durations = ["10 segundos", "30 segundos", "1 minuto", "5 minutos", "10 mi
 type Step = 1 | 2 | 3;
 
 export function EnviarAlerta() {
+  const { devices: allDevices } = useMockDevicesApi();
+  const allTags = Array.from(new Set(allDevices.flatMap((d) => d.tags)));
   const [step, setStep] = useState<Step>(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
