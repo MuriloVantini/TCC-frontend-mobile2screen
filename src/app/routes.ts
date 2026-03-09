@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
+import { RequireAuth } from "./components/RequireAuth";
 import { AdminLayout } from "./components/AdminLayout";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
@@ -16,14 +17,19 @@ export const router = createBrowserRouter([
   { path: "/", Component: Login },
   {
     path: "/app",
-    Component: Layout,
+    Component: RequireAuth,
     children: [
-      { index: true, Component: Dashboard },
-      { path: "dispositivos", Component: Dispositivos },
-      { path: "enviar", Component: EnviarAlerta },
-      { path: "historico", Component: Historico },
-      { path: "mapa", Component: MapaInterativo },
-      { path: "configuracoes", Component: Configuracoes },
+      {
+        Component: Layout,
+        children: [
+          { index: true, Component: Dashboard },
+          { path: "dispositivos", Component: Dispositivos },
+          { path: "enviar", Component: EnviarAlerta },
+          { path: "historico", Component: Historico },
+          { path: "mapa", Component: MapaInterativo },
+          { path: "configuracoes", Component: Configuracoes },
+        ],
+      },
     ],
   },
   {
