@@ -17,9 +17,12 @@ import {
   ChevronDown,
   ShieldCheck,
   Map,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Switch } from "./ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,8 +46,11 @@ const logoDarkInline = LogoDarkMarkup
   .replace(/<path /g, '<path vector-effect="non-scaling-stroke" ')
   .replace("<svg ", '<svg class="h-5 w-auto" ');
 
+const THEME_STORAGE_KEY = "m2s.theme";
+
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const { user, clearUser } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,6 +80,21 @@ export function Layout() {
   };
 
   useDrawableAnimation(logoRef, {duration: 1500, staggerMs: 80});
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldUseDark = storedTheme ? storedTheme === "dark" : prefersDark;
+
+    document.documentElement.classList.toggle("dark", shouldUseDark);
+    setIsDarkMode(shouldUseDark);
+  }, []);
+
+  const handleThemeChange = (checked: boolean) => {
+    setIsDarkMode(checked);
+    document.documentElement.classList.toggle("dark", checked);
+    window.localStorage.setItem(THEME_STORAGE_KEY, checked ? "dark" : "light");
+  };
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -236,6 +257,10 @@ export function Layout() {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             </Button>
+            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 px-2.5 py-1.5">
+              {isDarkMode ? <Moon className="w-4 h-4 text-blue-700" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <Switch checked={isDarkMode} onCheckedChange={handleThemeChange} aria-label="Alternar tema" />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-xl">
