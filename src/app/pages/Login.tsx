@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNavigate, Link } from "react-router";
 import { Zap, Eye, EyeOff, Mail, Lock, User, Building2, AlertCircle, CheckCircle } from "lucide-react";
 import { shake, useMorphButton, type SubmitState } from "../hooks/useFormSubmitAnimation";
@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useAuthApi, useSanctumApi } from "../hooks/api/entities";
 import { ApiError } from "../hooks/api/config/httpClient";
 import { useUserContext } from "../contexts/UserContextProvider";
 
@@ -59,7 +59,8 @@ export function Login() {
   const [registerForm, setRegisterForm] = useState({ name: "", email: "", company: "", password: "", confirm: "" });
 
   const navigate = useNavigate();
-  const api = useLaravelApi();
+  const authApi = useMemo(() => useAuthApi(), []);
+  const sanctumApi = useMemo(() => useSanctumApi(), []);
   const { setUser } = useUserContext();
   const cardRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -86,8 +87,8 @@ export function Login() {
     setLoginState("loading");
 
     try {
-      await api.sanctum.csrfCookie();
-      const response = await api.auth.login({
+      await sanctumApi.csrfCookie();
+      const response = await authApi.login({
         email: loginForm.email,
         password: loginForm.password,
       });
@@ -127,8 +128,8 @@ export function Login() {
     setRegisterState("loading");
 
     try {
-      await api.sanctum.csrfCookie();
-      const response = await api.auth.register({
+      await sanctumApi.csrfCookie();
+      const response = await authApi.register({
         name: registerForm.name,
         email: registerForm.email,
         password: registerForm.password,

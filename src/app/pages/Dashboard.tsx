@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useAlertsApi, useDevicesApi, useStatisticsApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
 
 type DashboardDevice = {
@@ -119,7 +119,9 @@ const tagColors = [
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
 export function Dashboard() {
-  const api = useMemo(() => useLaravelApi(), []);
+  const devicesApi = useMemo(() => useDevicesApi(), []);
+  const alertsApi = useMemo(() => useAlertsApi(), []);
+  const statisticsApi = useMemo(() => useStatisticsApi(), []);
   const { user } = useUserContext();
   const [devices, setDevices] = useState<DashboardDevice[]>([]);
   const [recentAlerts, setRecentAlerts] = useState<DashboardAlert[]>([]);
@@ -136,10 +138,10 @@ export function Dashboard() {
 
     const load = async () => {
       const [devicesResult, alertsResult, dailyResult, dashboardResult] = await Promise.allSettled([
-        api.devices.list(),
-        api.alerts.list(),
-        api.statistics.daily(),
-        api.statistics.dashboard(),
+        devicesApi.list(),
+        alertsApi.list(),
+        statisticsApi.daily(),
+        statisticsApi.dashboard(),
       ]);
 
       if (!isMounted) return;
@@ -204,7 +206,7 @@ export function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, [api]);
+  }, [devicesApi, alertsApi, statisticsApi]);
 
   useEffect(() => {
     if (!metricsRef.current) return;

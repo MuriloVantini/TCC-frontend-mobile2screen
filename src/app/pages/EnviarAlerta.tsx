@@ -31,7 +31,7 @@ import {
   WifiOff,
   MoveRight,
 } from "lucide-react";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useAlertsApi, useDevicesApi, useTagsApi } from "../hooks/api/entities";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -64,6 +64,11 @@ type AlertDevice = {
   tags: string[];
 };
 
+type AlertTag = {
+  id: number;
+  name: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -76,10 +81,28 @@ function extractTagNames(source: unknown): string[] {
     .filter((item): item is string => typeof item === "string");
 }
 
+function durationToSeconds(value: string): number | null {
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === "indefinido") return null;
+
+  const [rawAmount, rawUnit] = normalized.split(" ");
+  const amount = Number(rawAmount);
+  if (!Number.isFinite(amount) || amount <= 0) return 30;
+
+  if (rawUnit?.startsWith("min")) {
+    return amount * 60;
+  }
+
+  return amount;
+}
+
 export function EnviarAlerta() {
-  const api = useMemo(() => useLaravelApi(), []);
+  const devicesApi = useMemo(() => useDevicesApi(), []);
+  const tagsApi = useMemo(() => useTagsApi(), []);
+  const alertsApi = useMemo(() => useAlertsApi(), []);
   const [allDevices, setAllDevices] = useState<AlertDevice[]>([]);
-  const allTags = Array.from(new Set(allDevices.flatMap((d) => d.tags)));
+  const [allTags, setAllTags] = useState<AlertTag[]>([]);
   const [step, setStep] = useState<Step>(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -113,30 +136,46 @@ export function EnviarAlerta() {
   useEffect(() => {
     let isMounted = true;
 
-    api.devices
-      .list()
-      .then((resources) => {
+    Promise.allSettled([devicesApi.list(), tagsApi.list()])
+      .then(([devicesResult, tagsResult]) => {
         if (!isMounted) return;
 
-        const mapped = resources.map((resource, index) => ({
-          id: typeof resource.id === "number" ? resource.id : index + 1,
-          name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
-          type: (resource.type === "rpi" ? "rpi" : "tv") as AlertDevice["type"],
-          online: Boolean(resource.is_online),
-          tags: extractTagNames(resource.tags),
-        }));
+        if (devicesResult.status === "fulfilled") {
+          const mappedDevices = devicesResult.value.map((resource, index) => ({
+            id: typeof resource.id === "number" ? resource.id : index + 1,
+            name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
+            type: (resource.type === "rpi" ? "rpi" : "tv") as AlertDevice["type"],
+            online: Boolean(resource.is_online),
+            tags: extractTagNames(resource.tags),
+          }));
+          setAllDevices(mappedDevices);
+        } else {
+          setAllDevices([]);
+        }
 
-        setAllDevices(mapped);
+        if (tagsResult.status === "fulfilled") {
+          const mappedTags = tagsResult.value
+            .map((tag, index) => ({
+              id: typeof tag.id === "number" ? tag.id : index + 1,
+              name: typeof tag.name === "string" ? tag.name : `tag-${index + 1}`,
+            }))
+            .filter((tag) => tag.name.trim().length > 0);
+
+          setAllTags(mappedTags);
+        } else {
+          setAllTags([]);
+        }
       })
       .catch(() => {
         if (!isMounted) return;
         setAllDevices([]);
+        setAllTags([]);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [api]);
+  }, [devicesApi, tagsApi]);
 
   useEffect(() => {
     const prev = prevStepRef.current;
@@ -212,10 +251,32 @@ export function EnviarAlerta() {
   };
 
   const handleSend = async () => {
+    const selectedTagIds = (selectAll ? allTags : allTags.filter((tag) => selectedTags.includes(tag.name))).map((tag) => tag.id);
+    if (selectedTagIds.length === 0) {
+      setSendState("error");
+      shakeCard();
+      setTimeout(() => setSendState("idle"), 1500);
+      return;
+    }
+
     setSendState("loading");
-    await new Promise((r) => setTimeout(r, 1500));
-    setSendState("success");
-    setTimeout(() => setSent(true), 700);
+    try {
+      await alertsApi.create({
+        title,
+        message,
+        type: alertType,
+        duration_seconds: durationToSeconds(duration),
+        priority: 0,
+        tags: selectedTagIds,
+      });
+
+      setSendState("success");
+      setTimeout(() => setSent(true), 700);
+    } catch {
+      setSendState("error");
+      shakeCard();
+      setTimeout(() => setSendState("idle"), 1500);
+    }
   };
 
   const reset = () => {
@@ -227,6 +288,7 @@ export function EnviarAlerta() {
       setTitle("");
       setMessage("");
       setDuration("30 segundos");
+      setShowPreview(false);
       setSendState("idle");
       setSent(false);
     }, 800);
@@ -306,7 +368,7 @@ export function EnviarAlerta() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
               <button
-                onClick={() => { setSelectAll(true); setSelectedTags(allTags); }}
+                onClick={() => { setSelectAll(true); setSelectedTags(allTags.map((tag) => tag.name)); }}
                 className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all ${selectAll ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
@@ -315,15 +377,15 @@ export function EnviarAlerta() {
               </button>
               {allTags.map((tag) => (
                 <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all text-left ${selectedTags.includes(tag) && !selectAll
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.name)}
+                  className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm transition-all text-left ${selectedTags.includes(tag.name) && !selectAll
                       ? "border-blue-600 bg-blue-50 text-blue-700"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50"
                     }`}
                 >
                   <Tag className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">{tag}</span>
+                  <span className="truncate">{tag.name}</span>
                 </button>
               ))}
             </div>

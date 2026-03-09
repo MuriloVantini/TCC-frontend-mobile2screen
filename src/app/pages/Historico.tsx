@@ -30,7 +30,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "../components/ui/dialog";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useAlertsApi } from "../hooks/api/entities";
 
 type AlertType = "info" | "warning" | "critical" | "success";
 
@@ -111,7 +111,7 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 const PAGE_SIZE = 5;
 
 export function Historico() {
-  const api = useMemo(() => useLaravelApi(), []);
+  const alertsApi = useMemo(() => useAlertsApi(), []);
   const [alertHistory, setAlertHistory] = useState<AlertRecord[]>([]);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("");
@@ -122,7 +122,7 @@ export function Historico() {
   useEffect(() => {
     let isMounted = true;
 
-    api.alerts
+    alertsApi
       .list()
       .then((result) => {
         if (!isMounted) return;
@@ -160,14 +160,14 @@ export function Historico() {
     return () => {
       isMounted = false;
     };
-  }, [api]);
+  }, [alertsApi]);
 
   const handleResend = async () => {
     if (!selected) return;
 
     setResendState("loading");
     try {
-      await api.alerts.retry(selected.id);
+      await alertsApi.retry(selected.id);
       setResendState("success");
       setTimeout(() => setResendState("idle"), 1500);
     } catch {

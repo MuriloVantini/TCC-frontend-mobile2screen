@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import type { Device, DeviceType } from "../interfaces/types/device";
-import { useLaravelApi } from "../hooks/api/useLaravelApi";
+import { useDevicesApi } from "../hooks/api/entities";
 import {
   Plus,
   Monitor,
@@ -143,7 +143,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 }
 
 export function Dispositivos() {
-  const api = useMemo(() => useLaravelApi(), []);
+  const devicesApi = useMemo(() => useDevicesApi(), []);
   const [devices, setDevices] = useState<Device[]>([]);
   const [search, setSearch] = useState("");
   const [filterTag, setFilterTag] = useState("");
@@ -160,7 +160,7 @@ export function Dispositivos() {
   });
 
   const loadDevices = async () => {
-    const resources = await api.devices.list();
+    const resources = await devicesApi.list();
     const mapped = resources.map((resource, index) => mapApiDevice(resource as Record<string, unknown>, index));
     setDevices(mapped);
   };
@@ -169,7 +169,7 @@ export function Dispositivos() {
     loadDevices().catch(() => {
       showFeedback({ type: "error", msg: "Nao foi possivel carregar os dispositivos." });
     });
-  }, [api]);
+  }, [devicesApi]);
 
   const allTags = Array.from(new Set(devices.flatMap((d) => d.tags)));
 
@@ -214,7 +214,7 @@ export function Dispositivos() {
 
     try {
       if (editingId !== null) {
-        await api.devices.update(editingId, {
+        await devicesApi.update(editingId, {
           name: form.name,
           type: form.type,
           location: form.location,
@@ -222,7 +222,7 @@ export function Dispositivos() {
         });
         showFeedback({ type: "success", msg: "Dispositivo atualizado com sucesso!" });
       } else {
-        await api.devices.create({
+        await devicesApi.create({
           name: form.name,
           type: form.type,
           location: form.location,
@@ -244,7 +244,7 @@ export function Dispositivos() {
     setDeleteConfirm(null);
 
     try {
-      await api.devices.remove(id);
+      await devicesApi.remove(id);
       await loadDevices();
       showFeedback({ type: "success", msg: "Dispositivo removido." });
     } catch {

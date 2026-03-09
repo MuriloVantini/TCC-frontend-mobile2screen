@@ -14,6 +14,12 @@ export interface AlertsListResult {
   pagination?: PaginationData<AlertResource>;
 }
 
+export interface AlertCreateResult {
+  alert: AlertResource;
+  devices_count?: number;
+  online_devices?: number;
+}
+
 function parseAlertsList(response: unknown): AlertsListResult {
   const data = extractData<unknown>(response);
 
@@ -48,8 +54,20 @@ export function useAlertsApi(client: ApiClient = defaultApiClient) {
       return parseAlertsList(response);
     },
     create: async (payload: AlertPayload) => {
-      const response = await client.post<ApiSuccessResponse<AlertResource> | AlertResource>("/api/alerts", payload);
-      return extractEntity<AlertResource>(response);
+      const response = await client.post<unknown>("/api/alerts", payload);
+      const data = extractData<unknown>(response);
+
+      if (isRecord(data) && isRecord(data.alert)) {
+        return {
+          alert: data.alert as AlertResource,
+          devices_count: typeof data.devices_count === "number" ? data.devices_count : undefined,
+          online_devices: typeof data.online_devices === "number" ? data.online_devices : undefined,
+        } satisfies AlertCreateResult;
+      }
+
+      return {
+        alert: extractEntity<AlertResource>(response),
+      } satisfies AlertCreateResult;
     },
     getById: async (alertId: number | string) => {
       const response = await client.get<ApiSuccessResponse<AlertDetailsData>>(`/api/alerts/${alertId}`);
