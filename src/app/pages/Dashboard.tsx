@@ -105,7 +105,7 @@ const alertTypeConfig = {
 };
 
 const activityChartConfig = {
-  alertas: { label: "Alertas", color: "#2563eb" },
+  alertas: { label: "Alertas", color: "var(--color-chart-1)" },
 } satisfies ChartConfig;
 
 const tagColors = [
@@ -278,9 +278,9 @@ export function Dashboard() {
                   <stop offset="95%" stopColor="var(--color-alertas)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
               <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
               <Area type="monotone" dataKey="alertas" stroke="var(--color-alertas)" fill="url(#grad)" strokeWidth={2} dot={false} />
             </AreaChart>

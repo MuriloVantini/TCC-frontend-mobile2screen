@@ -93,19 +93,19 @@ const metrics = [
 ];
 
 const weeklyChartConfig = {
-  alertas: { label: "Alertas", color: "#2563eb" },
-  usuarios: { label: "Usuários ativos", color: "#8b5cf6" },
+  alertas: { label: "Alertas", color: "var(--color-chart-1)" },
+  usuarios: { label: "Usuários ativos", color: "var(--color-chart-2)" },
 } satisfies ChartConfig;
 
 const alertTypesChartConfig = {
-  informativo: { label: "Informativo", color: "#3b82f6" },
-  aviso: { label: "Aviso", color: "#f59e0b" },
-  critico: { label: "Crítico", color: "#ef4444" },
-  sucesso: { label: "Sucesso", color: "#10b981" },
+  informativo: { label: "Informativo", color: "var(--color-chart-1)" },
+  aviso: { label: "Aviso", color: "var(--color-chart-3)" },
+  critico: { label: "Crítico", color: "var(--color-destructive)" },
+  sucesso: { label: "Sucesso", color: "var(--color-success)" },
 } satisfies ChartConfig;
 
 const userGrowthChartConfig = {
-  usuarios: { label: "Usuários", color: "#8b5cf6" },
+  usuarios: { label: "Usuários", color: "var(--color-chart-2)" },
 } satisfies ChartConfig;
 
 export function Admin() {
@@ -145,9 +145,9 @@ export function Admin() {
           <CardContent className="px-5 pb-5">
           <ChartContainer config={weeklyChartConfig} className="h-[200px] w-full">
             <BarChart data={weeklyAlerts} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Bar dataKey="alertas" fill="var(--color-alertas)" radius={[4, 4, 0, 0]} />
@@ -188,9 +188,9 @@ export function Admin() {
           <CardContent className="px-5 pb-5">
           <ChartContainer config={userGrowthChartConfig} className="h-[180px] w-full">
             <LineChart data={userGrowth} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Line type="monotone" dataKey="usuarios" stroke="var(--color-usuarios)" strokeWidth={2.5} dot={{ fill: "var(--color-usuarios)", r: 4 }} />
             </LineChart>

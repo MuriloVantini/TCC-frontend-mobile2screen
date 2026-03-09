@@ -149,7 +149,7 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-sidebar to-background flex flex-col items-center justify-center p-4">
       {/* Decorative blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -160,8 +160,8 @@ export function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-xl shadow-blue-600/30">
             <Zap className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-white text-2xl mb-1">AlertaTV</h1>
-          <p className="text-slate-400 text-sm">Sistema de alertas em tempo real</p>
+          <h1 className="text-foreground text-2xl mb-1">AlertaTV</h1>
+          <p className="text-muted-foreground text-sm">Sistema de alertas em tempo real</p>
         </div>
 
         {/* Card */}

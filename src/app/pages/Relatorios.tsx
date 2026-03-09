@@ -46,11 +46,11 @@ const barData = [
 ];
 
 const pieData = [
-  { name: "Ambiental", value: 35, color: "#10b981" },
-  { name: "Comercial", value: 25, color: "#2563eb" },
-  { name: "Residencial", value: 20, color: "#8b5cf6" },
-  { name: "Rural", value: 12, color: "#f59e0b" },
-  { name: "Infraestrutura", value: 8, color: "#06b6d4" },
+  { name: "Ambiental", value: 35, color: "var(--color-success)" },
+  { name: "Comercial", value: 25, color: "var(--color-chart-1)" },
+  { name: "Residencial", value: 20, color: "var(--color-chart-2)" },
+  { name: "Rural", value: 12, color: "var(--color-warning)" },
+  { name: "Infraestrutura", value: 8, color: "var(--color-chart-5)" },
 ];
 
 const statusBadge: Record<string, string> = {
@@ -131,11 +131,11 @@ export function Relatorios() {
           <p className="text-gray-500 text-xs mb-4">Últimos 6 meses</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={barData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="registros" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+              <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
+              <Bar dataKey="registros" fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -149,7 +149,7 @@ export function Relatorios() {
                   <Cell key={index} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>

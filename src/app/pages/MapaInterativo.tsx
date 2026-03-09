@@ -30,8 +30,8 @@ const typeIcon = {
 };
 
 const typeColor: Record<string, string> = {
-  rpi: "#16a34a",
-  tv: "#2563eb",
+  rpi: "var(--color-success)",
+  tv: "var(--color-primary)",
 };
 
 const typeLayerKey: Record<string, string> = {
@@ -40,9 +40,9 @@ const typeLayerKey: Record<string, string> = {
 };
 
 const statusBadge = {
-  active: { label: "Ativo", cls: "bg-emerald-100 text-emerald-700" },
-  alert: { label: "Atenção", cls: "bg-amber-100 text-amber-700" },
-  inactive: { label: "Inativo", cls: "bg-gray-100 text-gray-500" },
+  active: { label: "Ativo", cls: "bg-secondary text-success" },
+  alert: { label: "Atenção", cls: "bg-secondary text-warning" },
+  inactive: { label: "Inativo", cls: "bg-muted text-muted-foreground" },
 };
 
 function makeMarkerIcon(color: string, isAlert: boolean): L.DivIcon {
@@ -53,7 +53,7 @@ function makeMarkerIcon(color: string, isAlert: boolean): L.DivIcon {
     className: "",
     html: `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
       ${pulse}
-      <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35);"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid var(--color-card);box-shadow:0 1px 6px color-mix(in oklab, var(--color-foreground) 35%, transparent);"></div>
     </div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
