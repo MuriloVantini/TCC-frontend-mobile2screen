@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate, Link, useLocation } from "react-router";
 import { animate } from "animejs";
 import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
+import LogoLightMarkup from "../assets/LogoLight.svg?raw";
 import { useAuthApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
 import {
@@ -46,6 +47,10 @@ const logoDarkInline = LogoDarkMarkup
   .replace(/<path /g, '<path vector-effect="non-scaling-stroke" ')
   .replace("<svg ", '<svg class="h-5 w-auto" ');
 
+const logoLightInline = LogoLightMarkup
+  .replace(/<path /g, '<path vector-effect="non-scaling-stroke" ')
+  .replace("<svg ", '<svg class="h-5 w-auto" ');
+
 const THEME_STORAGE_KEY = "m2s.theme";
 
 export function Layout() {
@@ -67,6 +72,7 @@ export function Layout() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("") || "US";
+  const logoInline = isDarkMode ? logoDarkInline : logoLightInline;
 
   const handleLogout = async () => {
     try {
@@ -99,7 +105,7 @@ export function Layout() {
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       if (sidebarNavRef.current) {
-        const activeLink = sidebarNavRef.current.querySelector<HTMLElement>(".bg-blue-600");
+        const activeLink = sidebarNavRef.current.querySelector<HTMLElement>(".bg-primary");
         if (activeLink) {
           animate(activeLink, {
             scale: [0.6, 1],
@@ -110,7 +116,7 @@ export function Layout() {
         }
       }
       if (mobileNavRef.current) {
-        const activeMobile = mobileNavRef.current.querySelector<HTMLElement>(".text-blue-600");
+        const activeMobile = mobileNavRef.current.querySelector<HTMLElement>(".text-primary");
         if (activeMobile) {
           animate(activeMobile, {
             scale: [0.70, 1],
@@ -125,17 +131,17 @@ export function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* Mobile Sidebar via Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-[#0f172a] border-white/10 flex flex-col gap-0">
+        <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border text-sidebar-foreground flex flex-col gap-0">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
-          <div className="px-4 py-2 border-b border-white/10">
+          <div className="px-4 py-2 border-b border-sidebar-border">
             <div
               className="px-3 py-2.5 flex items-center"
               aria-label="Mobile2Screen"
               role="img"
-              dangerouslySetInnerHTML={{ __html: logoDarkInline }}
+              dangerouslySetInnerHTML={{ __html: logoInline }}
             />
           </div>
           <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
@@ -147,8 +153,8 @@ export function Layout() {
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "text-slate-400 hover:bg-white/10 hover:text-white"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   }`
                 }
               >
@@ -157,11 +163,11 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
-          <div className="px-3 py-4 border-t border-white/10 space-y-1">
+          <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
             <Link
               to="/admin"
               onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
             >
               <ShieldCheck className="w-4 h-4 shrink-0" />
               <span>Painel Admin</span>
@@ -169,7 +175,7 @@ export function Layout() {
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white"
+              className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <LogOut className="w-4 h-4 shrink-0" />
               <span>Sair</span>
@@ -179,14 +185,14 @@ export function Layout() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#0f172a]">
-        <div className="px-4 py-2 border-b border-white/10">
+      <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground">
+        <div className="px-4 py-2 border-b border-sidebar-border">
           <div
             ref={logoRef}
             className="px-3 py-2.5 flex items-center"
             aria-label="Mobile2Screen"
             role="img"
-            dangerouslySetInnerHTML={{ __html: logoDarkInline }}
+            dangerouslySetInnerHTML={{ __html: logoInline }}
           />
         </div>
         <nav ref={sidebarNavRef} className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
@@ -197,8 +203,8 @@ export function Layout() {
               end={end}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${isActive
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-slate-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 }`
               }
             >
@@ -207,10 +213,10 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-3 py-4 border-t border-white/10 space-y-1">
+        <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
           <Link
             to="/admin"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
           >
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span>{'Painel Admin'}</span>
@@ -218,7 +224,7 @@ export function Layout() {
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white"
+            className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             <span>Sair</span>
@@ -229,12 +235,12 @@ export function Layout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0 z-30">
+        <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between shrink-0 z-30">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden rounded-xl text-slate-500 hover:text-slate-700"
+              className="md:hidden rounded-xl text-muted-foreground hover:text-foreground"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="w-5 h-5" />
@@ -253,28 +259,28 @@ export function Layout() {
                 Enviar Alerta
               </NavLink>
             </Button>
-            <Button variant="ghost" size="icon" className="relative rounded-xl text-slate-500">
+            <Button variant="ghost" size="icon" className="relative rounded-xl text-muted-foreground">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             </Button>
-            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 px-2.5 py-1.5">
-              {isDarkMode ? <Moon className="w-4 h-4 text-blue-700" /> : <Sun className="w-4 h-4 text-amber-500" />}
+            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-border px-2.5 py-1.5 bg-background">
+              {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
               <Switch checked={isDarkMode} onCheckedChange={handleThemeChange} aria-label="Alternar tema" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-xl">
                   <Avatar className="size-7 rounded-lg">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-bold rounded-lg">{initials}</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:block text-sm text-slate-700">{displayName}</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+                  <span className="hidden sm:block text-sm text-foreground">{displayName}</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground hidden sm:block" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-xl">
                 <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium text-slate-800">{displayName}</p>
-                  <p className="text-xs text-slate-500">{displayEmail}</p>
+                  <p className="text-sm font-medium text-foreground">{displayName}</p>
+                  <p className="text-xs text-muted-foreground">{displayEmail}</p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -293,14 +299,14 @@ export function Layout() {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav ref={mobileNavRef} className="md:hidden bg-white border-t border-slate-200 flex items-center justify-around px-1 py-2 shrink-0">
+        <nav ref={mobileNavRef} className="md:hidden bg-card border-t border-border flex items-center justify-around px-1 py-2 shrink-0">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors ${isActive ? "text-blue-600" : "text-slate-400"
+                `relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors ${isActive ? "text-primary" : "text-muted-foreground"
                 }`
               }
             >
