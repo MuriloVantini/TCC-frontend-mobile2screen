@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
+import { useUsersApi } from "../hooks/api/entities";
 import {
   Search,
   Monitor,
@@ -17,7 +18,7 @@ interface User {
   name: string;
   email: string;
   company: string;
-  plan: "free" | "pro" | "enterprise";
+  plan: "free" | "pro" | "enterprise" | "outro";
   devices: number;
   alerts: number;
   deliveryRate: number;
@@ -25,23 +26,15 @@ interface User {
   joined: string;
   status: "active" | "suspended";
   tags: string[];
+  role: string;
+  planId: number | null;
 }
-
-const users: User[] = [
-  { id: 1, name: "João Silva", email: "joao@empresa.com.br", company: "Empresa Ltda", plan: "pro", devices: 6, alerts: 82, deliveryRate: 97, lastActive: "há 5 min", joined: "Jan/2026", status: "active", tags: ["recepcao", "producao", "ti"] },
-  { id: 2, name: "Maria Oliveira", email: "maria@fabrica.com.br", company: "Fábrica XYZ", plan: "enterprise", devices: 12, alerts: 145, deliveryRate: 100, lastActive: "há 2 min", joined: "Dez/2025", status: "active", tags: ["linha1", "seguranca", "rh", "gestao"] },
-  { id: 3, name: "Carlos Santos", email: "carlos@hospital.com.br", company: "Hospital Municipal", plan: "enterprise", devices: 8, alerts: 67, deliveryRate: 89, lastActive: "há 1h", joined: "Nov/2025", status: "active", tags: ["emergencia", "ti", "recepcao"] },
-  { id: 4, name: "Ana Ferreira", email: "ana@escola.gov.br", company: "Escola Estadual", plan: "free", devices: 4, alerts: 38, deliveryRate: 95, lastActive: "ontem", joined: "Fev/2026", status: "active", tags: ["sala1", "direcao"] },
-  { id: 5, name: "Pedro Costa", email: "pedro@varejo.com.br", company: "Varejo S.A.", plan: "pro", devices: 9, alerts: 112, deliveryRate: 98, lastActive: "há 3h", joined: "Out/2025", status: "active", tags: ["atendimento", "estoque", "gerencia"] },
-  { id: 6, name: "Luiza Pereira", email: "luiza@hotel.com.br", company: "Hotel Palace", plan: "pro", devices: 7, alerts: 54, deliveryRate: 92, lastActive: "há 2 dias", joined: "Jan/2026", status: "suspended", tags: ["recepcao", "restaurante"] },
-  { id: 7, name: "Ricardo Lima", email: "ricardo@startup.com", company: "Startup Tech", plan: "free", devices: 2, alerts: 15, deliveryRate: 100, lastActive: "há 4 dias", joined: "Fev/2026", status: "active", tags: ["escritorio"] },
-  { id: 8, name: "Fernanda Souza", email: "fern@industria.com.br", company: "Indústria BR", plan: "enterprise", devices: 18, alerts: 203, deliveryRate: 96, lastActive: "agora", joined: "Set/2025", status: "active", tags: ["planta1", "planta2", "seguranca", "rh", "gestao"] },
-];
 
 const planConfig = {
   free: { label: "Free", cls: "bg-muted text-muted-foreground" },
   pro: { label: "Pro", cls: "bg-secondary text-primary" },
   enterprise: { label: "Enterprise", cls: "bg-secondary text-primary" },
+  outro: { label: "Outro", cls: "bg-muted text-muted-foreground" },
 };
 
 const PAGE_SIZE = 5;
@@ -49,13 +42,93 @@ const PAGE_SIZE = 5;
 const tagColors = ["bg-secondary text-primary", "bg-secondary text-primary", "bg-secondary text-success", "bg-secondary text-warning", "bg-accent text-accent-foreground", "bg-accent text-accent-foreground"];
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function toPlan(value: unknown): User["plan"] {
+  if (value === "free" || value === "pro" || value === "enterprise") {
+    return value;
+  }
+
+  return "outro";
+}
+
+function formatRelativeDate(value: unknown): string {
+  if (typeof value !== "string") return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.max(1, Math.floor(diffMs / 60000));
+  if (minutes < 60) return `ha ${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `ha ${hours}h`;
+
+  const days = Math.floor(hours / 24);
+  return `ha ${days}d`;
+}
+
+function formatJoined(value: unknown): string {
+  if (typeof value !== "string") return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+}
+
+function mapApiUser(resource: Record<string, unknown>, index: number): User {
+  const plan = isRecord(resource.plan) ? resource.plan : null;
+
+  return {
+    id: typeof resource.id === "number" ? resource.id : index + 1,
+    name: typeof resource.name === "string" ? resource.name : `Usuario ${index + 1}`,
+    email: typeof resource.email === "string" ? resource.email : "-",
+    company: typeof resource.company === "string" ? resource.company : "-",
+    plan: toPlan(plan?.name),
+    devices: plan && typeof plan.max_devices === "number" ? plan.max_devices : 0,
+    alerts: plan && typeof plan.max_alerts_per_month === "number" ? plan.max_alerts_per_month : 0,
+    deliveryRate: 0,
+    lastActive: formatRelativeDate(resource.last_active),
+    joined: formatJoined(resource.joined_at ?? resource.created_at),
+    status: resource.status === "suspended" ? "suspended" : "active",
+    tags: [],
+    role: typeof resource.role === "string" ? resource.role : "user",
+    planId: typeof resource.plan_id === "number" ? resource.plan_id : null,
+  };
+}
+
 export function AdminUsuarios() {
+  const usersApi = useMemo(() => useUsersApi(), []);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<User | null>(null);
-  const [localUsers, setLocalUsers] = useState(users);
+  const [localUsers, setLocalUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    usersApi
+      .list()
+      .then((resources) => {
+        if (!isMounted) return;
+        const mapped = resources.map((resource, index) => mapApiUser(resource as Record<string, unknown>, index));
+        setLocalUsers(mapped);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setLocalUsers([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [usersApi]);
 
   const filtered = localUsers.filter((u) => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -75,9 +148,29 @@ export function AdminUsuarios() {
   useGridAnimation(tbodyRef, { effect: "seket", selector: ":scope > tr", deps: [paginated.map((u) => u.id).join()] });
   useGridAnimation(mobileListRef, { effect: "seket", deps: [paginated.map((u) => u.id).join()] });
 
-  const toggleSuspend = (id: number) => {
-    setLocalUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: u.status === "active" ? "suspended" : "active" } : u));
-    if (selected?.id === id) setSelected((s) => s ? { ...s, status: s.status === "active" ? "suspended" : "active" } : null);
+  const toggleSuspend = async (id: number) => {
+    const targetUser = localUsers.find((user) => user.id === id);
+    if (!targetUser) return;
+
+    const nextStatus = targetUser.status === "active" ? "suspended" : "active";
+
+    try {
+      await usersApi.update(id, {
+        name: targetUser.name,
+        email: targetUser.email,
+        company: targetUser.company,
+        plan_id: targetUser.planId,
+        role: targetUser.role,
+        status: nextStatus,
+      });
+
+      setLocalUsers((prev) => prev.map((user) => (user.id === id ? { ...user, status: nextStatus } : user)));
+      if (selected?.id === id) {
+        setSelected((current) => (current ? { ...current, status: nextStatus } : null));
+      }
+    } catch {
+      // Keep current status if backend update fails.
+    }
   };
 
   return (

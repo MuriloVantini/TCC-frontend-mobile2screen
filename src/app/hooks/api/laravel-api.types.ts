@@ -73,6 +73,10 @@ export interface WebhookPayload {
   [key: string]: unknown;
 }
 
+export interface UserPayload {
+  [key: string]: unknown;
+}
+
 export interface HeartbeatPayload {
   [key: string]: unknown;
 }
@@ -114,6 +118,13 @@ export interface WebhookResource extends ApiRecord {
 
 export interface DeliveryResource extends ApiRecord {
   id?: number;
+  status?: string;
+}
+
+export interface UserResource extends ApiRecord {
+  id?: number;
+  name?: string;
+  email?: string;
   status?: string;
 }
 

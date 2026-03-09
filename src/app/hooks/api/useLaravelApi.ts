@@ -10,6 +10,7 @@ import {
   useSettingsApi,
   useStatisticsApi,
   useTagsApi,
+  useUsersApi,
   useWebhooksApi,
 } from "./entities";
 
@@ -25,6 +26,7 @@ export {
   useSettingsApi,
   useStatisticsApi,
   useTagsApi,
+  useUsersApi,
   useWebhooksApi,
 } from "./entities";
 
@@ -41,5 +43,6 @@ export function useLaravelApi(client: ApiClient = defaultApiClient) {
     apiKeys: useApiKeysApi(client),
     webhooks: useWebhooksApi(client),
     statistics: useStatisticsApi(client),
+    users: useUsersApi(client),
   };
 }

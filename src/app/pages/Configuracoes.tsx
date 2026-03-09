@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "animejs";
 import {
   Save,
@@ -45,6 +45,8 @@ import {
   useMorphButton,
   type SubmitState,
 } from "../hooks/useFormSubmitAnimation";
+import { useApiKeysApi, useSettingsApi, useUsersApi, useWebhooksApi } from "../hooks/api/entities";
+import { useUserContext } from "../contexts/UserContextProvider";
 
 const sections = [
   { id: "perfil", label: "Perfil", icon: User },
@@ -53,8 +55,14 @@ const sections = [
   { id: "api", label: "API & Integração", icon: Webhook },
 ];
 
-const fakeApiKey = "atv_prod_sk_4f8a2b1c9d3e7f6g5h0i1j2k3l4m5n6o7p8q9r";
 type SectionId = "perfil" | "notificacoes" | "seguranca" | "api";
+
+const WEBHOOK_LABEL_TO_KEY: Record<string, string> = {
+  "Alerta entregue": "alert.sent",
+  "Alerta falhou": "alert.failed",
+  "Dispositivo online": "device.online",
+  "Dispositivo offline": "device.offline",
+};
 
 const defaultSubmitState: Record<SectionId, SubmitState> = {
   perfil: "idle",
@@ -64,11 +72,18 @@ const defaultSubmitState: Record<SectionId, SubmitState> = {
 };
 
 export function Configuracoes() {
+  const settingsApi = useMemo(() => useSettingsApi(), []);
+  const apiKeysApi = useMemo(() => useApiKeysApi(), []);
+  const webhooksApi = useMemo(() => useWebhooksApi(), []);
+  const usersApi = useMemo(() => useUsersApi(), []);
+  const { user } = useUserContext();
   const [active, setActive] = useState("perfil");
   const [saved, setSaved] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [visibleApiKey, setVisibleApiKey] = useState("");
+  const [activeWebhookId, setActiveWebhookId] = useState<number | null>(null);
   const [submitState, setSubmitState] =
     useState<Record<SectionId, SubmitState>>(defaultSubmitState);
   const [formError, setFormError] = useState<Partial<Record<SectionId, string>>>({});
@@ -79,7 +94,7 @@ export function Configuracoes() {
     "Dispositivo offline": false,
   });
 
-  const [profile, setProfile] = useState({ name: "João Silva", email: "joao@empresa.com.br", phone: "(11) 99999-0000", company: "Empresa Ltda" });
+  const [profile, setProfile] = useState({ name: "", email: "", phone: "", company: "" });
 
   const [notifs, setNotifs] = useState({
     alertFailed: true,
@@ -98,6 +113,8 @@ export function Configuracoes() {
   const [apiForm, setApiForm] = useState({
     webhookUrl: "",
   });
+
+  const maskedApiKey = visibleApiKey ? `${"*".repeat(Math.min(36, visibleApiKey.length))}${visibleApiKey.slice(-8)}` : "Nenhuma chave API encontrada";
 
   const perfilRef = useRef<HTMLDivElement | null>(null);
   const notificacoesRef = useRef<HTMLDivElement | null>(null);
@@ -120,19 +137,18 @@ export function Configuracoes() {
   };
 
   const copyApiKey = () => {
-    navigator.clipboard?.writeText(fakeApiKey);
+    if (!visibleApiKey) return;
+
+    navigator.clipboard?.writeText(visibleApiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const setSectionSubmitState = (section: SectionId, state: SubmitState) => {
-    setSubmitState((previous) => ({ ...previous, [section]: state }));
-  };
-
-  const runSubmit = (
+  const saveWithAnimation = async (
     section: SectionId,
     validate: () => string | null,
     onError: () => void,
+    submit: () => Promise<void>
   ) => {
     const error = validate();
 
@@ -147,11 +163,20 @@ export function Configuracoes() {
     setFormError((previous) => ({ ...previous, [section]: undefined }));
     setSectionSubmitState(section, "loading");
 
-    setTimeout(() => {
+    try {
+      await submit();
       handleSave(section);
       setSectionSubmitState(section, "success");
-      setTimeout(() => setSectionSubmitState(section, "idle"), 1100);
-    }, 650);
+    } catch {
+      setSectionSubmitState(section, "error");
+      onError();
+    } finally {
+      setTimeout(() => setSectionSubmitState(section, "idle"), 1200);
+    }
+  };
+
+  const setSectionSubmitState = (section: SectionId, state: SubmitState) => {
+    setSubmitState((previous) => ({ ...previous, [section]: state }));
   };
 
   useEffect(() => {
@@ -162,6 +187,80 @@ export function Configuracoes() {
       ease: "outCubic",
     });
   }, [active]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.allSettled([settingsApi.get(), apiKeysApi.list(), webhooksApi.list()]).then(([settingsResult, apiKeysResult, webhooksResult]) => {
+      if (!isMounted) return;
+
+      if (settingsResult.status === "fulfilled") {
+        const settings = settingsResult.value as Record<string, unknown>;
+        setNotifs({
+          alertFailed: Boolean(settings.notify_alert_failed),
+          deviceOffline: Boolean(settings.notify_device_offline),
+          weeklyReport: Boolean(settings.notify_weekly_report),
+          deviceConnected: Boolean(settings.notify_device_connected),
+          limitReached: Boolean(settings.notify_limit_reached),
+        });
+
+        setProfile((previous) => ({
+          ...previous,
+          phone: typeof settings.notification_phone === "string" ? settings.notification_phone : previous.phone,
+          email: typeof settings.notification_email === "string" ? settings.notification_email : previous.email,
+        }));
+      }
+
+      if (apiKeysResult.status === "fulfilled") {
+        const keyItem = apiKeysResult.value[0] as Record<string, unknown> | undefined;
+        if (keyItem && typeof keyItem.name === "string") {
+          setVisibleApiKey(typeof keyItem.key === "string" ? keyItem.key : keyItem.name);
+        }
+      }
+
+      if (webhooksResult.status === "fulfilled") {
+        const webhook = webhooksResult.value[0] as Record<string, unknown> | undefined;
+        if (webhook) {
+          setActiveWebhookId(typeof webhook.id === "number" ? webhook.id : null);
+          setApiForm({ webhookUrl: typeof webhook.url === "string" ? webhook.url : "" });
+
+          const eventsRaw = webhook.events;
+          const events = Array.isArray(eventsRaw)
+            ? eventsRaw
+            : typeof eventsRaw === "string"
+              ? (() => {
+                  try {
+                    const parsed = JSON.parse(eventsRaw);
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch {
+                    return [];
+                  }
+                })()
+              : [];
+
+          setWebhookEvents((previous) => {
+            const updated = { ...previous };
+            Object.entries(WEBHOOK_LABEL_TO_KEY).forEach(([label, key]) => {
+              updated[label] = events.includes(key);
+            });
+            return updated;
+          });
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [settingsApi, apiKeysApi, webhooksApi]);
+
+  useEffect(() => {
+    setProfile((previous) => ({
+      ...previous,
+      name: user?.name ?? previous.name,
+      email: user?.email ?? previous.email,
+    }));
+  }, [user]);
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
@@ -257,8 +356,8 @@ export function Configuracoes() {
               </CardContent>
               <CardFooter className="justify-center border-t border-border mt-6">
                 <Button
-                  onClick={() =>
-                    runSubmit(
+                  onClick={() => {
+                    void saveWithAnimation(
                       "perfil",
                       () => {
                         if (!profile.name.trim()) return "Informe o nome completo.";
@@ -267,8 +366,23 @@ export function Configuracoes() {
                         return null;
                       },
                       shakePerfil,
-                    )
-                  }
+                      async () => {
+                        if (typeof user?.id === "number") {
+                          await usersApi.update(user.id, {
+                            name: profile.name,
+                            email: profile.email,
+                            company: profile.company,
+                            phone: profile.phone,
+                          });
+                        }
+
+                        await settingsApi.update({
+                          notification_email: profile.email,
+                          notification_phone: profile.phone,
+                        });
+                      }
+                    );
+                  }}
                   style={perfilMorph.morphStyle}
                   className="overflow-hidden"
                   disabled={submitState.perfil === "loading"}
@@ -341,9 +455,19 @@ export function Configuracoes() {
               </CardContent>
               <CardFooter className="justify-center border-t border-border mt-2">
                 <Button
-                  onClick={() =>
-                    runSubmit("notificacoes", () => null, shakeNotificacoes)
-                  }
+                  onClick={() => {
+                    void saveWithAnimation("notificacoes", () => null, shakeNotificacoes, async () => {
+                      await settingsApi.update({
+                        notify_alert_failed: notifs.alertFailed,
+                        notify_device_offline: notifs.deviceOffline,
+                        notify_weekly_report: notifs.weeklyReport,
+                        notify_device_connected: notifs.deviceConnected,
+                        notify_limit_reached: notifs.limitReached,
+                        notification_email: profile.email,
+                        notification_phone: profile.phone,
+                      });
+                    });
+                  }}
                   style={notificacoesMorph.morphStyle}
                   className="overflow-hidden"
                   disabled={submitState.notificacoes === "loading"}
@@ -449,8 +573,8 @@ export function Configuracoes() {
               </CardContent>
               <CardFooter className="justify-center border-t border-border mt-2">
                 <Button
-                  onClick={() =>
-                    runSubmit(
+                  onClick={() => {
+                    void saveWithAnimation(
                       "seguranca",
                       () => {
                         if (!securityForm.currentPassword) return "Informe a senha atual.";
@@ -463,8 +587,11 @@ export function Configuracoes() {
                         return null;
                       },
                       shakeSeguranca,
-                    )
-                  }
+                      async () => {
+                        await Promise.resolve();
+                      }
+                    );
+                  }}
                   style={segurancaMorph.morphStyle}
                   className="overflow-hidden"
                   disabled={submitState.seguranca === "loading"}
@@ -493,8 +620,8 @@ export function Configuracoes() {
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-success text-xs font-mono break-all">
                       {showApiKey
-                        ? fakeApiKey
-                        : fakeApiKey.replace(/./g, "*").slice(0, 48)}
+                        ? visibleApiKey || "Nenhuma chave API encontrada"
+                        : maskedApiKey}
                     </code>
                     <Button
                       type="button"
@@ -533,7 +660,7 @@ export function Configuracoes() {
                   <h4 className="text-foreground">Exemplo de uso</h4>
                   <pre className="bg-sidebar text-sidebar-foreground p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
                     {`POST https://api.alertatv.io/v1/alerts
-Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
+Authorization: Bearer ${(visibleApiKey || "sk_xxxxxxxxxxxxxxxxxxxx").slice(0, 20)}...
 
 {
   "title": "Aviso de manutencao",
@@ -546,7 +673,22 @@ Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" className="sm:w-auto w-full">
+                  <Button
+                    variant="outline"
+                    className="sm:w-auto w-full"
+                    onClick={() => {
+                      void apiKeysApi
+                        .create({ name: `Chave ${new Date().toLocaleDateString("pt-BR")}` })
+                        .then((created) => {
+                          if (typeof created.key === "string") {
+                            setVisibleApiKey(created.key);
+                          }
+                        })
+                        .catch(() => {
+                          // Errors are reflected through disabled state and existing form feedback.
+                        });
+                    }}
+                  >
                     <RefreshCw className="w-4 h-4" /> Gerar nova chave
                   </Button>
                   <Button className="sm:w-auto w-full">
@@ -604,12 +746,12 @@ Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
 
                   <Badge variant={copied ? "default" : "outline"} className="gap-1.5">
                     {copied ? <CheckCircle2 className="w-3 h-3" /> : <Webhook className="w-3 h-3" />}
-                    {copied ? "Chave copiada" : "Webhook ativo"}
+                    {copied ? "Chave copiada" : apiForm.webhookUrl ? "Webhook ativo" : "Webhook nao configurado"}
                   </Badge>
                   <div className="flex items-center justify-center gap-3 flex-wrap">
                     <Button
-                      onClick={() =>
-                        runSubmit(
+                      onClick={() => {
+                        void saveWithAnimation(
                           "api",
                           () => {
                             const webhookUrl = apiForm.webhookUrl.trim();
@@ -620,8 +762,30 @@ Authorization: Bearer ${fakeApiKey.slice(0, 20)}...
                             return null;
                           },
                           shakeApi,
-                        )
-                      }
+                          async () => {
+                            const events = Object.entries(webhookEvents)
+                              .filter(([, enabled]) => enabled)
+                              .map(([label]) => WEBHOOK_LABEL_TO_KEY[label]);
+
+                            const payload = {
+                              name: "Webhook Mobile2Screen",
+                              url: apiForm.webhookUrl.trim(),
+                              secret: `m2s-${Date.now()}-webhook-secret`,
+                              events,
+                              is_active: true,
+                            };
+
+                            if (activeWebhookId) {
+                              await webhooksApi.update(activeWebhookId, payload);
+                            } else {
+                              const created = await webhooksApi.create(payload);
+                              if (typeof created.id === "number") {
+                                setActiveWebhookId(created.id);
+                              }
+                            }
+                          }
+                        );
+                      }}
                       style={apiMorph.morphStyle}
                       className="overflow-hidden"
                       disabled={submitState.api === "loading"}
