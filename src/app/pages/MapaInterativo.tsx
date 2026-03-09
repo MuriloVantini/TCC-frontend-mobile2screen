@@ -284,7 +284,7 @@ export function MapaInterativo() {
         {/* Point detail card */}
         {selectedPoint && (
           <div
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 md:bottom-auto md:top-4 md:left-4 md:translate-x-0 w-72 bg-card rounded-xl shadow-xl border border-border overflow-hidden"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 md:bottom-auto md:top-4 md:left-4 md:translate-x-0 w-72 bg-card rounded-xl shadow-2xl overflow-hidden"
             style={{ zIndex: 1001 }}
           >
             <div className="h-1.5" style={{ background: typeColor[selectedPoint.type] }} />
