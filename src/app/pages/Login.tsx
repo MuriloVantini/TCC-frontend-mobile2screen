@@ -11,6 +11,7 @@ import { useDrawableAnimation } from "../hooks/useDrawableAnimation";
 import { useAuthApi, useSanctumApi } from "../hooks/api/entities";
 import { ApiError } from "../hooks/api/config/httpClient";
 import { useUserContext } from "../contexts/UserContextProvider";
+import { toast } from "sonner";
 
 const THEME_STORAGE_KEY = "m2s.theme";
 
@@ -117,7 +118,7 @@ export function Login() {
       setSuccess("Login realizado com sucesso!");
       setTimeout(() => navigate("/app"), 700);
     } catch (err) {
-      setError(extractApiErrorMessage(err, "Nao foi possivel entrar. Verifique seus dados."));
+      toast.error("Nao foi possivel entrar. Verifique seus dados.")
       setLoginState("error");
       shakeCard();
       setTimeout(() => setLoginState("idle"), 1500);
