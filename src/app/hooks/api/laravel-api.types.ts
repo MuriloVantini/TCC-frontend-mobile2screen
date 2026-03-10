@@ -5,7 +5,6 @@ export interface ApiRecord {
 }
 
 export interface ApiSuccessResponse<T> {
-  success: boolean;
   data: T;
   message?: string;
 }
@@ -82,7 +81,6 @@ export interface HeartbeatPayload {
 }
 
 export interface HeartbeatResponse {
-  success: boolean;
   message: string;
 }
 

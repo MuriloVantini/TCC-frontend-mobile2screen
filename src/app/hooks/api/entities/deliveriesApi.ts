@@ -2,7 +2,6 @@ import { defaultApiClient, type ApiClient } from "../config/httpClient";
 import type { DeliveryStatusPayload } from "../laravel-api.types";
 
 export interface DeliveryStatusResult {
-  success: boolean;
   message?: string;
 }
 
