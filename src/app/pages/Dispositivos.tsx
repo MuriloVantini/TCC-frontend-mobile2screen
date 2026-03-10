@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import type { Device, DeviceType } from "../interfaces/types/device";
-import { useDevicesApi } from "../hooks/api/entities";
+import { useDevicesApi, useTagsApi } from "../hooks/api/entities";
 import {
   Plus,
   Monitor,
@@ -10,7 +10,6 @@ import {
   Trash2,
   Wifi,
   WifiOff,
-  X,
   Tag,
   CheckCircle,
   AlertCircle,
@@ -44,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { ComboboxChips } from "../components/ui/combobox-chips";
 
 const tagColors = [
   "bg-secondary text-primary",
@@ -58,6 +58,7 @@ const tagColors = [
 const getTagColor = (tag: string) => tagColors[tag.charCodeAt(0) % tagColors.length];
 
 type Feedback = { type: "success" | "error"; msg: string } | null;
+type TagOption = { id: number; name: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -69,6 +70,15 @@ function extractTagNames(source: unknown): string[] {
   return source
     .map((item) => (isRecord(item) && typeof item.name === "string" ? item.name : null))
     .filter((item): item is string => typeof item === "string");
+}
+
+function mapTagResource(resource: Record<string, unknown>, index: number): TagOption | null {
+  const id = typeof resource.id === "number" ? resource.id : index + 1;
+  const name = typeof resource.name === "string" ? resource.name.trim() : "";
+
+  if (!name) return null;
+
+  return { id, name };
 }
 
 function mapApiDevice(resource: Record<string, unknown>, index: number): Device {
@@ -99,64 +109,24 @@ function DeviceIcon({ type, size = "md" }: { type: DeviceType; size?: "sm" | "md
   );
 }
 
-function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const addTag = (value: string) => {
-    const tag = value.trim().toLowerCase().replace(/\s+/g, "-");
-    if (tag && !tags.includes(tag)) onChange([...tags, tag]);
-    setInput("");
-  };
-
-  const removeTag = (tag: string) => onChange(tags.filter((t) => t !== tag));
-
-  return (
-    <div
-      className="flex flex-wrap gap-1.5 p-2 border border-border rounded-xl bg-muted min-h-[44px] cursor-text"
-      onClick={() => inputRef.current?.focus()}
-    >
-      {tags.map((tag) => (
-        <span key={tag} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getTagColor(tag)}`}>
-          {tag}
-          <button type="button" onClick={(e) => { e.stopPropagation(); removeTag(tag); }} className="hover:opacity-70">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      ))}
-      <input
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if ((e.key === "Enter" || e.key === "," || e.key === " ") && input.trim()) {
-            e.preventDefault();
-            addTag(input);
-          }
-          if (e.key === "Backspace" && !input && tags.length) removeTag(tags[tags.length - 1]);
-        }}
-        placeholder={tags.length === 0 ? "Digite uma tag e pressione Enter..." : ""}
-        className="flex-1 min-w-24 bg-transparent text-sm text-foreground placeholder-muted-foreground focus:outline-none"
-      />
-    </div>
-  );
-}
-
 export function Dispositivos() {
   const devicesApi = useMemo(() => useDevicesApi(), []);
+  const tagsApi = useMemo(() => useTagsApi(), []);
   const [devices, setDevices] = useState<Device[]>([]);
+  const [availableTags, setAvailableTags] = useState<TagOption[]>([]);
   const [search, setSearch] = useState("");
   const [filterTag, setFilterTag] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingTagNames, setEditingTagNames] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const deviceRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const pendingEnterId = useRef<number | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const [form, setForm] = useState<{ name: string; type: DeviceType; location: string; tags: string[] }>({
-    name: "", type: "tv", location: "", tags: [],
+  const [form, setForm] = useState<{ name: string; type: DeviceType; location: string; tagIds: number[] }>({
+    name: "", type: "tv", location: "", tagIds: [],
   });
 
   const loadDevices = async () => {
@@ -165,13 +135,40 @@ export function Dispositivos() {
     setDevices(mapped);
   };
 
+  const loadTags = async () => {
+    const resources = await tagsApi.list();
+    const mapped = resources
+      .map((resource, index) => mapTagResource(resource as Record<string, unknown>, index))
+      .filter((tag): tag is TagOption => tag !== null);
+
+    setAvailableTags(mapped);
+  };
+
   useEffect(() => {
-    loadDevices().catch(() => {
-      showFeedback({ type: "error", msg: "Nao foi possivel carregar os dispositivos." });
+    Promise.allSettled([loadDevices(), loadTags()]).then((results) => {
+      const [devicesResult, tagsResult] = results;
+
+      if (devicesResult.status === "rejected") {
+        showFeedback({ type: "error", msg: "Nao foi possivel carregar os dispositivos." });
+      }
+
+      if (tagsResult.status === "rejected") {
+        showFeedback({ type: "error", msg: "Nao foi possivel carregar as tags." });
+      }
     });
-  }, [devicesApi]);
+  }, [devicesApi, tagsApi]);
 
   const allTags = Array.from(new Set(devices.flatMap((d) => d.tags)));
+
+  useEffect(() => {
+    if (editingId === null || editingTagNames.length === 0 || availableTags.length === 0) return;
+
+    const selectedIds = availableTags
+      .filter((tag) => editingTagNames.includes(tag.name))
+      .map((tag) => tag.id);
+
+    setForm((prev) => ({ ...prev, tagIds: selectedIds }));
+  }, [editingId, editingTagNames, availableTags]);
 
   useEffect(() => {
     if (pendingEnterId.current === null) return;
@@ -190,17 +187,30 @@ export function Dispositivos() {
     return matchSearch && matchTag;
   });
 
+  const tagComboboxOptions = availableTags.map((tag) => ({
+    value: String(tag.id),
+    label: tag.name,
+  }));
+
+  const selectedTagValues = form.tagIds.map((id) => String(id));
+
   useGridAnimation(gridRef, { effect: "hapi", deps: [filtered.map((d) => d.id).join()] });
 
   const openNew = () => {
-    setForm({ name: "", type: "tv", location: "", tags: [] });
+    setForm({ name: "", type: "tv", location: "", tagIds: [] });
     setEditingId(null);
+    setEditingTagNames([]);
     setShowModal(true);
   };
 
   const openEdit = (d: Device) => {
-    setForm({ name: d.name, type: d.type, location: d.location ?? "", tags: [...d.tags] });
+    const selectedIds = availableTags
+      .filter((tag) => d.tags.includes(tag.name))
+      .map((tag) => tag.id);
+
+    setForm({ name: d.name, type: d.type, location: d.location ?? "", tagIds: selectedIds });
     setEditingId(d.id);
+    setEditingTagNames(d.tags);
     setShowModal(true);
   };
 
@@ -218,7 +228,7 @@ export function Dispositivos() {
           name: form.name,
           type: form.type,
           location: form.location,
-          tags: form.tags,
+          tags: form.tagIds,
         });
         showFeedback({ type: "success", msg: "Dispositivo atualizado com sucesso!" });
       } else {
@@ -226,7 +236,7 @@ export function Dispositivos() {
           name: form.name,
           type: form.type,
           location: form.location,
-          tags: form.tags,
+          tags: form.tagIds,
         });
         showFeedback({ type: "success", msg: "Dispositivo cadastrado!" });
       }
@@ -413,8 +423,21 @@ export function Dispositivos() {
                   <Tag className="w-3.5 h-3.5" />
                   Tags de segmentação
                 </Label>
-                <TagInput tags={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
-                <p className="text-xs text-muted-foreground mt-1.5">Digite e pressione Enter para adicionar. As tags agrupam os dispositivos para envio de alertas.</p>
+                <ComboboxChips
+                  options={tagComboboxOptions}
+                  value={selectedTagValues}
+                  onChange={(values) => {
+                    const nextTagIds = values
+                      .map((value) => Number(value))
+                      .filter((id) => Number.isFinite(id));
+
+                    setForm((f) => ({ ...f, tagIds: nextTagIds }));
+                  }}
+                  placeholder="Selecione as tags"
+                  searchPlaceholder="Buscar tag..."
+                  emptyMessage="Nenhuma tag encontrada."
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">Selecione uma ou mais tags para relacionar o dispositivo aos grupos de envio de alertas.</p>
               </div>
 
               {!editingId && (
