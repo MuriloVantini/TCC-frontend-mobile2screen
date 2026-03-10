@@ -5,7 +5,9 @@ import { UserContextProvider } from "./contexts/UserContextProvider";
 export default function App() {
   return (
     <UserContextProvider>
-      <RouterProvider router={router} />
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+        <RouterProvider router={router} />
+      </div>
     </UserContextProvider>
   );
 }
