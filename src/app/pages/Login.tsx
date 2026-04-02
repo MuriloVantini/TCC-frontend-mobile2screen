@@ -214,6 +214,7 @@ export function Login() {
               <TabsTrigger
                 value="login"
                 className="flex-1 h-auto py-3.5 rounded-none border-0 border-b-2 border-transparent text-muted-foreground
+                hover:cursor-pointer
                 data-[state=active]:border-primary
                 data-[state=active]:text-primary
                 data-[state=active]:bg-accent
@@ -224,6 +225,7 @@ export function Login() {
               <TabsTrigger
                 value="register"
                 className="flex-1 h-auto py-3.5 rounded-none border-0 border-b-2 border-transparent text-muted-foreground
+                hover:cursor-pointer
                 data-[state=active]:border-primary
                 data-[state=active]:text-primary
                 data-[state=active]:bg-accent
