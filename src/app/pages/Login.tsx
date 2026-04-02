@@ -107,7 +107,7 @@ export function Login() {
     setSuccess("");
 
     if (!loginForm.email || !loginForm.password) {
-      setError("Preencha todos os campos.");
+      toast.error("Preencha todos os campos.");
       setLoginState("error");
       shakeCard();
       setTimeout(() => setLoginState("idle"), 1500);
@@ -125,7 +125,7 @@ export function Login() {
       setUser(response.user);
 
       setLoginState("success");
-      setSuccess("Login realizado com sucesso!");
+      toast.success("Login realizado com sucesso!");
       setTimeout(() => navigate("/app"), 700);
     } catch (err) {
       toast.error("Nao foi possivel entrar. Verifique seus dados.")
