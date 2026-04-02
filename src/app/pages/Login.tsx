@@ -83,7 +83,12 @@ export function Login() {
   const { morphStyle: loginMorphStyle, morphContent: loginMorphContent } = useMorphButton(loginState, <span>Entrar</span>);
   const { morphStyle: registerMorphStyle, morphContent: registerMorphContent } = useMorphButton(registerState, <span>Criar Minha Conta</span>);
 
-  useDrawableAnimation(logoRef, { duration: 1200, staggerMs: 30, ease: "ease-out" });
+  useDrawableAnimation(logoRef, {
+    duration: 1200,
+    staggerMs: 30,
+    ease: "ease-out",
+    deps: [isDarkMode],
+  });
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
