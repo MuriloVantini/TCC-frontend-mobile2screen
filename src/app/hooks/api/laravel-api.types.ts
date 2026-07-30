@@ -43,6 +43,21 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ValidateResetPinPayload {
+  email: string;
+  pin_code: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  pin_code: string;
+  password: string;
+}
+
 export interface SettingsPayload {
   [key: string]: unknown;
 }

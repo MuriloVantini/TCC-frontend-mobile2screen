@@ -12,9 +12,11 @@ import { MapaInterativo } from "./pages/MapaInterativo";
 import { Admin } from "./pages/Admin";
 import { AdminUsuarios } from "./pages/AdminUsuarios";
 import { NotFound } from "./pages/NotFound";
+import { EsqueciSenha } from "./pages/EsqueciSenha";
 
 export const router = createBrowserRouter([
   { path: "/", Component: Login },
+  { path: "/esqueci-senha", Component: EsqueciSenha },
   {
     path: "/app",
     Component: RequireAuth,
