@@ -299,15 +299,6 @@ export function Login() {
                     </Button>
                   </div>
 
-                  <div className="relative my-2">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-                    <div className="relative flex justify-center"><span className="bg-card px-3 text-xs text-muted-foreground">ou acesse como</span></div>
-                  </div>
-                  <Link to="/admin">
-                    <Button variant="outline" className="w-full border-border text-primary hover:bg-accent hover:text-primary rounded-xl py-2.5 h-auto">
-                      Painel Administrador →
-                    </Button>
-                  </Link>
                 </form>
               </TabsContent>
 
