@@ -225,7 +225,7 @@ export function Dashboard() {
       <div className="bg-gradient-to-r from-primary to-chart-2 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-primary/20">
         <div>
           <p className="text-primary-foreground/80 text-sm">Bem-vindo de volta,</p>
-          <h1 className="text-white text-xl mt-0.5">{displayName} 👋</h1>
+          <h1 className="text-white text-xl mt-0.5">{displayName}</h1>
           <p className="text-primary-foreground/70 text-sm mt-1">{devices.length} dispositivos · {onlineCount} online</p>
         </div>
         <Link
