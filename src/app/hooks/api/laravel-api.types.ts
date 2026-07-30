@@ -56,6 +56,7 @@ export interface ResetPasswordPayload {
   email: string;
   pin_code: string;
   password: string;
+  password_confirmation: string;
 }
 
 export interface SettingsPayload {

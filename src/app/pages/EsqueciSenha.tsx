@@ -157,6 +157,7 @@ export function EsqueciSenha() {
                 email: email.trim(),
                 pin_code: pinCode.trim(),
                 password,
+                password_confirmation: confirmPassword
             });
             toast.success(response.message || "Senha atualizada com sucesso.");
             setResetPasswordState("success");
