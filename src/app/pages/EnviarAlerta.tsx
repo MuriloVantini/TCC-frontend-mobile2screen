@@ -454,7 +454,7 @@ export function EnviarAlerta() {
             </div>
 
             <div className="form-field space-y-1.5">
-              <Label className="text-muted-foreground">Mensagem</Label>
+              <Label className="text-muted-foreground">Mensagem <span className="text-destructive">*</span></Label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -534,7 +534,7 @@ export function EnviarAlerta() {
             </div>
           </div>
           <div className="flex">
-            <Button onClick={() => !title ? shakeCard() : setStep(3)} className="flex-1 rounded-xl">
+            <Button onClick={() => (!title || !message) ? shakeCard() : setStep(3)} className="flex-1 rounded-xl">
               <>Próximo: Revisar e enviar <MoveRight/></>
             </Button>
           </div>
