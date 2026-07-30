@@ -284,7 +284,9 @@ export function Login() {
                     </div>
                   </div>
                   <div className="form-field flex justify-end">
-                    <Button type="button" variant="link" className="text-xs p-0 h-auto text-primary">Esqueci a senha</Button>
+                    <Link to="/esqueci-senha" className="text-xs text-primary hover:underline">
+                      Esqueci a senha
+                    </Link>
                   </div>
                   <div className="form-field flex justify-center">
                     <Button
