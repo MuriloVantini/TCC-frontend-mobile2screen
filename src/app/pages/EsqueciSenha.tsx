@@ -272,13 +272,16 @@ export function EsqueciSenha() {
                         </div>
                         <div className="form-field space-y-1.5">
                             <Label>Confirmar senha</Label>
-                            <Input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="rounded-xl bg-muted"
-                            />
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="pl-9 rounded-xl bg-muted"
+                                />
+                            </div>
                         </div>
                         <div className="form-field flex justify-center">
                             <Button
