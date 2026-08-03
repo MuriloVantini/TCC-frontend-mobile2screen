@@ -1,26 +1,25 @@
-
 # Mobile2Screen Frontend Web
 
-Aplicacao frontend do sistema de gerenciamento e envio de alertas para dispositivos (TVs e Raspberry Pi), com dashboard, historico, gerenciamento de dispositivos e autenticacao integrada ao backend Laravel.
+Aplicação frontend do sistema de gerenciamento e envio de alertas para dispositivos (TVs e Raspberry Pi), com dashboard, histórico, gerenciamento de dispositivos e autenticação integrada ao backend Laravel.
 
 ## Tecnologias
 
-- React 19 + TypeScript
-- Vite 6
-- React Router 7
-- Tailwind CSS 4 + Radix UI
-- Axios
-- Recharts
+* React 19 + TypeScript
+* Vite 6
+* React Router 7
+* Tailwind CSS 4 + Radix UI
+* Axios
+* Recharts
 
 ## Requisitos
 
-- Node.js 18+
-- npm 9+
-- Backend Laravel rodando (padrao `http://localhost:8000`)
+* Node.js 18+
+* npm 9+
+* Backend Laravel rodando (padrão `http://localhost:8000`)
 
 ## Como executar
 
-1. Instale dependencias:
+1. Instale as dependências:
 
 ```bash
 npm install
@@ -32,15 +31,15 @@ npm install
 npm run dev
 ```
 
-3. Build de producao:
+3. Gere o build de produção:
 
 ```bash
 npm run build
 ```
 
-## Configuracao de ambiente
+## Configuração de ambiente
 
-O client HTTP usa por padrao `http://localhost:8000`.
+O cliente HTTP usa, por padrão, `http://localhost:8000`.
 
 Para alterar, crie um arquivo `.env` na raiz:
 
@@ -50,38 +49,44 @@ VITE_API_BASE_URL=http://localhost:8000
 
 ## Rotas principais
 
-- Publica:
-  - `/` login/registro
-- Protegidas (requer usuario autenticado):
-  - `/app` dashboard
-  - `/app/dispositivos`
-  - `/app/enviar`
-  - `/app/historico`
-  - `/app/mapa`
-  - `/app/configuracoes`
-- Admin:
-  - `/admin`
-  - `/admin/usuarios`
+* Pública:
 
-## Autenticacao e sessao
+  * `/` — login/registro
+* Protegidas (requer usuário autenticado):
 
-- Fluxo Laravel Sanctum:
-  - `GET /sanctum/csrf-cookie`
-  - `POST /api/login` ou `POST /api/register`
-- Token salvo no `localStorage` com a chave `m2s.auth_token`.
-- O frontend possui `UserContextProvider` global para disponibilizar usuario autenticado em toda a aplicacao.
-- Quando uma requisicao retorna `401`:
-  - sessao local e token sao limpos
-  - usuario e redirecionado para `/`
-  - rotas protegidas continuam bloqueadas via `RequireAuth` (inclusive acesso direto por URL ou botao voltar)
+  * `/app` — dashboard
+  * `/app/dispositivos`
+  * `/app/enviar`
+  * `/app/historico`
+  * `/app/mapa`
+  * `/app/configuracoes`
+* Administrativas:
+
+  * `/admin`
+  * `/admin/usuarios`
+
+## Autenticação e sessão
+
+* Fluxo Laravel Sanctum:
+
+  * `GET /sanctum/csrf-cookie`
+  * `POST /api/login` ou `POST /api/register`
+* Token salvo no `localStorage` com a chave `m2s.auth_token`.
+* O frontend possui um `UserContextProvider` global para disponibilizar o usuário autenticado em toda a aplicação.
+* Quando uma requisição retorna `401`:
+
+  * a sessão local e o token são limpos;
+  * o usuário é redirecionado para `/`;
+  * as rotas protegidas continuam bloqueadas por meio do `RequireAuth`, inclusive em acessos diretos por URL ou pelo botão Voltar.
 
 ## Tema (Light/Dark)
 
-- Tema customizado com base em:
-  - Light mode: `#2782DD`
-  - Dark mode: `#0C17B6`
-- O switch de tema fica no header do `Layout`.
-- Preferencia persistida no `localStorage` (`m2s.theme`).
+* Tema customizado com base em:
+
+  * Light mode: `#2782DD`
+  * Dark mode: `#0C17B6`
+* O switch de tema fica no header do `Layout`.
+* A preferência é persistida no `localStorage` (`m2s.theme`).
 
 ## Estrutura resumida
 
@@ -117,11 +122,10 @@ src/
 
 ## API e dados
 
-- Colecao Postman: `database/Laravel.postman_collection.json`
-- Documentacao de modelagem de dados: `database/README.md`
+* Coleção do Postman: `database/Laravel.postman_collection.json`
+* Documentação da modelagem de dados: `database/README.md`
 
-## Observacoes
+## Observações
 
-- Este frontend foi estruturado para consumir respostas do backend Laravel com envelopes no formato `success/data/message` e variacoes por endpoint.
-- Os hooks de API estao segregados por entidade para facilitar manutencao e evolucao.
-  
+* Este frontend foi estruturado para consumir respostas do backend Laravel com envelopes no formato `success/data/message` e variações conforme o endpoint.
+* Os hooks de API estão segregados por entidade para facilitar a manutenção e a evolução.
