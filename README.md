@@ -1,5 +1,5 @@
 
-# AlertaTV Frontend Web
+# Mobile2Screen Frontend Web
 
 Aplicacao frontend do sistema de gerenciamento e envio de alertas para dispositivos (TVs e Raspberry Pi), com dashboard, historico, gerenciamento de dispositivos e autenticacao integrada ao backend Laravel.
 
