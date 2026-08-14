@@ -15,6 +15,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
+import { TagManagerDialog, type ManagedTag } from "../components/TagManagerDialog";
 import {
   Monitor,
   Tag,
@@ -30,6 +31,7 @@ import {
   Wifi,
   WifiOff,
   MoveRight,
+  Settings,
 } from "lucide-react";
 import { useAlertsApi, useDevicesApi, useTagsApi } from "../hooks/api/entities";
 
@@ -64,10 +66,7 @@ type AlertDevice = {
   tags: string[];
 };
 
-type AlertTag = {
-  id: number;
-  name: string;
-};
+type AlertTag = ManagedTag;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -103,6 +102,7 @@ export function EnviarAlerta() {
   const alertsApi = useMemo(() => useAlertsApi(), []);
   const [allDevices, setAllDevices] = useState<AlertDevice[]>([]);
   const [allTags, setAllTags] = useState<AlertTag[]>([]);
+  const [showTagManager, setShowTagManager] = useState(false);
   const [step, setStep] = useState<Step>(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -113,6 +113,18 @@ export function EnviarAlerta() {
   const [showPreview, setShowPreview] = useState(false);
   const [sendState, setSendState] = useState<SubmitState>("idle");
   const [sent, setSent] = useState(false);
+
+  const loadDevices = async () => {
+    const resources = await devicesApi.list();
+    const mappedDevices = resources.map((resource, index) => ({
+      id: typeof resource.id === "number" ? resource.id : index + 1,
+      name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
+      type: (resource.type === "rpi" ? "rpi" : "tv") as AlertDevice["type"],
+      online: Boolean(resource.is_online),
+      tags: extractTagNames(resource.tags),
+    }));
+    setAllDevices(mappedDevices);
+  };
 
   const matchingDevices = selectAll
     ? allDevices
@@ -136,20 +148,11 @@ export function EnviarAlerta() {
   useEffect(() => {
     let isMounted = true;
 
-    Promise.allSettled([devicesApi.list(), tagsApi.list()])
+    Promise.allSettled([loadDevices(), tagsApi.list()])
       .then(([devicesResult, tagsResult]) => {
         if (!isMounted) return;
 
-        if (devicesResult.status === "fulfilled") {
-          const mappedDevices = devicesResult.value.map((resource, index) => ({
-            id: typeof resource.id === "number" ? resource.id : index + 1,
-            name: typeof resource.name === "string" ? resource.name : `Dispositivo ${index + 1}`,
-            type: (resource.type === "rpi" ? "rpi" : "tv") as AlertDevice["type"],
-            online: Boolean(resource.is_online),
-            tags: extractTagNames(resource.tags),
-          }));
-          setAllDevices(mappedDevices);
-        } else {
+        if (devicesResult.status === "rejected") {
           setAllDevices([]);
         }
 
@@ -158,6 +161,9 @@ export function EnviarAlerta() {
             .map((tag, index) => ({
               id: typeof tag.id === "number" ? tag.id : index + 1,
               name: typeof tag.name === "string" ? tag.name : `tag-${index + 1}`,
+              color: typeof tag.color === "string" ? tag.color : null,
+              devicesCount: typeof tag.devices_count === "number" ? tag.devices_count : 0,
+              alertsCount: typeof tag.alerts_count === "number" ? tag.alerts_count : 0,
             }))
             .filter((tag) => tag.name.trim().length > 0);
 
@@ -248,6 +254,21 @@ export function EnviarAlerta() {
   const toggleTag = (tag: string) => {
     setSelectAll(false);
     setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  };
+
+  const handleTagsChange = (tags: ManagedTag[], change?: { from?: string; to?: string }) => {
+    setAllTags(tags);
+    void loadDevices().catch(() => setAllDevices([]));
+    setSelectedTags((previous) => {
+      if (selectAll) return tags.map((tag) => tag.name);
+
+      const renamed = change?.from && change.to
+        ? previous.map((name) => name === change.from ? change.to! : name)
+        : previous;
+      const availableNames = new Set(tags.map((tag) => tag.name));
+
+      return Array.from(new Set(renamed.filter((name) => availableNames.has(name))));
+    });
   };
 
   const handleSend = async () => {
@@ -363,8 +384,23 @@ export function EnviarAlerta() {
       {step === 1 && (
         <div className="space-y-4">
           <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
-            <h3 className="text-foreground mb-1">Selecionar destino por Tags</h3>
-            <p className="text-muted-foreground text-sm mb-4">Os alertas serão enviados para todos os dispositivos com as tags selecionadas.</p>
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h3 className="text-foreground mb-1">Selecionar destino por Tags</h3>
+                <p className="text-muted-foreground text-sm">Os alertas serão enviados para todos os dispositivos com as tags selecionadas.</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setShowTagManager(true)}
+                className="shrink-0 rounded-xl"
+                aria-label="Gerenciar tags"
+                title="Gerenciar tags"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
               <button
@@ -384,7 +420,7 @@ export function EnviarAlerta() {
                       : "border-border text-muted-foreground hover:bg-muted"
                     }`}
                 >
-                  <Tag className="w-3.5 h-3.5 shrink-0" />
+                  <Tag className="w-3.5 h-3.5 shrink-0" style={{ color: tag.color || undefined }} />
                   <span className="truncate">{tag.name}</span>
                 </button>
               ))}
@@ -624,6 +660,12 @@ export function EnviarAlerta() {
         </div>
       )}
       </div>
+      <TagManagerDialog
+        open={showTagManager}
+        onOpenChange={setShowTagManager}
+        tags={allTags}
+        onTagsChange={handleTagsChange}
+      />
     </div>
   );
 }

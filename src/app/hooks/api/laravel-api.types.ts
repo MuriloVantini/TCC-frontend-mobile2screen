@@ -68,6 +68,8 @@ export interface DevicePayload {
 }
 
 export interface TagPayload {
+  name: string;
+  color?: string | null;
   [key: string]: unknown;
 }
 
@@ -108,6 +110,9 @@ export interface DeviceResource extends ApiRecord {
 export interface TagResource extends ApiRecord {
   id?: number;
   name?: string;
+  color?: string | null;
+  devices_count?: number;
+  alerts_count?: number;
 }
 
 export interface AlertResource extends ApiRecord {
