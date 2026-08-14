@@ -113,6 +113,10 @@ export interface TagResource extends ApiRecord {
 export interface AlertResource extends ApiRecord {
   id?: number;
   title?: string;
+  devices_count?: number;
+  received_devices_count?: number;
+  failed_devices_count?: number;
+  pending_devices_count?: number;
 }
 
 export interface PlanResource extends ApiRecord {

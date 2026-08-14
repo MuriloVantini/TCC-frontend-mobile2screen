@@ -51,6 +51,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function toCount(value: unknown, fallback = 0): number {
+  const count = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(count) && count >= 0 ? Math.trunc(count) : fallback;
+}
+
 function formatDateTime(value: unknown): string {
   if (typeof value !== "string") return "-";
 
@@ -129,8 +134,12 @@ export function Historico() {
 
         const mapped: AlertRecord[] = result.items.map((item, index) => {
           const deliveries = Array.isArray(item.deliveries) ? item.deliveries : [];
-          const delivered = deliveries.filter((delivery) => isRecord(delivery) && delivery.status === "delivered").length;
-          const failed = deliveries.filter((delivery) => isRecord(delivery) && delivery.status === "failed").length;
+          const receivedFallback = deliveries.filter((delivery) => isRecord(delivery)
+            && (delivery.delivered_at != null || ["delivered", "acknowledged", "dismissed"].includes(String(delivery.status)))).length;
+          const failedFallback = deliveries.filter((delivery) => isRecord(delivery) && delivery.status === "failed").length;
+          const devices = toCount(item.devices_count, deliveries.length);
+          const delivered = toCount(item.received_devices_count, receivedFallback);
+          const failed = toCount(item.failed_devices_count, failedFallback);
 
           return {
             id: typeof item.id === "number" ? item.id : index + 1,
@@ -142,7 +151,7 @@ export function Historico() {
                   .map((tag) => (isRecord(tag) && typeof tag.name === "string" ? tag.name : null))
                   .filter((tag): tag is string => typeof tag === "string")
               : [],
-            devices: deliveries.length,
+            devices,
             delivered,
             failed,
             duration: formatDuration(item.duration_seconds),
@@ -200,7 +209,8 @@ export function Historico() {
 
   const totalDelivered = alertHistory.reduce((s, a) => s + a.delivered, 0);
   const totalFailed = alertHistory.reduce((s, a) => s + a.failed, 0);
-  const deliveryRate = Math.round((totalDelivered / (totalDelivered + totalFailed)) * 100);
+  const totalDevices = alertHistory.reduce((sum, alert) => sum + alert.devices, 0);
+  const deliveryRate = totalDevices > 0 ? Math.round((totalDelivered / totalDevices) * 100) : 0;
   const summaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -225,7 +235,7 @@ export function Historico() {
       <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-primary", bg: "bg-accent" },
-          { label: "Entregues", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-success", bg: "bg-secondary" },
+          { label: "Receberam", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-success", bg: "bg-secondary" },
           { label: "Falhas", numericValue: totalFailed, suffix: "", icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
           { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", icon: Monitor, color: "text-primary", bg: "bg-accent" },
         ].map(({ label, numericValue, suffix, icon: Icon, color, bg }) => (
@@ -273,7 +283,7 @@ export function Historico() {
           {paginated.map((alert) => {
             const cfg = alertTypeConfig[alert.type];
             const Icon = cfg.icon;
-            const deliveryPct = Math.round((alert.delivered / alert.devices) * 100);
+            const deliveryPct = alert.devices > 0 ? Math.round((alert.delivered / alert.devices) * 100) : 0;
             return (
               <Button
                 key={alert.id}
@@ -300,7 +310,7 @@ export function Historico() {
                     </span>
                     <span className="flex items-center gap-1">
                       <CheckCircle2 className={`w-3 h-3 ${deliveryPct === 100 ? "text-success" : "text-warning"}`} />
-                      {deliveryPct}% entregues
+                      {deliveryPct}% receberam
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {alert.sentAt}
@@ -379,7 +389,7 @@ export function Historico() {
               {selected.message && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Mensagem</p>
-                  <p className="text-sm text-foreground bg-muted rounded-xl p-3">{selected.message}</p>
+                  <p className="text-sm text-foreground bg-muted rounded-xl p-3 break-all" style={{ overflowWrap: "anywhere" }}>{selected.message}</p>
                 </div>
               )}
 
@@ -390,7 +400,7 @@ export function Historico() {
                 </div>
                 <div className="bg-secondary rounded-xl p-3 text-center">
                   <p className="text-lg font-bold text-success">{selected.delivered}</p>
-                  <p className="text-xs text-success">Entregues</p>
+                  <p className="text-xs text-success">Receberam</p>
                 </div>
                 <div className={`rounded-xl p-3 text-center ${selected.failed > 0 ? "bg-destructive/10" : "bg-muted"}`}>
                   <p className={`text-lg font-bold ${selected.failed > 0 ? "text-destructive" : "text-muted-foreground"}`}>{selected.failed}</p>
