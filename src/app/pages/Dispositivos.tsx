@@ -64,6 +64,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function formatDateTime(value: unknown): string {
+  if (typeof value !== "string" || !value) return "nunca";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "nunca";
+  return (
+    date.toLocaleDateString("pt-BR") +
+    " " +
+    date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+  );
+}
+
 function extractTagNames(source: unknown): string[] {
   if (!Array.isArray(source)) return [];
 
@@ -89,7 +100,7 @@ function mapApiDevice(resource: Record<string, unknown>, index: number): Device 
     online: Boolean(resource.is_online),
     tags: extractTagNames(resource.tags),
     location: typeof resource.location === "string" ? resource.location : "",
-    lastSeen: typeof resource.last_seen === "string" ? resource.last_seen : "nunca",
+    lastSeen: formatDateTime(resource.last_seen),
     ip: typeof resource.ip_address === "string" ? resource.ip_address : "-",
   };
 }
