@@ -15,11 +15,7 @@ export function RequireAdmin() {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/" replace state={{ from: location }} />;
-  }
-
-  if (user.role !== "admin") {
+  if (!user || user.role !== "admin") {
     return <Navigate to="/app" replace state={{ adminAccessDenied: true, from: location }} />;
   }
 
