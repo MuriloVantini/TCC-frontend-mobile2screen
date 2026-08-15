@@ -11,7 +11,10 @@ import {
   Shield,
   ShieldOff,
   Tag,
+  Eye,
 } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../components/ui/tooltip";
 
 interface User {
   id: number;
@@ -62,13 +65,13 @@ function formatRelativeDate(value: unknown): string {
 
   const diffMs = Date.now() - date.getTime();
   const minutes = Math.max(1, Math.floor(diffMs / 60000));
-  if (minutes < 60) return `ha ${minutes} min`;
+  if (minutes < 60) return `há ${minutes} min`;
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `ha ${hours}h`;
+  if (hours < 24) return `há ${hours}h`;
 
   const days = Math.floor(hours / 24);
-  return `ha ${days}d`;
+  return `há ${days}d`;
 }
 
 function formatJoined(value: unknown): string {
@@ -85,7 +88,7 @@ function mapApiUser(resource: Record<string, unknown>, index: number): User {
 
   return {
     id: typeof resource.id === "number" ? resource.id : index + 1,
-    name: typeof resource.name === "string" ? resource.name : `Usuario ${index + 1}`,
+    name: typeof resource.name === "string" ? resource.name : `Usuário ${index + 1}`,
     email: typeof resource.email === "string" ? resource.email : "-",
     company: typeof resource.company === "string" ? resource.company : "-",
     plan: toPlan(plan?.name),
@@ -231,15 +234,21 @@ export function AdminUsuarios() {
               {paginated.map((u) => (
                 <tr key={u.id} className="hover:bg-muted/50 transition-colors">
                   <td className="px-4 py-3">
-                    <button onClick={() => setSelected(u)} className="flex items-center gap-2.5 text-left hover:text-primary group">
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center shrink-0">
-                        <span className="text-white text-xs font-bold">{u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground group-hover:text-primary">{u.name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
-                      </div>
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button onClick={() => setSelected(u)} className="flex items-center gap-2.5 text-left hover:text-primary group cursor-pointer">
+                          <div className="w-8 h-8 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center shrink-0">
+                            <span className="text-white text-xs font-bold">{u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary">{u.name}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                          </div>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Ver detalhes do usuário</TooltipContent>
+                    </Tooltip>
+
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${planConfig[u.plan].cls}`}>{planConfig[u.plan].label}</span>
@@ -259,10 +268,22 @@ export function AdminUsuarios() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setSelected(u)} className="p-1.5 text-primary hover:bg-accent rounded-lg text-xs">Ver</button>
-                      <button onClick={() => toggleSuspend(u.id)} className={`p-1.5 rounded-lg ${u.status === "active" ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-secondary"}`}>
-                        {u.status === "active" ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={() => setSelected(u)} className="size-7 text-primary hover:bg-accent cursor-pointer">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Ver detalhes do usuário</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={() => toggleSuspend(u.id)} className={`size-7 cursor-pointer ${u.status === "active" ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-secondary"}`}>
+                            {u.status === "active" ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{u.status === "active" ? "Suspender usuário" : "Reativar usuário"}</TooltipContent>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>
@@ -315,10 +336,22 @@ export function AdminUsuarios() {
               <span className="flex items-center gap-1"><BellRing className="w-3 h-3" /> {u.alerts} alertas</span>
               <span className={`font-medium ${u.deliveryRate >= 95 ? "text-success" : "text-warning"}`}>{u.deliveryRate}%</span>
               <div className="flex gap-1">
-                <button onClick={() => setSelected(u)} className="px-2 py-1 bg-accent text-primary rounded-lg text-xs">Ver</button>
-                <button onClick={() => toggleSuspend(u.id)} className={`p-1.5 rounded-lg ${u.status === "active" ? "text-destructive bg-destructive/10" : "text-success bg-secondary"}`}>
-                  {u.status === "active" ? <ShieldOff className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={() => setSelected(u)} className="size-7 text-primary hover:bg-accent cursor-pointer">
+                      <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Ver detalhes</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={() => toggleSuspend(u.id)} className={`size-7 cursor-pointer ${u.status === "active" ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-secondary"}`}>
+                      {u.status === "active" ? <ShieldOff className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{u.status === "active" ? "Suspender" : "Reativar"}</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -341,10 +374,11 @@ export function AdminUsuarios() {
       {/* User detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] flex flex-col">
+          <div className="bg-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-border">
+            {/* Header */}
             <div className="flex items-start justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center">
+                <div className="w-11 h-11 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center shrink-0">
                   <span className="text-white text-sm font-bold">{selected.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
                 </div>
                 <div>
@@ -352,9 +386,12 @@ export function AdminUsuarios() {
                   <p className="text-xs text-muted-foreground">{selected.email}</p>
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground p-1"><X className="w-5 h-5" /></button>
+              <Button variant="ghost" size="icon" onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground cursor-pointer shrink-0">
+                <X className="w-5 h-5" />
+              </Button>
             </div>
 
+            {/* Body */}
             <div className="overflow-y-auto p-5 space-y-4">
               <div className="flex flex-wrap gap-2">
                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${planConfig[selected.plan].cls}`}>{planConfig[selected.plan].label}</span>
@@ -373,7 +410,7 @@ export function AdminUsuarios() {
                   <p className="text-lg font-bold text-primary">{selected.alerts}</p>
                   <p className="text-xs text-primary">Alertas</p>
                 </div>
-                <div className={`rounded-xl p-3 text-center ${selected.deliveryRate >= 95 ? "bg-secondary" : "bg-secondary"}`}>
+                <div className="bg-secondary rounded-xl p-3 text-center">
                   <p className={`text-lg font-bold ${selected.deliveryRate >= 95 ? "text-success" : "text-warning"}`}>{selected.deliveryRate}%</p>
                   <p className={`text-xs ${selected.deliveryRate >= 95 ? "text-success" : "text-warning"}`}>Taxa</p>
                 </div>
@@ -382,34 +419,38 @@ export function AdminUsuarios() {
               <div>
                 <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1"><Tag className="w-3 h-3" /> Tags utilizadas</p>
                 <div className="flex flex-wrap gap-1.5">
+                  {selected.tags.length === 0 && <span className="text-xs text-muted-foreground">Nenhuma tag</span>}
                   {selected.tags.map((tag) => (
                     <span key={tag} className={`text-xs px-2.5 py-1 rounded-full font-medium ${getTagColor(tag)}`}>{tag}</span>
                   ))}
                 </div>
               </div>
 
-              <div className="text-sm text-muted-foreground space-y-2 bg-muted rounded-xl p-3">
+              <div className="text-sm space-y-2 bg-muted rounded-xl p-3">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Cadastrado em</span>
-                  <span className="font-medium">{selected.joined}</span>
+                  <span className="font-medium text-foreground">{selected.joined}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Último acesso</span>
-                  <span className="font-medium">{selected.lastActive}</span>
+                  <span className="font-medium text-foreground">{selected.lastActive}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 px-5 py-4 border-t border-border">
-              <button onClick={() => toggleSuspend(selected.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            {/* Footer */}
+            <div className="flex gap-3 px-5 py-4 border-t border-border shrink-0">
+              <Button
+                onClick={() => toggleSuspend(selected.id)}
+                variant="ghost"
+                className={`flex-1 cursor-pointer ${
                   selected.status === "active"
                     ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
                     : "bg-secondary text-success hover:bg-secondary/80"
                 }`}
               >
                 {selected.status === "active" ? <><ShieldOff className="w-4 h-4" /> Suspender</> : <><Shield className="w-4 h-4" /> Reativar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
