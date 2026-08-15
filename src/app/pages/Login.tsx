@@ -167,6 +167,7 @@ export function Login() {
       const response = await authApi.register({
         name: registerForm.name,
         email: registerForm.email,
+        company: registerForm.company.trim() || undefined,
         password: registerForm.password,
         password_confirmation: registerForm.confirm,
       });
