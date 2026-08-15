@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Outlet, NavLink, useNavigate, Link } from "react-router";
+import { useUserContext } from "../contexts/UserContextProvider";
+import { useAuthApi } from "../hooks/api/entities";
 import {
   LayoutDashboard,
   Users,
@@ -20,6 +22,26 @@ const navItems = [
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const authApi = useMemo(() => useAuthApi(), []);
+  const { user, clearUser } = useUserContext();
+  const displayName = user?.name ?? "Administrador";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "AD";
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // A sessão local deve ser removida mesmo se a revogação remota falhar.
+    } finally {
+      clearUser();
+      navigate("/", { replace: true });
+    }
+  };
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
@@ -71,7 +93,7 @@ export function AdminLayout() {
             <ChevronLeft className="w-4 h-4" />
             Área do Usuário
           </Link>
-          <button onClick={() => navigate("/")} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+          <button onClick={() => void handleLogout()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all">
             <LogOut className="w-4 h-4" /> Sair
           </button>
         </div>
@@ -90,9 +112,9 @@ export function AdminLayout() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-violet-700 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">AD</span>
+              <span className="text-white text-xs font-bold">{initials}</span>
             </div>
-            <span className="hidden sm:block text-sm text-slate-700">Admin</span>
+            <span className="hidden sm:block text-sm text-slate-700">{displayName}</span>
           </div>
         </header>
 

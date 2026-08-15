@@ -21,6 +21,7 @@ export interface AuthUser {
   id: number;
   name: string;
   email: string;
+  role: "user" | "admin";
   [key: string]: unknown;
 }
 

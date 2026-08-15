@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 import { RequireAuth } from "./components/RequireAuth";
+import { RequireAdmin } from "./components/RequireAdmin";
 import { AdminLayout } from "./components/AdminLayout";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
@@ -36,10 +37,15 @@ export const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    Component: AdminLayout,
+    Component: RequireAdmin,
     children: [
-      { index: true, Component: Admin },
-      { path: "usuarios", Component: AdminUsuarios },
+      {
+        Component: AdminLayout,
+        children: [
+          { index: true, Component: Admin },
+          { path: "usuarios", Component: AdminUsuarios },
+        ],
+      },
     ],
   },
   { path: "*", Component: NotFound },

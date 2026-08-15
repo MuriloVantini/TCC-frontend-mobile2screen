@@ -66,6 +66,7 @@ export function Layout() {
 
   const displayName = user?.name ?? "Usuario";
   const displayEmail = user?.email ?? "-";
+  const isAdmin = user?.role === "admin";
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -164,14 +165,16 @@ export function Layout() {
             ))}
           </nav>
           <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
-            <Link
-              to="/admin"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
-            >
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span>Painel Admin</span>
-            </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
+              >
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span>Painel Admin</span>
+              </Link>
+            )}
             <Button
               variant="ghost"
               onClick={handleLogout}
@@ -214,13 +217,15 @@ export function Layout() {
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
-          <Link
-            to="/admin"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
-          >
-            <ShieldCheck className="w-4 h-4 shrink-0" />
-            <span>{'Painel Admin'}</span>
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
+            >
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span>Painel Admin</span>
+            </Link>
+          )}
           <Button
             variant="ghost"
             onClick={handleLogout}
