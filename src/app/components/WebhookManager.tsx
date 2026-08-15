@@ -109,7 +109,7 @@ export function WebhookManager() {
     const secret = form.secret.trim();
 
     if (!name) { toast.error("Informe um nome para o webhook."); return; }
-    if (!/^https?:\/\//i.test(url)) { toast.error("Informe uma URL HTTP ou HTTPS valida."); return; }
+    if (!/^https?:\/\//i.test(url)) { toast.error("Informe uma URL HTTP ou HTTPS válida."); return; }
     if (events.length === 0) { toast.error("Selecione pelo menos um evento."); return; }
     if (!selectedId && secret.length < 16) { toast.error("O segredo deve ter pelo menos 16 caracteres."); return; }
     if (secret && secret.length < 16) { toast.error("O segredo deve ter pelo menos 16 caracteres."); return; }
@@ -228,7 +228,7 @@ export function WebhookManager() {
         <div className="space-y-1.5">
           <Label htmlFor="webhook-secret">Segredo de assinatura</Label>
           <Input id="webhook-secret" type="password" value={form.secret} onChange={(event) => setForm((current) => ({ ...current, secret: event.target.value }))} placeholder={selectedId ? "Deixe vazio para manter o segredo atual" : "Minimo de 16 caracteres"} autoComplete="new-password" />
-          <p className="text-[11px] text-muted-foreground">Cada POST recebe a assinatura HMAC-SHA256 no cabecalho X-Mobile2Screen-Signature.</p>
+          <p className="text-[11px] text-muted-foreground">Cada POST recebe a assinatura HMAC-SHA256 no cabeçalho X-Mobile2Screen-Signature.</p>
         </div>
 
         <div className="space-y-2">
@@ -246,7 +246,7 @@ export function WebhookManager() {
         <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
           <div>
             <p className="text-sm font-medium">Webhook ativo</p>
-            <p className="text-xs text-muted-foreground">Desative temporariamente sem remover a configuracao.</p>
+            <p className="text-xs text-muted-foreground">Desative temporariamente sem remover a configuração.</p>
           </div>
           <Switch checked={form.isActive} onCheckedChange={(checked) => setForm((current) => ({ ...current, isActive: checked }))} />
         </div>
@@ -265,7 +265,7 @@ export function WebhookManager() {
             <h5 className="text-sm font-medium">Log de entregas</h5>
           </div>
           {logs.length === 0 ? (
-            <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">Nenhuma tentativa registrada. Use Testar URL para validar a integracao.</p>
+            <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">Nenhuma tentativa registrada. Use Testar URL para validar a integração.</p>
           ) : (
             <div className="max-h-72 divide-y overflow-y-auto rounded-lg border border-border">
               {logs.map((log) => {

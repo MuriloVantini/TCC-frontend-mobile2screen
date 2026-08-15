@@ -133,7 +133,7 @@ export function Login() {
       toast.success("Login realizado com sucesso!");
       setTimeout(() => navigate("/app"), 700);
     } catch (err) {
-      toast.error("Nao foi possivel entrar. Verifique seus dados.")
+      toast.error("Não foi possível entrar. Verifique seus dados.");
       setLoginState("error");
       shakeCard();
       setTimeout(() => setLoginState("idle"), 1500);
@@ -145,7 +145,7 @@ export function Login() {
     setError("");
 
     if (!registerForm.name || !registerForm.email || !registerForm.password) {
-      setError("Preencha todos os campos obrigatorios.");
+      setError("Preencha todos os campos obrigatórios.");
       setRegisterState("error");
       shakeCard();
       setTimeout(() => setRegisterState("idle"), 1500);
@@ -153,7 +153,7 @@ export function Login() {
     }
 
     if (registerForm.password !== registerForm.confirm) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       setRegisterState("error");
       shakeCard();
       setTimeout(() => setRegisterState("idle"), 1500);
@@ -177,7 +177,7 @@ export function Login() {
       setSuccess("Conta criada! Redirecionando...");
       setTimeout(() => navigate("/app"), 900);
     } catch (err) {
-      setError(extractApiErrorMessage(err, "Nao foi possivel criar a conta."));
+      setError(extractApiErrorMessage(err, "Não foi possível criar a conta."));
       setRegisterState("error");
       shakeCard();
       setTimeout(() => setRegisterState("idle"), 1500);

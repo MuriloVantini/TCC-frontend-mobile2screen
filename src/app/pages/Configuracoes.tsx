@@ -215,9 +215,9 @@ export function Configuracoes() {
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
       <div>
-        <h1 className="text-foreground">Configuracoes</h1>
+        <h1 className="text-foreground">Configurações</h1>
         <p className="text-muted-foreground text-sm mt-0.5">
-          Gerencie sua conta e preferencias
+          Gerencie sua conta e preferências
         </p>
       </div>
 
@@ -255,7 +255,7 @@ export function Configuracoes() {
               <CardContent className="pt-6">
                 {formError.perfil && (
                   <Alert variant="destructive" className="mb-4">
-                    <AlertTitle>Erro no formulario</AlertTitle>
+                    <AlertTitle>Erro no formulário</AlertTitle>
                     <AlertDescription>{formError.perfil}</AlertDescription>
                   </Alert>
                 )}
@@ -312,7 +312,7 @@ export function Configuracoes() {
                       () => {
                         if (!profile.name.trim()) return "Informe o nome completo.";
                         if (!profile.email.trim()) return "Informe o e-mail.";
-                        if (!profile.email.includes("@")) return "Informe um e-mail valido.";
+                        if (!profile.email.includes("@")) return "Informe um e-mail válido.";
                         return null;
                       },
                       shakePerfil,
@@ -350,28 +350,28 @@ export function Configuracoes() {
           <div ref={notificacoesRef} className="js-settings-section">
             <Card className="rounded-2xl border-border shadow-sm gap-0">
               <CardHeader className="border-b border-border">
-                <CardTitle className="text-foreground">Notificacoes</CardTitle>
+                <CardTitle className="text-foreground">Notificações</CardTitle>
                 <CardDescription>
-                  Quando voce quer ser notificado por e-mail
+                  Quando você quer ser notificado por e-mail
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-4 space-y-1">
                 {formError.notificacoes && (
                   <Alert variant="destructive" className="mb-4">
-                    <AlertTitle>Erro no formulario</AlertTitle>
+                    <AlertTitle>Erro no formulário</AlertTitle>
                     <AlertDescription>{formError.notificacoes}</AlertDescription>
                   </Alert>
                 )}
                 {[
                   {
                     key: "alertFailed",
-                    label: "Alerta nao entregue",
+                    label: "Alerta não entregue",
                     desc: "Quando um alerta falha ao ser entregue",
                   },
                   {
                     key: "deviceOffline",
                     label: "Dispositivo desconectado",
-                    desc: "Quando um TV/Raspberry perde conexao",
+                    desc: "Quando um TV/Raspberry perde conexão",
                   },
                   {
                     key: "deviceConnected",
@@ -380,13 +380,13 @@ export function Configuracoes() {
                   },
                   {
                     key: "weeklyReport",
-                    label: "Relatorio semanal",
+                    label: "Relatório semanal",
                     desc: "Resumo de atividades toda segunda-feira",
                   },
                   {
                     key: "limitReached",
                     label: "Limite atingido",
-                    desc: "Quando o plano esta proximo do limite",
+                    desc: "Quando o plano está próximo do limite",
                   },
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-start justify-between gap-3 py-3 form-field">
@@ -443,7 +443,7 @@ export function Configuracoes() {
               <CardContent className="pt-6 space-y-4">
                 {formError.seguranca && (
                   <Alert variant="destructive" className="mb-4">
-                    <AlertTitle>Erro no formulario</AlertTitle>
+                    <AlertTitle>Erro no formulário</AlertTitle>
                     <AlertDescription>{formError.seguranca}</AlertDescription>
                   </Alert>
                 )}
@@ -532,7 +532,7 @@ export function Configuracoes() {
                           return "A nova senha deve ter pelo menos 8 caracteres.";
                         }
                         if (securityForm.newPassword !== securityForm.confirmPassword) {
-                          return "A confirmacao da senha nao confere.";
+                          return "A confirmação da senha não confere.";
                         }
                         return null;
                       },
@@ -559,7 +559,7 @@ export function Configuracoes() {
           <div ref={apiRef} className="js-settings-section">
             <Card className="rounded-2xl border-border shadow-sm gap-0">
               <CardHeader className="border-b border-border">
-                <CardTitle className="text-foreground">API e Integracao</CardTitle>
+                <CardTitle className="text-foreground">API e Integração</CardTitle>
                 <CardDescription>
                   Use a API para integrar o AlertaTV com seus sistemas
                 </CardDescription>
@@ -600,9 +600,9 @@ export function Configuracoes() {
 
                 <Alert className="border-border bg-secondary text-warning">
                   <KeyRound className="h-4 w-4" />
-                  <AlertTitle>Chave sensivel</AlertTitle>
+                  <AlertTitle>Chave sensível</AlertTitle>
                   <AlertDescription>
-                    Mantenha sua chave em sigilo. Nao compartilhe em repositorios ou clientes publicos.
+                    Mantenha sua chave em sigilo. Não compartilhe em repositórios ou clientes públicos.
                   </AlertDescription>
                 </Alert>
 
@@ -610,15 +610,15 @@ export function Configuracoes() {
                   <h4 className="text-foreground">Exemplo de uso</h4>
                   <pre className="bg-sidebar text-sidebar-foreground p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
                     {`POST https://api.alertatv.io/v1/alerts
-Authorization: Bearer ${(visibleApiKey || "sk_xxxxxxxxxxxxxxxxxxxx").slice(0, 20)}...
+                      Authorization: Bearer ${(visibleApiKey || "sk_xxxxxxxxxxxxxxxxxxxx").slice(0, 20)}...
 
-{
-  "title": "Aviso de manutencao",
-  "message": "Sistema em manutencao as 18h",
-  "type": "warning",
-  "tags": ["ti", "todos"],
-  "duration": "10min"
-}`}
+                      {
+                        "title": "Aviso de manutencao",
+                        "message": "Sistema em manutencao as 18h",
+                        "type": "warning",
+                        "tags": ["ti", "todos"],
+                        "duration": "10min"
+                      }`}
                   </pre>
                 </div>
 

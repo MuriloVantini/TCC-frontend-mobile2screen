@@ -95,14 +95,14 @@ export function EsqueciSenha() {
         try {
             await sanctumApi.csrfCookie();
             const response = await authApi.forgotPassword({ email: email.trim() });
-            toast.success(response.message || "Codigo enviado para seu e-mail.");
+            toast.success(response.message || "Código enviado para seu e-mail.");
             setSendEmailState("success");
             setTimeout(() => {
                 setSendEmailState("idle");
                 setStep(2);
             }, 600);
         } catch (error) {
-            toast.error(extractApiErrorMessage(error, "Nao foi possivel enviar o codigo."));
+            toast.error(extractApiErrorMessage(error, "Não foi possível enviar o código."));
             triggerError(setSendEmailState);
         }
     };
@@ -130,7 +130,7 @@ export function EsqueciSenha() {
                 setStep(3);
             }, 600);
         } catch (error) {
-            toast.error(extractApiErrorMessage(error, "Pincode invalido ou expirado."));
+            toast.error(extractApiErrorMessage(error, "Pincode inválido ou expirado."));
             triggerError(setValidatePinState);
         }
     };
@@ -145,7 +145,7 @@ export function EsqueciSenha() {
         }
 
         if (password !== confirmPassword) {
-            toast.error("As senhas nao coincidem.");
+            toast.error("As senhas não coincidem.");
             triggerError(setResetPasswordState);
             return;
         }
@@ -163,7 +163,7 @@ export function EsqueciSenha() {
             setResetPasswordState("success");
             setTimeout(() => navigate("/"), 700);
         } catch (error) {
-            toast.error(extractApiErrorMessage(error, "Nao foi possivel atualizar sua senha."));
+            toast.error(extractApiErrorMessage(error, "Não foi possível atualizar sua senha."));
             triggerError(setResetPasswordState);
         }
     };

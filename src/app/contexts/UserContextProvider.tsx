@@ -73,7 +73,7 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
       }
 
       setUserState(null);
-      setError("Nao foi possivel carregar o usuario autenticado.");
+      setError("Não foi possível carregar o usuário autenticado.");
       return null;
     } finally {
       setIsLoading(false);

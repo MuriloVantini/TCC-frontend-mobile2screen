@@ -69,13 +69,13 @@ function relativeTime(value: unknown): string {
 
   const diffMs = Date.now() - date.getTime();
   const mins = Math.max(1, Math.floor(diffMs / 60000));
-  if (mins < 60) return `ha ${mins} min`;
+  if (mins < 60) return `há ${mins} min`;
 
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `ha ${hours}h`;
+  if (hours < 24) return `há ${hours}h`;
 
   const days = Math.floor(hours / 24);
-  return `ha ${days}d`;
+  return `há ${days}d`;
 }
 
 function formatDay(value: unknown, index: number): string {
@@ -130,7 +130,7 @@ export function Dashboard() {
   const [deliveryRate, setDeliveryRate] = useState(0);
   const onlineCount = devices.filter((d) => d.online).length;
   const offlineCount = devices.length - onlineCount;
-  const displayName = user?.name ?? "Usuario";
+  const displayName = user?.name ?? "Usuário";
   const metricsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -267,7 +267,7 @@ export function Dashboard() {
               <p className="text-muted-foreground text-xs mt-0.5">Alertas enviados por dia</p>
             </div>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> Ultimos dias
+              <Clock className="w-3.5 h-3.5" /> Últimos dias
             </span>
           </div>
           <ChartContainer config={activityChartConfig} className="h-48 w-full aspect-auto">

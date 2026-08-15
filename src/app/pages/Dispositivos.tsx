@@ -160,11 +160,11 @@ export function Dispositivos() {
       const [devicesResult, tagsResult] = results;
 
       if (devicesResult.status === "rejected") {
-        showFeedback({ type: "error", msg: "Nao foi possivel carregar os dispositivos." });
+        showFeedback({ type: "error", msg: "Não foi possível carregar os dispositivos." });
       }
 
       if (tagsResult.status === "rejected") {
-        showFeedback({ type: "error", msg: "Nao foi possivel carregar as tags." });
+        showFeedback({ type: "error", msg: "Não foi possível carregar as tags." });
       }
     });
   }, [devicesApi, tagsApi]);
@@ -257,7 +257,7 @@ export function Dispositivos() {
       pendingEnterId.current = latestId;
       setShowModal(false);
     } catch {
-      showFeedback({ type: "error", msg: "Nao foi possivel salvar o dispositivo." });
+      showFeedback({ type: "error", msg: "Não foi possível salvar o dispositivo." });
     }
   };
 
@@ -269,7 +269,7 @@ export function Dispositivos() {
       await loadDevices();
       showFeedback({ type: "success", msg: "Dispositivo removido." });
     } catch {
-      showFeedback({ type: "error", msg: "Nao foi possivel remover o dispositivo." });
+      showFeedback({ type: "error", msg: "Não foi possível remover o dispositivo." });
     }
   };
 
