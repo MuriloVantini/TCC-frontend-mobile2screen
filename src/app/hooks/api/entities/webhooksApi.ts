@@ -1,5 +1,5 @@
 import { defaultApiClient, type ApiClient } from "../config/httpClient";
-import type { ApiSuccessResponse, WebhookPayload, WebhookResource } from "../laravel-api.types";
+import type { ApiSuccessResponse, WebhookLogResource, WebhookPayload, WebhookResource } from "../laravel-api.types";
 import { extractCollection, extractEntity } from "./shared";
 
 export function useWebhooksApi(client: ApiClient = defaultApiClient) {
@@ -23,11 +23,10 @@ export function useWebhooksApi(client: ApiClient = defaultApiClient) {
     remove: (webhookId: number | string) => client.delete<unknown>(`/api/webhooks/${webhookId}`),
     logs: async (webhookId: number | string) => {
       const response = await client.get<unknown>(`/api/webhooks/${webhookId}/logs`);
-      return response;
+      return extractCollection<WebhookLogResource>(response);
     },
     test: async (webhookId: number | string) => {
-      const response = await client.post<unknown>(`/api/webhooks/${webhookId}/test`);
-      return response;
+      return client.post<{ message: string }>(`/api/webhooks/${webhookId}/test`);
     },
   };
 }

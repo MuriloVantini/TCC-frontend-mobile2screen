@@ -21,6 +21,8 @@ export interface AuthUser {
   id: number;
   name: string;
   email: string;
+  company?: string | null;
+  phone?: string | null;
   role: "user" | "admin";
   [key: string]: unknown;
 }
@@ -35,6 +37,7 @@ export interface AuthResponse {
 export interface RegisterPayload {
   name: string;
   email: string;
+  company?: string;
   password: string;
   password_confirmation: string;
 }
@@ -88,6 +91,11 @@ export interface ApiKeyPayload {
 }
 
 export interface WebhookPayload {
+  name: string;
+  url: string;
+  secret?: string;
+  events: string[];
+  is_active: boolean;
   [key: string]: unknown;
 }
 
@@ -138,6 +146,22 @@ export interface ApiKeyResource extends ApiRecord {
 export interface WebhookResource extends ApiRecord {
   id?: number;
   name?: string;
+  url?: string;
+  has_secret?: boolean;
+  events?: ApiPrimitive[];
+  is_active?: boolean;
+  last_triggered?: string | null;
+  logs_count?: number;
+}
+
+export interface WebhookLogResource extends ApiRecord {
+  id?: number;
+  webhook_id?: number;
+  event_type?: string;
+  response_status?: number | null;
+  response_body?: string | null;
+  error_message?: string | null;
+  created_at?: string;
 }
 
 export interface DeliveryResource extends ApiRecord {

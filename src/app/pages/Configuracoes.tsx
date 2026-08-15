@@ -16,7 +16,6 @@ import {
   Shield,
   Webhook,
   KeyRound,
-  CheckCircle2,
 } from "lucide-react";
 import {
   Tabs,
@@ -37,16 +36,15 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
-import { Checkbox } from "../components/ui/checkbox";
 import { Separator } from "../components/ui/separator";
-import { Badge } from "../components/ui/badge";
 import {
   shake,
   useMorphButton,
   type SubmitState,
 } from "../hooks/useFormSubmitAnimation";
-import { useApiKeysApi, useSettingsApi, useUsersApi, useWebhooksApi } from "../hooks/api/entities";
+import { useApiKeysApi, useSettingsApi, useUsersApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
+import { WebhookManager } from "../components/WebhookManager";
 
 const sections = [
   { id: "perfil", label: "Perfil", icon: User },
@@ -56,13 +54,6 @@ const sections = [
 ];
 
 type SectionId = "perfil" | "notificacoes" | "seguranca" | "api";
-
-const WEBHOOK_LABEL_TO_KEY: Record<string, string> = {
-  "Alerta entregue": "alert.sent",
-  "Alerta falhou": "alert.failed",
-  "Dispositivo online": "device.online",
-  "Dispositivo offline": "device.offline",
-};
 
 const defaultSubmitState: Record<SectionId, SubmitState> = {
   perfil: "idle",
@@ -74,7 +65,6 @@ const defaultSubmitState: Record<SectionId, SubmitState> = {
 export function Configuracoes() {
   const settingsApi = useMemo(() => useSettingsApi(), []);
   const apiKeysApi = useMemo(() => useApiKeysApi(), []);
-  const webhooksApi = useMemo(() => useWebhooksApi(), []);
   const usersApi = useMemo(() => useUsersApi(), []);
   const { user } = useUserContext();
   const [active, setActive] = useState("perfil");
@@ -83,16 +73,9 @@ export function Configuracoes() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [visibleApiKey, setVisibleApiKey] = useState("");
-  const [activeWebhookId, setActiveWebhookId] = useState<number | null>(null);
   const [submitState, setSubmitState] =
     useState<Record<SectionId, SubmitState>>(defaultSubmitState);
   const [formError, setFormError] = useState<Partial<Record<SectionId, string>>>({});
-  const [webhookEvents, setWebhookEvents] = useState<Record<string, boolean>>({
-    "Alerta entregue": true,
-    "Alerta falhou": true,
-    "Dispositivo online": false,
-    "Dispositivo offline": false,
-  });
 
   const [profile, setProfile] = useState({ name: "", email: "", phone: "", company: "" });
 
@@ -110,10 +93,6 @@ export function Configuracoes() {
     confirmPassword: "",
   });
 
-  const [apiForm, setApiForm] = useState({
-    webhookUrl: "",
-  });
-
   const maskedApiKey = visibleApiKey ? `${"*".repeat(Math.min(36, visibleApiKey.length))}${visibleApiKey.slice(-8)}` : "Nenhuma chave API encontrada";
 
   const perfilRef = useRef<HTMLDivElement | null>(null);
@@ -124,12 +103,10 @@ export function Configuracoes() {
   const { shakeCard: shakePerfil } = shake(perfilRef, active);
   const { shakeCard: shakeNotificacoes } = shake(notificacoesRef, active);
   const { shakeCard: shakeSeguranca } = shake(segurancaRef, active);
-  const { shakeCard: shakeApi } = shake(apiRef, active);
 
   const perfilMorph = useMorphButton(submitState.perfil, <><Save className="w-4 h-4" /> Salvar</>);
   const notificacoesMorph = useMorphButton(submitState.notificacoes, <><Save className="w-4 h-4" /> Salvar</>);
   const segurancaMorph = useMorphButton(submitState.seguranca, <><Save className="w-4 h-4" /> Alterar senha</>);
-  const apiMorph = useMorphButton(submitState.api, <><Save className="w-4 h-4" /> Salvar webhook</>);
 
   const handleSave = (section: string) => {
     setSaved((p) => [...p, section]);
@@ -191,7 +168,7 @@ export function Configuracoes() {
   useEffect(() => {
     let isMounted = true;
 
-    Promise.allSettled([settingsApi.get(), apiKeysApi.list(), webhooksApi.list()]).then(([settingsResult, apiKeysResult, webhooksResult]) => {
+    Promise.allSettled([settingsApi.get(), apiKeysApi.list()]).then(([settingsResult, apiKeysResult]) => {
       if (!isMounted) return;
 
       if (settingsResult.status === "fulfilled") {
@@ -218,47 +195,20 @@ export function Configuracoes() {
         }
       }
 
-      if (webhooksResult.status === "fulfilled") {
-        const webhook = webhooksResult.value[0] as Record<string, unknown> | undefined;
-        if (webhook) {
-          setActiveWebhookId(typeof webhook.id === "number" ? webhook.id : null);
-          setApiForm({ webhookUrl: typeof webhook.url === "string" ? webhook.url : "" });
-
-          const eventsRaw = webhook.events;
-          const events = Array.isArray(eventsRaw)
-            ? eventsRaw
-            : typeof eventsRaw === "string"
-              ? (() => {
-                  try {
-                    const parsed = JSON.parse(eventsRaw);
-                    return Array.isArray(parsed) ? parsed : [];
-                  } catch {
-                    return [];
-                  }
-                })()
-              : [];
-
-          setWebhookEvents((previous) => {
-            const updated = { ...previous };
-            Object.entries(WEBHOOK_LABEL_TO_KEY).forEach(([label, key]) => {
-              updated[label] = events.includes(key);
-            });
-            return updated;
-          });
-        }
-      }
     });
 
     return () => {
       isMounted = false;
     };
-  }, [settingsApi, apiKeysApi, webhooksApi]);
+  }, [settingsApi, apiKeysApi]);
 
   useEffect(() => {
     setProfile((previous) => ({
       ...previous,
       name: user?.name ?? previous.name,
       email: user?.email ?? previous.email,
+      company: user?.company ?? previous.company,
+      phone: user?.phone ?? previous.phone,
     }));
   }, [user]);
 
@@ -697,105 +647,7 @@ Authorization: Bearer ${(visibleApiKey || "sk_xxxxxxxxxxxxxxxxxxxx").slice(0, 20
                 </div>
 
                 <Separator />
-
-                <div className="space-y-3">
-                  <h4 className="text-foreground">Webhooks</h4>
-                  {formError.api && (
-                    <Alert variant="destructive" className="mb-2">
-                      <AlertTitle>Erro no formulario</AlertTitle>
-                      <AlertDescription>{formError.api}</AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="webhook-url">URL de callback</Label>
-                    <Input
-                      id="webhook-url"
-                      placeholder="https://seusite.com.br/webhook/alertatv"
-                      className="form-field"
-                      value={apiForm.webhookUrl}
-                      onChange={(e) =>
-                        setApiForm((previous) => ({
-                          ...previous,
-                          webhookUrl: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 form-field">
-                    {Object.keys(webhookEvents).map((eventName) => (
-                      <Label
-                        key={eventName}
-                        htmlFor={`event-${eventName}`}
-                        className="border rounded-md px-2.5 py-1.5 cursor-pointer font-normal"
-                      >
-                        <Checkbox
-                          id={`event-${eventName}`}
-                          checked={webhookEvents[eventName]}
-                          onCheckedChange={(checked) =>
-                            setWebhookEvents((previous) => ({
-                              ...previous,
-                              [eventName]: Boolean(checked),
-                            }))
-                          }
-                        />
-                        {eventName}
-                      </Label>
-                    ))}
-                  </div>
-
-                  <Badge variant={copied ? "default" : "outline"} className="gap-1.5">
-                    {copied ? <CheckCircle2 className="w-3 h-3" /> : <Webhook className="w-3 h-3" />}
-                    {copied ? "Chave copiada" : apiForm.webhookUrl ? "Webhook ativo" : "Webhook nao configurado"}
-                  </Badge>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
-                    <Button
-                      onClick={() => {
-                        void saveWithAnimation(
-                          "api",
-                          () => {
-                            const webhookUrl = apiForm.webhookUrl.trim();
-                            if (!webhookUrl) return "Informe a URL de callback.";
-                            if (!/^https?:\/\//i.test(webhookUrl)) {
-                              return "A URL deve comecar com http:// ou https://.";
-                            }
-                            return null;
-                          },
-                          shakeApi,
-                          async () => {
-                            const events = Object.entries(webhookEvents)
-                              .filter(([, enabled]) => enabled)
-                              .map(([label]) => WEBHOOK_LABEL_TO_KEY[label]);
-
-                            const payload = {
-                              name: "Webhook Mobile2Screen",
-                              url: apiForm.webhookUrl.trim(),
-                              secret: `m2s-${Date.now()}-webhook-secret`,
-                              events,
-                              is_active: true,
-                            };
-
-                            if (activeWebhookId) {
-                              await webhooksApi.update(activeWebhookId, payload);
-                            } else {
-                              const created = await webhooksApi.create(payload);
-                              if (typeof created.id === "number") {
-                                setActiveWebhookId(created.id);
-                              }
-                            }
-                          }
-                        );
-                      }}
-                      style={apiMorph.morphStyle}
-                      className="overflow-hidden"
-                      disabled={submitState.api === "loading"}
-                    >
-                      {saved.includes("api") && submitState.api === "idle"
-                        ? <><Check className="w-4 h-4" /> Salvo!</>
-                        : apiMorph.morphContent}
-                    </Button>
-                  </div>
-                </div>
+                <WebhookManager />
               </CardContent>
             </Card>
           </div>
