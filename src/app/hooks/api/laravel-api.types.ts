@@ -182,6 +182,55 @@ export interface AlertDetailsData extends ApiRecord {
 }
 
 export interface DashboardStatistics extends ApiRecord {}
+export interface AdminDashboardUsers extends ApiRecord {
+  total?: number;
+  active?: number;
+  suspended?: number;
+  new_today?: number;
+}
+export interface AdminDashboardDevices extends ApiRecord {
+  total?: number;
+  online?: number;
+  offline?: number;
+  online_percentage?: number;
+}
+export interface AdminDashboardAlerts extends ApiRecord {
+  today?: number;
+  last_30_days?: number;
+}
+export interface AdminDashboardDeliveries extends ApiRecord {
+  total?: number;
+  delivered?: number;
+  failed?: number;
+  pending?: number;
+  delivery_rate?: number;
+}
+export interface AdminDashboardDaily extends ApiRecord {
+  date?: string;
+  alerts_sent?: number;
+  alerts_delivered?: number;
+  alerts_failed?: number;
+  delivery_rate?: number;
+}
+export interface AdminDashboardTopUser extends ApiRecord {
+  id?: number;
+  name?: string;
+  email?: string;
+  company?: string | null;
+  devices_count?: number;
+  alerts_count?: number;
+  delivery_rate?: number;
+}
+export interface AdminDashboardStatistics extends ApiRecord {
+  generated_at?: string;
+  users?: AdminDashboardUsers;
+  devices?: AdminDashboardDevices;
+  alerts?: AdminDashboardAlerts;
+  deliveries?: AdminDashboardDeliveries;
+  daily?: AdminDashboardDaily[];
+  alerts_by_type?: AlertsByTypeStatistics[];
+  top_users?: AdminDashboardTopUser[];
+}
 export interface DailyStatistics extends ApiRecord {
   date?: string;
   alerts_sent?: number;

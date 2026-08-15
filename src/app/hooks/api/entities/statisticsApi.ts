@@ -1,5 +1,6 @@
 import { defaultApiClient, type ApiClient } from "../config/httpClient";
 import type {
+  AdminDashboardStatistics,
   AlertsByTypeStatistics,
   ApiSuccessResponse,
   DailyStatistics,
@@ -10,6 +11,10 @@ import { extractCollection, extractEntity } from "./shared";
 
 export function useStatisticsApi(client: ApiClient = defaultApiClient) {
   return {
+    adminDashboard: async () => {
+      const response = await client.get<ApiSuccessResponse<AdminDashboardStatistics>>("/api/statistics/admin-dashboard");
+      return extractEntity<AdminDashboardStatistics>(response);
+    },
     dashboard: async () => {
       const response = await client.get<ApiSuccessResponse<DashboardStatistics>>("/api/statistics/dashboard");
       return extractEntity<DashboardStatistics>(response);
