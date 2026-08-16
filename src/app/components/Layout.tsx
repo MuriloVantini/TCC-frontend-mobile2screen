@@ -14,7 +14,6 @@ import {
   Settings,
   LogOut,
   Menu,
-  Bell,
   ChevronDown,
   ShieldCheck,
   Map,
@@ -263,10 +262,6 @@ export function Layout() {
                 <BellRing className="w-4 h-4" />
                 Enviar Alerta
               </NavLink>
-            </Button>
-            <Button variant="ghost" size="icon" className="relative rounded-xl text-muted-foreground">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             </Button>
             <div className="hidden sm:flex items-center gap-2 rounded-xl border border-border px-2.5 py-1.5 bg-background">
               {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
