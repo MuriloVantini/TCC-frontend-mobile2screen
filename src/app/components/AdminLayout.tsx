@@ -15,7 +15,7 @@ import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
 import LogoLightMarkup from "../assets/LogoLight.svg?raw";
 import { useUserContext } from "../contexts/UserContextProvider";
 import { useAuthApi } from "../hooks/api/entities";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -137,7 +137,7 @@ export function AdminLayout() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-auto gap-2 rounded-xl px-2 py-1.5">
-                  <Avatar className="size-7 rounded-lg"><AvatarFallback className="rounded-lg bg-primary text-xs font-bold text-primary-foreground">{initials}</AvatarFallback></Avatar>
+                  <Avatar className="size-7 rounded-lg"><AvatarImage src={user?.profile_image_url ?? undefined} alt={`Foto de ${displayName}`} className="rounded-lg object-cover" /><AvatarFallback className="rounded-lg bg-primary text-xs font-bold text-primary-foreground">{initials}</AvatarFallback></Avatar>
                   <span className="hidden text-sm text-foreground sm:block">{displayName}</span>
                   <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
                 </Button>

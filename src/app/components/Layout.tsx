@@ -21,7 +21,7 @@ import {
   Moon,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Switch } from "./ui/switch";
 import {
   DropdownMenu,
@@ -271,6 +271,7 @@ export function Layout() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-xl">
                   <Avatar className="size-7 rounded-lg">
+                    <AvatarImage src={user?.profile_image_url ?? undefined} alt={`Foto de ${displayName}`} className="rounded-lg object-cover" />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
                   <span className="hidden sm:block text-sm text-foreground">{displayName}</span>

@@ -23,6 +23,7 @@ export interface AuthUser {
   email: string;
   company?: string | null;
   phone?: string | null;
+  profile_image_url?: string | null;
   role: "user" | "admin";
   [key: string]: unknown;
 }
@@ -174,6 +175,7 @@ export interface UserResource extends ApiRecord {
   name?: string;
   email?: string;
   status?: string;
+  profile_image_url?: string | null;
 }
 
 export interface AlertDetailsData extends ApiRecord {

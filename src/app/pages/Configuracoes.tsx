@@ -16,6 +16,7 @@ import {
   Shield,
   Webhook,
   KeyRound,
+  ImagePlus,
 } from "lucide-react";
 import {
   Tabs,
@@ -45,6 +46,7 @@ import {
 import { useApiKeysApi, useSettingsApi, useUsersApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
 import { WebhookManager } from "../components/WebhookManager";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 const sections = [
   { id: "perfil", label: "Perfil", icon: User },
@@ -66,13 +68,14 @@ export function Configuracoes() {
   const settingsApi = useMemo(() => useSettingsApi(), []);
   const apiKeysApi = useMemo(() => useApiKeysApi(), []);
   const usersApi = useMemo(() => useUsersApi(), []);
-  const { user } = useUserContext();
+  const { user, refreshUser } = useUserContext();
   const [active, setActive] = useState("perfil");
   const [saved, setSaved] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [visibleApiKey, setVisibleApiKey] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [submitState, setSubmitState] =
     useState<Record<SectionId, SubmitState>>(defaultSubmitState);
   const [formError, setFormError] = useState<Partial<Record<SectionId, string>>>({});
@@ -99,6 +102,7 @@ export function Configuracoes() {
   const notificacoesRef = useRef<HTMLDivElement | null>(null);
   const segurancaRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<HTMLDivElement | null>(null);
+  const profileImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const { shakeCard: shakePerfil } = shake(perfilRef, active);
   const { shakeCard: shakeNotificacoes } = shake(notificacoesRef, active);
@@ -119,6 +123,33 @@ export function Configuracoes() {
     navigator.clipboard?.writeText(visibleApiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleProfileImage = async (file?: File) => {
+    if (!file || typeof user?.id !== "number") return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFormError((previous) => ({ ...previous, perfil: "Escolha uma imagem JPG, PNG ou WebP." }));
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setFormError((previous) => ({ ...previous, perfil: "A foto deve ter no máximo 2 MB." }));
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setFormError((previous) => ({ ...previous, perfil: undefined }));
+
+    try {
+      await usersApi.updateProfileImage(user.id, file);
+      await refreshUser();
+    } catch {
+      setFormError((previous) => ({ ...previous, perfil: "Não foi possível enviar a foto. Tente novamente." }));
+    } finally {
+      setIsUploadingImage(false);
+      if (profileImageInputRef.current) profileImageInputRef.current.value = "";
+    }
   };
 
   const saveWithAnimation = async (
@@ -240,14 +271,31 @@ export function Configuracoes() {
             <Card className="rounded-2xl border-border shadow-sm gap-0">
               <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary to-chart-2 rounded-2xl flex items-center justify-center shadow-md">
-                    <span className="text-white text-xl font-bold">JS</span>
-                  </div>
+                  <Avatar className="w-14 h-14 rounded-2xl shadow-md">
+                    <AvatarImage src={user?.profile_image_url ?? undefined} alt={`Foto de ${profile.name || "perfil"}`} className="rounded-2xl object-cover" />
+                    <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-chart-2 text-white text-xl font-bold">
+                      {profile.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "US"}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <CardTitle className="text-foreground">{profile.name}</CardTitle>
                     <CardDescription className="text-sm">{profile.email}</CardDescription>
-                    <Button variant="link" className="h-auto p-0 text-xs mt-0.5">
-                      Alterar foto
+                    <input
+                      ref={profileImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="sr-only"
+                      onChange={(event) => void handleProfileImage(event.target.files?.[0])}
+                    />
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 text-xs mt-0.5 gap-1"
+                      disabled={isUploadingImage}
+                      onClick={() => profileImageInputRef.current?.click()}
+                    >
+                      <ImagePlus className="w-3.5 h-3.5" />
+                      {isUploadingImage ? "Enviando foto..." : "Alterar foto"}
                     </Button>
                   </div>
                 </div>

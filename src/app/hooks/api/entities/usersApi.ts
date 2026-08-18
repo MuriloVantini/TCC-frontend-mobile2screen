@@ -20,6 +20,16 @@ export function useUsersApi(client: ApiClient = defaultApiClient) {
       const response = await client.put<ApiSuccessResponse<UserResource> | UserResource>(`/api/users/${userId}`, payload);
       return extractEntity<UserResource>(response);
     },
+    updateProfileImage: async (userId: number | string, image: File) => {
+      const body = new FormData();
+      body.append("image", image);
+      const response = await client.post<ApiSuccessResponse<UserResource>>(`/api/users/${userId}/profile-image`, body);
+      return extractEntity<UserResource>(response);
+    },
+    removeProfileImage: async (userId: number | string) => {
+      const response = await client.delete<ApiSuccessResponse<UserResource>>(`/api/users/${userId}/profile-image`);
+      return extractEntity<UserResource>(response);
+    },
     remove: (userId: number | string) => client.delete<unknown>(`/api/users/${userId}`),
   };
 }
