@@ -17,6 +17,7 @@ import {
   Webhook,
   KeyRound,
   ImagePlus,
+  Trash2,
 } from "lucide-react";
 import {
   Tabs,
@@ -76,6 +77,7 @@ export function Configuracoes() {
   const [copied, setCopied] = useState(false);
   const [visibleApiKey, setVisibleApiKey] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isRemovingImage, setIsRemovingImage] = useState(false);
   const [submitState, setSubmitState] =
     useState<Record<SectionId, SubmitState>>(defaultSubmitState);
   const [formError, setFormError] = useState<Partial<Record<SectionId, string>>>({});
@@ -149,6 +151,23 @@ export function Configuracoes() {
     } finally {
       setIsUploadingImage(false);
       if (profileImageInputRef.current) profileImageInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveProfileImage = async () => {
+    if (typeof user?.id !== "number" || !user.profile_image_url) return;
+    if (!window.confirm("Remover a foto de perfil atual?")) return;
+
+    setIsRemovingImage(true);
+    setFormError((previous) => ({ ...previous, perfil: undefined }));
+
+    try {
+      await usersApi.removeProfileImage(user.id);
+      await refreshUser();
+    } catch {
+      setFormError((previous) => ({ ...previous, perfil: "Não foi possível remover a foto. Tente novamente." }));
+    } finally {
+      setIsRemovingImage(false);
     }
   };
 
@@ -287,16 +306,30 @@ export function Configuracoes() {
                       className="sr-only"
                       onChange={(event) => void handleProfileImage(event.target.files?.[0])}
                     />
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="h-auto p-0 text-xs mt-0.5 gap-1"
-                      disabled={isUploadingImage}
-                      onClick={() => profileImageInputRef.current?.click()}
-                    >
-                      <ImagePlus className="w-3.5 h-3.5" />
-                      {isUploadingImage ? "Enviando foto..." : "Alterar foto"}
-                    </Button>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0 text-xs gap-1"
+                        disabled={isUploadingImage || isRemovingImage}
+                        onClick={() => profileImageInputRef.current?.click()}
+                      >
+                        <ImagePlus className="w-3.5 h-3.5" />
+                        {isUploadingImage ? "Enviando foto..." : "Alterar foto"}
+                      </Button>
+                      {user?.profile_image_url && (
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="h-auto p-0 text-xs gap-1 text-destructive hover:text-destructive/80"
+                          disabled={isUploadingImage || isRemovingImage}
+                          onClick={() => void handleRemoveProfileImage()}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          {isRemovingImage ? "Removendo..." : "Remover foto"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardHeader>
