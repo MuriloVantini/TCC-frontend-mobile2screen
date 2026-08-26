@@ -1,5 +1,5 @@
 import { defaultApiClient, type ApiClient } from "../config/httpClient";
-import type { ApiSuccessResponse, UserPayload, UserResource } from "../laravel-api.types";
+import type { ApiSuccessResponse, UpdatePasswordPayload, UserPayload, UserResource } from "../laravel-api.types";
 import { extractCollection, extractEntity } from "./shared";
 
 export function useUsersApi(client: ApiClient = defaultApiClient) {
@@ -20,6 +20,8 @@ export function useUsersApi(client: ApiClient = defaultApiClient) {
       const response = await client.put<ApiSuccessResponse<UserResource> | UserResource>(`/api/users/${userId}`, payload);
       return extractEntity<UserResource>(response);
     },
+    updatePassword: (userId: number | string, payload: UpdatePasswordPayload) =>
+      client.patch<{ message: string }>(`/api/users/${userId}/password`, payload),
     updateProfileImage: async (userId: number | string, image: File) => {
       const body = new FormData();
       body.append("image", image);

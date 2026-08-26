@@ -95,6 +95,12 @@ export interface UserPayload {
   [key: string]: unknown;
 }
 
+export interface UpdatePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export interface HeartbeatPayload {
   [key: string]: unknown;
 }

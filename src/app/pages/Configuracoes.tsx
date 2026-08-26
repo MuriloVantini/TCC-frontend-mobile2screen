@@ -45,6 +45,16 @@ import {
 import { useApiKeysApi, useSettingsApi, useUsersApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { ApiError } from "../hooks/api/config/httpClient";
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (!(error instanceof ApiError) || typeof error.data !== "object" || error.data === null) {
+    return fallback;
+  }
+
+  const data = error.data as { message?: unknown };
+  return typeof data.message === "string" ? data.message : fallback;
+}
 
 const sections = [
   { id: "perfil", label: "Perfil", icon: User },
@@ -196,7 +206,11 @@ export function Configuracoes() {
       await submit();
       handleSave(section);
       setSectionSubmitState(section, "success");
-    } catch {
+    } catch (error) {
+      setFormError((previous) => ({
+        ...previous,
+        [section]: getApiErrorMessage(error, "Não foi possível salvar as alterações."),
+      }));
       setSectionSubmitState(section, "error");
       onError();
     } finally {
@@ -618,7 +632,20 @@ export function Configuracoes() {
                       },
                       shakeSeguranca,
                       async () => {
-                        await Promise.resolve();
+                        if (typeof user?.id !== "number") {
+                          throw new Error("Usuário autenticado não encontrado.");
+                        }
+
+                        await usersApi.updatePassword(user.id, {
+                          current_password: securityForm.currentPassword,
+                          password: securityForm.newPassword,
+                          password_confirmation: securityForm.confirmPassword,
+                        });
+                        setSecurityForm({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        });
                       }
                     );
                   }}
