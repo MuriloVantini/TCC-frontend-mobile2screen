@@ -454,7 +454,7 @@ export function Dispositivos() {
               {!editingId && (
                 <div className="p-3.5 bg-accent border border-border rounded-xl text-sm text-primary">
                   <p className="font-medium mb-1">Como conectar</p>
-                  <p className="text-xs text-primary">Após cadastrar, acesse <code className="bg-secondary px-1 py-0.5 rounded">alertatv.io/connect</code> no dispositivo e insira o código de pareamento.</p>
+                  <p className="text-xs text-primary">Após cadastrar, acesse <code className="bg-secondary px-1 py-0.5 rounded">mobile2screen.io/connect</code> no dispositivo e insira o código de pareamento.</p>
                 </div>
               )}
             </div>
