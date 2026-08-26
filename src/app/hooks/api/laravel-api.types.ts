@@ -91,15 +91,6 @@ export interface ApiKeyPayload {
   [key: string]: unknown;
 }
 
-export interface WebhookPayload {
-  name: string;
-  url: string;
-  secret?: string;
-  events: string[];
-  is_active: boolean;
-  [key: string]: unknown;
-}
-
 export interface UserPayload {
   [key: string]: unknown;
 }
@@ -142,27 +133,10 @@ export interface PlanResource extends ApiRecord {
 export interface ApiKeyResource extends ApiRecord {
   id?: number;
   name?: string;
-}
-
-export interface WebhookResource extends ApiRecord {
-  id?: number;
-  name?: string;
-  url?: string;
-  has_secret?: boolean;
-  events?: ApiPrimitive[];
+  key?: string;
+  last_used?: string | null;
+  expires_at?: string | null;
   is_active?: boolean;
-  last_triggered?: string | null;
-  logs_count?: number;
-}
-
-export interface WebhookLogResource extends ApiRecord {
-  id?: number;
-  webhook_id?: number;
-  event_type?: string;
-  response_status?: number | null;
-  response_body?: string | null;
-  error_message?: string | null;
-  created_at?: string;
 }
 
 export interface DeliveryResource extends ApiRecord {

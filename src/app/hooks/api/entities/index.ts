@@ -7,6 +7,5 @@ export { useTagsApi } from "./tagsApi";
 export { useAlertsApi, type AlertsListResult } from "./alertsApi";
 export { useDeliveriesApi } from "./deliveriesApi";
 export { useApiKeysApi } from "./apiKeysApi";
-export { useWebhooksApi } from "./webhooksApi";
 export { useStatisticsApi } from "./statisticsApi";
 export { useUsersApi } from "./usersApi";
