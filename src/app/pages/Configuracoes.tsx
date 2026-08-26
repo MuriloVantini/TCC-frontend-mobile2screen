@@ -14,7 +14,6 @@ import {
   User,
   Bell,
   Shield,
-  Webhook,
   KeyRound,
   ImagePlus,
   Trash2,
@@ -38,7 +37,6 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
-import { Separator } from "../components/ui/separator";
 import {
   shake,
   useMorphButton,
@@ -46,14 +44,13 @@ import {
 } from "../hooks/useFormSubmitAnimation";
 import { useApiKeysApi, useSettingsApi, useUsersApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
-import { WebhookManager } from "../components/WebhookManager";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 const sections = [
   { id: "perfil", label: "Perfil", icon: User },
   { id: "notificacoes", label: "Notificações", icon: Bell },
   { id: "seguranca", label: "Segurança", icon: Shield },
-  { id: "api", label: "API & Integração", icon: Webhook },
+  { id: "api", label: "API & Integração", icon: KeyRound },
 ];
 
 type SectionId = "perfil" | "notificacoes" | "seguranca" | "api";
@@ -76,6 +73,7 @@ export function Configuracoes() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [visibleApiKey, setVisibleApiKey] = useState("");
+  const [hasStoredApiKey, setHasStoredApiKey] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isRemovingImage, setIsRemovingImage] = useState(false);
   const [submitState, setSubmitState] =
@@ -98,7 +96,11 @@ export function Configuracoes() {
     confirmPassword: "",
   });
 
-  const maskedApiKey = visibleApiKey ? `${"*".repeat(Math.min(36, visibleApiKey.length))}${visibleApiKey.slice(-8)}` : "Nenhuma chave API encontrada";
+  const maskedApiKey = visibleApiKey
+    ? `${"*".repeat(Math.min(36, visibleApiKey.length))}${visibleApiKey.slice(-8)}`
+    : hasStoredApiKey
+      ? "Chave existente — gere outra para visualizar o segredo"
+      : "Nenhuma chave API encontrada";
 
   const perfilRef = useRef<HTMLDivElement | null>(null);
   const notificacoesRef = useRef<HTMLDivElement | null>(null);
@@ -239,10 +241,7 @@ export function Configuracoes() {
       }
 
       if (apiKeysResult.status === "fulfilled") {
-        const keyItem = apiKeysResult.value[0] as Record<string, unknown> | undefined;
-        if (keyItem && typeof keyItem.name === "string") {
-          setVisibleApiKey(typeof keyItem.key === "string" ? keyItem.key : keyItem.name);
-        }
+        setHasStoredApiKey(apiKeysResult.value.length > 0);
       }
 
     });
@@ -642,7 +641,7 @@ export function Configuracoes() {
               <CardHeader className="border-b border-border">
                 <CardTitle className="text-foreground">API e Integração</CardTitle>
                 <CardDescription>
-                  Use a API para integrar o AlertaTV com seus sistemas
+                  Use a API para integrar o Mobile2Screen com seus sistemas
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6 space-y-5">
@@ -659,6 +658,7 @@ export function Configuracoes() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowApiKey(!showApiKey)}
+                      disabled={!visibleApiKey}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -668,6 +668,7 @@ export function Configuracoes() {
                       variant="ghost"
                       size="icon"
                       onClick={copyApiKey}
+                      disabled={!visibleApiKey}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       {copied ? (
@@ -683,22 +684,23 @@ export function Configuracoes() {
                   <KeyRound className="h-4 w-4" />
                   <AlertTitle>Chave sensível</AlertTitle>
                   <AlertDescription>
-                    Mantenha sua chave em sigilo. Não compartilhe em repositórios ou clientes públicos.
+                    O segredo é exibido somente após a criação. Copie e guarde a chave em local seguro;
+                    não a compartilhe em repositórios ou clientes públicos.
                   </AlertDescription>
                 </Alert>
 
                 <div className="space-y-3">
                   <h4 className="text-foreground">Exemplo de uso</h4>
                   <pre className="bg-sidebar text-sidebar-foreground p-4 rounded-xl text-xs overflow-x-auto leading-relaxed">
-                    {`POST https://api.alertatv.io/v1/alerts
-                      Authorization: Bearer ${(visibleApiKey || "sk_xxxxxxxxxxxxxxxxxxxx").slice(0, 20)}...
+                    {`POST http://localhost:8000/api/alerts
+                      Authorization: Bearer SUA_API_KEY
 
                       {
                         "title": "Aviso de manutencao",
                         "message": "Sistema em manutencao as 18h",
                         "type": "warning",
-                        "tags": ["ti", "todos"],
-                        "duration": "10min"
+                        "tags": [1, 2],
+                        "duration_seconds": 600
                       }`}
                   </pre>
                 </div>
@@ -713,6 +715,8 @@ export function Configuracoes() {
                         .then((created) => {
                           if (typeof created.key === "string") {
                             setVisibleApiKey(created.key);
+                            setHasStoredApiKey(true);
+                            setShowApiKey(true);
                           }
                         })
                         .catch(() => {
@@ -723,12 +727,9 @@ export function Configuracoes() {
                     <RefreshCw className="w-4 h-4" /> Gerar nova chave
                   </Button>
                   <Button className="sm:w-auto w-full">
-                    <Webhook className="w-4 h-4" /> Ver documentacao completa
+                    <KeyRound className="w-4 h-4" /> Ver documentação completa
                   </Button>
                 </div>
-
-                <Separator />
-                <WebhookManager />
               </CardContent>
             </Card>
           </div>
