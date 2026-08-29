@@ -16,6 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../components/ui/tooltip";
 import { Link } from "react-router";
 
@@ -227,19 +228,27 @@ export function AdminUsuarios() {
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Pesquisar usuário, empresa..."
             className="w-full pl-9 pr-4 py-2.5 border border-border rounded-xl bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring shadow-sm" />
         </div>
-        <select value={planFilter} onChange={(e) => { setPlanFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 border border-border rounded-xl bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring text-muted-foreground shadow-sm">
-          <option value="">Todos os planos</option>
-          <option value="free">Free</option>
-          <option value="pro">Pro</option>
-          <option value="enterprise">Enterprise</option>
-        </select>
-        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 border border-border rounded-xl bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring text-muted-foreground shadow-sm">
-          <option value="">Todos os status</option>
-          <option value="active">Ativo</option>
-          <option value="suspended">Suspenso</option>
-        </select>
+        <Select value={planFilter || "all"} onValueChange={(value) => { setPlanFilter(value === "all" ? "" : value); setPage(1); }}>
+          <SelectTrigger aria-label="Filtrar por plano" className="rounded-xl bg-card shadow-sm sm:w-44">
+            <SelectValue placeholder="Todos os planos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os planos</SelectItem>
+            <SelectItem value="free">Free</SelectItem>
+            <SelectItem value="pro">Pro</SelectItem>
+            <SelectItem value="enterprise">Enterprise</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter || "all"} onValueChange={(value) => { setStatusFilter(value === "all" ? "" : value); setPage(1); }}>
+          <SelectTrigger aria-label="Filtrar por status" className="rounded-xl bg-card shadow-sm sm:w-44">
+            <SelectValue placeholder="Todos os status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os status</SelectItem>
+            <SelectItem value="active">Ativo</SelectItem>
+            <SelectItem value="suspended">Suspenso</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table - Desktop */}
