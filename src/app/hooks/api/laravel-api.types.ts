@@ -156,6 +156,31 @@ export interface UserResource extends ApiRecord {
   email?: string;
   status?: string;
   profile_image_url?: string | null;
+  devices_count?: number;
+  alerts_count?: number;
+  activity_logs_count?: number;
+  delivery_rate?: number;
+  tags?: TagResource[];
+}
+
+export interface ActivityLogResource extends ApiRecord {
+  id?: number;
+  user_id?: number;
+  action?: string;
+  resource_type?: string;
+  resource_id?: number | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  metadata?: ApiRecord | null;
+  created_at?: string;
+  user?: UserResource;
+}
+
+export interface RealtimeConfig {
+  key: string;
+  host: string;
+  port: number;
+  scheme: string;
 }
 
 export interface AlertDetailsData extends ApiRecord {

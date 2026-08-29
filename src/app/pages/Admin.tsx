@@ -55,6 +55,7 @@ import type {
   AdminDashboardStatistics,
   AdminDashboardTopUser,
 } from "../hooks/api/laravel-api.types";
+import { useRealtimeRefresh } from "../hooks/useRealtimeRefresh";
 
 const activityChartConfig = {
   alerts_sent: { label: "Alertas enviados", color: "var(--color-chart-1)" },
@@ -120,6 +121,8 @@ export function Admin() {
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
+
+  useRealtimeRefresh(() => void loadDashboard(true), true);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {

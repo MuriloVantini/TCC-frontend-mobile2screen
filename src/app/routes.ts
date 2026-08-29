@@ -12,6 +12,7 @@ import { Configuracoes } from "./pages/Configuracoes";
 import { MapaInterativo } from "./pages/MapaInterativo";
 import { Admin } from "./pages/Admin";
 import { AdminUsuarios } from "./pages/AdminUsuarios";
+import { AdminAtividades } from "./pages/AdminAtividades";
 import { NotFound } from "./pages/NotFound";
 import { EsqueciSenha } from "./pages/EsqueciSenha";
 
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, Component: Admin },
           { path: "usuarios", Component: AdminUsuarios },
+          { path: "atividades", Component: AdminAtividades },
         ],
       },
     ],

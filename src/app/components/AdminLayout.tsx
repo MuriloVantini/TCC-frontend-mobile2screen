@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sun,
   Users,
+  Activity,
 } from "lucide-react";
 import LogoDarkMarkup from "../assets/LogoDark.svg?raw";
 import LogoLightMarkup from "../assets/LogoLight.svg?raw";
@@ -32,6 +33,7 @@ import { Switch } from "./ui/switch";
 const navItems = [
   { to: "/admin", label: "Painel Geral", icon: LayoutDashboard, end: true },
   { to: "/admin/usuarios", label: "Usuários", icon: Users },
+  { to: "/admin/atividades", label: "Atividades", icon: Activity },
 ];
 
 const logoDarkInline = LogoDarkMarkup.replace("<svg ", '<svg class="h-5 w-auto" ');

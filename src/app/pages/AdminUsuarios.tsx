@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import { useUsersApi } from "../hooks/api/entities";
+import { useRealtimeRefresh } from "../hooks/useRealtimeRefresh";
 import {
   Search,
   Monitor,
@@ -12,9 +13,11 @@ import {
   ShieldOff,
   Tag,
   Eye,
+  Trash2,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../components/ui/tooltip";
+import { Link } from "react-router";
 
 interface User {
   id: number;
@@ -29,6 +32,7 @@ interface User {
   joined: string;
   status: "active" | "suspended";
   tags: string[];
+  activityCount: number;
   role: string;
   planId: number | null;
 }
@@ -92,13 +96,16 @@ function mapApiUser(resource: Record<string, unknown>, index: number): User {
     email: typeof resource.email === "string" ? resource.email : "-",
     company: typeof resource.company === "string" ? resource.company : "-",
     plan: toPlan(plan?.name),
-    devices: plan && typeof plan.max_devices === "number" ? plan.max_devices : 0,
-    alerts: plan && typeof plan.max_alerts_per_month === "number" ? plan.max_alerts_per_month : 0,
-    deliveryRate: 0,
+    devices: typeof resource.devices_count === "number" ? resource.devices_count : 0,
+    alerts: typeof resource.alerts_count === "number" ? resource.alerts_count : 0,
+    deliveryRate: typeof resource.delivery_rate === "number" ? resource.delivery_rate : 0,
     lastActive: formatRelativeDate(resource.last_active),
     joined: formatJoined(resource.joined_at ?? resource.created_at),
     status: resource.status === "suspended" ? "suspended" : "active",
-    tags: [],
+    tags: Array.isArray(resource.tags)
+      ? resource.tags.flatMap((tag) => isRecord(tag) && typeof tag.name === "string" ? [tag.name] : [])
+      : [],
+    activityCount: typeof resource.activity_logs_count === "number" ? resource.activity_logs_count : 0,
     role: typeof resource.role === "string" ? resource.role : "user",
     planId: typeof resource.plan_id === "number" ? resource.plan_id : null,
   };
@@ -112,6 +119,7 @@ export function AdminUsuarios() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<User | null>(null);
   const [localUsers, setLocalUsers] = useState<User[]>([]);
+  const [realtimeRevision, setRealtimeRevision] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -131,7 +139,9 @@ export function AdminUsuarios() {
     return () => {
       isMounted = false;
     };
-  }, [usersApi]);
+  }, [usersApi, realtimeRevision]);
+
+  useRealtimeRefresh(() => setRealtimeRevision((value) => value + 1), true);
 
   const filtered = localUsers.filter((u) => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,6 +183,19 @@ export function AdminUsuarios() {
       }
     } catch {
       // Keep current status if backend update fails.
+    }
+  };
+
+  const removeUser = async (id: number) => {
+    const target = localUsers.find((user) => user.id === id);
+    if (!target || !window.confirm(`Remover o usuário ${target.name}? O registro será preservado por soft delete.`)) return;
+
+    try {
+      await usersApi.remove(id);
+      setLocalUsers((users) => users.filter((user) => user.id !== id));
+      if (selected?.id === id) setSelected(null);
+    } catch {
+      // Mantém o usuário na lista quando a API rejeita a remoção.
     }
   };
 
@@ -278,6 +301,14 @@ export function AdminUsuarios() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={() => void removeUser(u.id)} className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Remover usuário</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
                           <Button variant="ghost" size="icon" onClick={() => toggleSuspend(u.id)} className={`size-7 cursor-pointer ${u.status === "active" ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-secondary"}`}>
                             {u.status === "active" ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                           </Button>
@@ -343,6 +374,10 @@ export function AdminUsuarios() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Ver detalhes</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => void removeUser(u.id)} className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></Button></TooltipTrigger>
+                  <TooltipContent>Remover</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -428,6 +463,10 @@ export function AdminUsuarios() {
 
               <div className="text-sm space-y-2 bg-muted rounded-xl p-3">
                 <div className="flex justify-between">
+                  <span className="text-muted-foreground">Atividades registradas</span>
+                  <span className="font-medium text-foreground">{selected.activityCount}</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">Cadastrado em</span>
                   <span className="font-medium text-foreground">{selected.joined}</span>
                 </div>
@@ -440,6 +479,8 @@ export function AdminUsuarios() {
 
             {/* Footer */}
             <div className="flex gap-3 px-5 py-4 border-t border-border shrink-0">
+              <Button asChild variant="outline"><Link to={`/admin/atividades?user_id=${selected.id}`}>Ver atividades</Link></Button>
+              <Button onClick={() => void removeUser(selected.id)} variant="ghost" className="cursor-pointer text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /> Remover</Button>
               <Button
                 onClick={() => toggleSuspend(selected.id)}
                 variant="ghost"

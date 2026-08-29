@@ -9,3 +9,5 @@ export { useDeliveriesApi } from "./deliveriesApi";
 export { useApiKeysApi } from "./apiKeysApi";
 export { useStatisticsApi } from "./statisticsApi";
 export { useUsersApi } from "./usersApi";
+export { useActivityLogsApi } from "./activityLogsApi";
+export { useRealtimeApi } from "./realtimeApi";
