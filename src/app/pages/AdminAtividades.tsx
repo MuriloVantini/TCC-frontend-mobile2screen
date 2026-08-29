@@ -1,17 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, RefreshCw, Search } from "lucide-react";
+import { format as formatCalendarDate } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Activity, CalendarDays, RefreshCw, Search } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 import { useSearchParams } from "react-router";
 import { useActivityLogsApi, useUsersApi } from "../hooks/api/entities";
 import type { ActivityLogResource, UserResource } from "../hooks/api/laravel-api.types";
 import { useRealtimeRefresh } from "../hooks/useRealtimeRefresh";
 import { Button } from "../components/ui/button";
+import { Calendar } from "../components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { cn } from "../components/ui/utils";
 
 function formatDate(value: unknown) {
   if (typeof value !== "string") return "-";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR");
+}
+
+function toApiDate(date: Date | undefined) {
+  return date ? formatCalendarDate(date, "yyyy-MM-dd") : "";
 }
 
 export function AdminAtividades() {
@@ -26,6 +37,19 @@ export function AdminAtividades() {
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const selectedRange = useMemo<DateRange | undefined>(() => {
+    if (!fromDate) return undefined;
+
+    return {
+      from: new Date(`${fromDate}T00:00:00`),
+      to: toDate ? new Date(`${toDate}T00:00:00`) : undefined,
+    };
+  }, [fromDate, toDate]);
+
+  const handleRangeChange = (range: DateRange | undefined) => {
+    setFromDate(toApiDate(range?.from));
+    setToDate(toApiDate(range?.to));
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,12 +80,50 @@ export function AdminAtividades() {
       </div>
       <div className="grid gap-3 md:grid-cols-4">
         <div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar por ação..." /></div>
-        <select value={userId} onChange={(event) => setUserId(event.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-foreground">
-          <option value="">Todos os usuários</option>
-          {users.map((user) => <option key={String(user.id)} value={String(user.id)}>{String(user.name ?? user.email ?? `Usuário ${user.id}`)}</option>)}
-        </select>
-        <Input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label="Data inicial" />
-        <Input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="Data final" />
+        <Select value={userId || "all"} onValueChange={(value) => setUserId(value === "all" ? "" : value)}>
+          <SelectTrigger aria-label="Filtrar por usuário">
+            <SelectValue placeholder="Todos os usuários" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os usuários</SelectItem>
+            {users.filter((user) => user.id != null).map((user) => (
+              <SelectItem key={String(user.id)} value={String(user.id)}>
+                {String(user.name ?? user.email ?? `Usuário ${user.id}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              aria-label="Selecionar intervalo de datas"
+              className={cn("justify-start text-left font-normal md:col-span-2", !selectedRange?.from && "text-muted-foreground")}
+            >
+              <CalendarDays className="size-4" />
+              {selectedRange?.from ? (
+                selectedRange.to ? (
+                  <span>{formatCalendarDate(selectedRange.from, "dd/MM/yyyy")} – {formatCalendarDate(selectedRange.to, "dd/MM/yyyy")}</span>
+                ) : (
+                  <span>{formatCalendarDate(selectedRange.from, "dd/MM/yyyy")}</span>
+                )
+              ) : (
+                <span>Selecionar período</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={selectedRange?.from}
+              selected={selectedRange}
+              onSelect={handleRangeChange}
+              numberOfMonths={2}
+              locale={ptBR}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Card className="gap-0 overflow-hidden border-border shadow-sm">
