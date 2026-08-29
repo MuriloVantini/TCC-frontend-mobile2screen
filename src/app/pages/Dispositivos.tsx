@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useGridAnimation } from "../hooks/useGridAnimation";
 import type { Device, DeviceType } from "../interfaces/types/device";
 import { useDevicesApi, useTagsApi } from "../hooks/api/entities";
+import { useRealtimeRefresh } from "../hooks/useRealtimeRefresh";
+import { ApiError } from "../hooks/api/config/httpClient";
 import {
   Plus,
   Monitor,
@@ -140,11 +142,11 @@ export function Dispositivos() {
     name: "", type: "tv", location: "", tagIds: [],
   });
 
-  const loadDevices = async () => {
+  const loadDevices = useCallback(async () => {
     const resources = await devicesApi.list();
     const mapped = resources.map((resource, index) => mapApiDevice(resource as Record<string, unknown>, index));
     setDevices(mapped);
-  };
+  }, [devicesApi]);
 
   const loadTags = async () => {
     const resources = await tagsApi.list();
@@ -167,7 +169,9 @@ export function Dispositivos() {
         showFeedback({ type: "error", msg: "Não foi possível carregar as tags." });
       }
     });
-  }, [devicesApi, tagsApi]);
+  }, [loadDevices, tagsApi]);
+
+  useRealtimeRefresh(() => void loadDevices());
 
   const allTags = Array.from(new Set(devices.flatMap((d) => d.tags)));
 
@@ -256,8 +260,11 @@ export function Dispositivos() {
       const latestId = devices.length > 0 ? Math.max(...devices.map((d) => d.id)) : null;
       pendingEnterId.current = latestId;
       setShowModal(false);
-    } catch {
-      showFeedback({ type: "error", msg: "Não foi possível salvar o dispositivo." });
+    } catch (error) {
+      const message = error instanceof ApiError && error.status === 429
+        ? "Limite de dispositivos do plano atingido."
+        : "Não foi possível salvar o dispositivo.";
+      showFeedback({ type: "error", msg: message });
     }
   };
 

@@ -16,6 +16,7 @@ import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { TagManagerDialog, type ManagedTag } from "../components/TagManagerDialog";
+import { ApiError } from "../hooks/api/config/httpClient";
 import {
   Monitor,
   Tag,
@@ -113,6 +114,7 @@ export function EnviarAlerta() {
   const [showPreview, setShowPreview] = useState(false);
   const [sendState, setSendState] = useState<SubmitState>("idle");
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState("");
 
   const loadDevices = async () => {
     const resources = await devicesApi.list();
@@ -281,6 +283,7 @@ export function EnviarAlerta() {
     }
 
     setSendState("loading");
+    setSendError("");
     try {
       await alertsApi.create({
         title,
@@ -293,7 +296,10 @@ export function EnviarAlerta() {
 
       setSendState("success");
       setTimeout(() => setSent(true), 700);
-    } catch {
+    } catch (error) {
+      setSendError(error instanceof ApiError && error.status === 429
+        ? "Limite mensal de alertas do plano atingido."
+        : "Não foi possível enviar o alerta.");
       setSendState("error");
       shakeCard();
       setTimeout(() => setSendState("idle"), 1500);
@@ -312,6 +318,7 @@ export function EnviarAlerta() {
       setShowPreview(false);
       setSendState("idle");
       setSent(false);
+      setSendError("");
     }, 800);
   };
 
@@ -644,6 +651,13 @@ export function EnviarAlerta() {
               <AlertDescription>
                 {matchingDevices.filter((d) => !d.online).length} dispositivo(s) estão offline e receberão o alerta quando reconectarem.
               </AlertDescription>
+            </Alert>
+          )}
+
+          {sendError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription>{sendError}</AlertDescription>
             </Alert>
           )}
 

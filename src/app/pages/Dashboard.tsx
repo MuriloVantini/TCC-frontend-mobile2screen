@@ -20,6 +20,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
 import { useAlertsApi, useDevicesApi, useStatisticsApi } from "../hooks/api/entities";
 import { useUserContext } from "../contexts/UserContextProvider";
+import { useRealtimeRefresh } from "../hooks/useRealtimeRefresh";
 
 type DashboardDevice = {
   id: number;
@@ -128,6 +129,7 @@ export function Dashboard() {
   const [activityData, setActivityData] = useState<Array<{ hora: string; alertas: number }>>([]);
   const [alertsToday, setAlertsToday] = useState(0);
   const [deliveryRate, setDeliveryRate] = useState(0);
+  const [realtimeRevision, setRealtimeRevision] = useState(0);
   const onlineCount = devices.filter((d) => d.online).length;
   const offlineCount = devices.length - onlineCount;
   const displayName = user?.name ?? "Usuário";
@@ -206,7 +208,9 @@ export function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, [devicesApi, alertsApi, statisticsApi]);
+  }, [devicesApi, alertsApi, statisticsApi, realtimeRevision]);
+
+  useRealtimeRefresh(() => setRealtimeRevision((value) => value + 1));
 
   useEffect(() => {
     if (!metricsRef.current) return;
