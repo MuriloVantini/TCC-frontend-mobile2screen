@@ -113,11 +113,15 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   );
 }
 
-const PAGE_SIZE = 5;
-
 export function Historico() {
   const alertsApi = useMemo(() => useAlertsApi(), []);
   const [alertHistory, setAlertHistory] = useState<AlertRecord[]>([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    perPage: 20,
+    total: 0,
+    lastPage: 1,
+  });
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -128,7 +132,7 @@ export function Historico() {
     let isMounted = true;
 
     alertsApi
-      .list()
+      .list({ page, type: typeFilter || undefined })
       .then((result) => {
         if (!isMounted) return;
 
@@ -160,16 +164,23 @@ export function Historico() {
         });
 
         setAlertHistory(mapped);
+        setPagination({
+          currentPage: result.pagination?.current_page ?? page,
+          perPage: result.pagination?.per_page ?? Math.max(mapped.length, 1),
+          total: result.pagination?.total ?? mapped.length,
+          lastPage: result.pagination?.last_page ?? 1,
+        });
       })
       .catch(() => {
         if (!isMounted) return;
         setAlertHistory([]);
+        setPagination({ currentPage: 1, perPage: 20, total: 0, lastPage: 1 });
       });
 
     return () => {
       isMounted = false;
     };
-  }, [alertsApi]);
+  }, [alertsApi, page, typeFilter]);
 
   const handleResend = async () => {
     if (!selected) return;
@@ -200,12 +211,17 @@ export function Historico() {
     return matchSearch && matchType;
   });
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = pagination.lastPage;
+  const firstItem = alertHistory.length > 0
+    ? (pagination.currentPage - 1) * pagination.perPage + 1
+    : 0;
+  const lastItem = alertHistory.length > 0
+    ? firstItem + alertHistory.length - 1
+    : 0;
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  useGridAnimation(listRef, { effect: "hapi", deps: [paginated.map((a) => a.id).join()] });
+  useGridAnimation(listRef, { effect: "hapi", deps: [filtered.map((a) => a.id).join()] });
 
   const totalDelivered = alertHistory.reduce((s, a) => s + a.delivered, 0);
   const totalFailed = alertHistory.reduce((s, a) => s + a.failed, 0);
@@ -228,13 +244,13 @@ export function Historico() {
     <div className="p-4 sm:p-6 space-y-5 max-w-4xl mx-auto">
       <div>
         <h1 className="text-foreground">Histórico de Alertas</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">{alertHistory.length} alertas enviados</p>
+        <p className="text-muted-foreground text-sm mt-0.5">{pagination.total} alertas enviados</p>
       </div>
 
       {/* Resumo */}
       <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-primary", bg: "bg-accent" },
+          { label: "Total enviados", numericValue: pagination.total, suffix: "", icon: Zap, color: "text-primary", bg: "bg-accent" },
           { label: "Receberam", numericValue: totalDelivered, suffix: "", icon: CheckCircle2, color: "text-success", bg: "bg-secondary" },
           { label: "Falhas", numericValue: totalFailed, suffix: "", icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
           { label: "Taxa de entrega", numericValue: deliveryRate, suffix: "%", icon: Monitor, color: "text-primary", bg: "bg-accent" },
@@ -280,7 +296,7 @@ export function Historico() {
       {/* Lista de alertas */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         <div ref={listRef} className="divide-y divide-border">
-          {paginated.map((alert) => {
+          {filtered.map((alert) => {
             const cfg = alertTypeConfig[alert.type];
             const Icon = cfg.icon;
             const deliveryPct = alert.devices > 0 ? Math.round((alert.delivered / alert.devices) * 100) : 0;
@@ -331,7 +347,9 @@ export function Historico() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
+              {search
+                ? `${filtered.length} resultado${filtered.length === 1 ? "" : "s"} nesta página`
+                : `${firstItem}–${lastItem} de ${pagination.total}`}
             </p>
             <div className="flex items-center gap-1">
               <Button

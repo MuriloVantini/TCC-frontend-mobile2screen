@@ -14,6 +14,11 @@ export interface AlertsListResult {
   pagination?: PaginationData<AlertResource>;
 }
 
+export interface AlertsListParams {
+  page?: number;
+  type?: string;
+}
+
 export interface AlertCreateResult {
   alert: AlertResource;
   devices_count?: number;
@@ -47,9 +52,13 @@ function parseAlertsList(response: unknown): AlertsListResult {
 
 export function useAlertsApi(client: ApiClient = defaultApiClient) {
   return {
-    list: async () => {
+    list: async (filters: AlertsListParams = {}) => {
+      const params = new URLSearchParams();
+      if (filters.page) params.set("page", String(filters.page));
+      if (filters.type) params.set("type", filters.type);
+      const query = params.toString();
       const response = await client.get<ApiSuccessResponse<PaginationData<AlertResource>> | ApiSuccessResponse<AlertResource[]>>(
-        "/api/alerts"
+        `/api/alerts${query ? `?${query}` : ""}`
       );
       return parseAlertsList(response);
     },
