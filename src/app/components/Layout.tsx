@@ -104,26 +104,23 @@ export function Layout() {
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
+      const animateActiveItem = (element: HTMLElement) => animate(element, {
+        scale: [0.82, 1],
+        opacity: [0.65, 1],
+        duration: 300,
+        ease: "outBack(1.6)",
+      });
+
       if (sidebarNavRef.current) {
         const activeLink = sidebarNavRef.current.querySelector<HTMLElement>(".bg-primary");
         if (activeLink) {
-          animate(activeLink, {
-            scale: [0.6, 1],
-            opacity: [0.6, 1],
-            duration: 380,
-            ease: "outBack(6.4)",
-          });
+          animateActiveItem(activeLink);
         }
       }
       if (mobileNavRef.current) {
         const activeMobile = mobileNavRef.current.querySelector<HTMLElement>(".text-primary");
         if (activeMobile) {
-          animate(activeMobile, {
-            scale: [0.70, 1],
-            opacity: [0.5, 1],
-            duration: 320,
-            ease: "outBack(1.8)",
-          });
+          animateActiveItem(activeMobile);
         }
       }
     });
