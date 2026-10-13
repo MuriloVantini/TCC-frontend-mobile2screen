@@ -5,7 +5,6 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "./utils";
 
-// Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
 export type ChartConfig = {
@@ -304,7 +303,7 @@ function ChartLegendContent({
   );
 }
 
-// Helper to extract item config from a payload.
+// Função auxiliar para extrair a configuração de um item dos dados recebidos.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,

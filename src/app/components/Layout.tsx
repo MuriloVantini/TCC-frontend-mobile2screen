@@ -78,7 +78,7 @@ export function Layout() {
     try {
       await authApi.logout();
     } catch {
-      // Even if logout fails on the server, clear local auth flow.
+      // Mesmo que o logout falhe no servidor, limpa o fluxo local de autenticação.
     } finally {
       clearUser();
       navigate("/");
@@ -132,7 +132,7 @@ export function Layout() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {/* Mobile Sidebar via Sheet */}
+      {/* Barra lateral móvel por meio de Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border text-sidebar-foreground flex flex-col gap-0">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
@@ -186,7 +186,7 @@ export function Layout() {
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
+      {/* Barra lateral para desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground">
         <div className="h-14 px-4 flex items-center border-b border-sidebar-border shrink-0">
           <div
@@ -236,9 +236,9 @@ export function Layout() {
         </div>
       </aside>
 
-      {/* Main */}
+      {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
+        {/* Cabeçalho */}
         <header className="h-14 bg-sidebar border-b border-sidebar-border px-4 flex items-center justify-between shrink-0 z-30">
           <div className="flex items-center gap-3">
             <Button
@@ -299,7 +299,7 @@ export function Layout() {
           <Outlet />
         </main>
 
-        {/* Mobile bottom nav */}
+        {/* Navegação inferior para dispositivos móveis */}
         <nav ref={mobileNavRef} className="md:hidden bg-card border-t border-border flex items-center justify-around px-1 py-2 shrink-0">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink

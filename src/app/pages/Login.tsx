@@ -194,12 +194,12 @@ export function Login() {
         </div>
       </div>
 
-      {/* Decorative blobs */}
+      {/* Formas decorativas */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-chart-2/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-sm">
-        {/* Logo */}
+        {/* Logotipo */}
         <div className="text-center mb-8 max-w-64 mx-auto">
           <div
             aria-label="Mobile2Screen"
@@ -209,7 +209,7 @@ export function Login() {
           />
         </div>
 
-        {/* Card */}
+        {/* Cartão */}
         <div ref={cardRef} className="bg-card rounded-2xl shadow-2xl overflow-hidden opacity-0">
           <Tabs
             value={tab}

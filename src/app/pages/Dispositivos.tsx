@@ -282,7 +282,7 @@ export function Dispositivos() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-7xl mx-auto">
-      {/* Header */}
+      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-foreground">Meus Dispositivos</h1>
@@ -295,7 +295,7 @@ export function Dispositivos() {
         </Button>
       </div>
 
-      {/* Feedback */}
+      {/* Retorno ao usuário */}
       {feedback && (
         <Alert variant={feedback.type === "success" ? "default" : "destructive"} className={feedback.type === "success" ? "border-border bg-secondary text-success" : ""}>
           {feedback.type === "success" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
@@ -303,7 +303,7 @@ export function Dispositivos() {
         </Alert>
       )}
 
-      {/* Filters */}
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
@@ -326,7 +326,7 @@ export function Dispositivos() {
         </Select>
       </div>
 
-      {/* Device Grid */}
+      {/* Grade de dispositivos */}
       <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {filtered.map((device) => (
           <div
@@ -373,7 +373,7 @@ export function Dispositivos() {
           </div>
         ))}
 
-        {/* Add device card */}
+        {/* Cartão para adicionar dispositivo */}
         <button onClick={openNew} className="border-2 border-dashed border-border rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-muted-foreground hover:border-ring hover:text-primary hover:bg-accent transition-all min-h-[160px]">
           <div className="w-10 h-10 border-2 border-current rounded-xl flex items-center justify-center">
             <Plus className="w-5 h-5" />
@@ -396,7 +396,7 @@ export function Dispositivos() {
           </DialogHeader>
 
             <div className="p-5 space-y-4">
-              {/* Type selector */}
+              {/* Seletor de tipo */}
               <div>
                 <Label className="text-muted-foreground mb-2">Tipo de dispositivo</Label>
                 <div className="grid grid-cols-2 gap-3">
@@ -477,7 +477,7 @@ export function Dispositivos() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirm */}
+      {/* Confirmação de exclusão */}
       <AlertDialog open={deleteConfirm !== null} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
         <AlertDialogContent className="max-w-sm text-center">
           <AlertDialogHeader className="items-center">

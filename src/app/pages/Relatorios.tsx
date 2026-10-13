@@ -86,7 +86,7 @@ export function Relatorios() {
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
-      {/* Header */}
+      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-foreground">Relatórios</h1>
@@ -104,7 +104,7 @@ export function Relatorios() {
         </div>
       </div>
 
-      {/* Summary cards */}
+      {/* Cartões de resumo */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {summaryMetrics.map(({ label, value, icon: Icon, change, up, color, bg }) => (
           <div key={label} className="bg-card rounded-xl border border-border shadow-sm p-4">
@@ -124,7 +124,7 @@ export function Relatorios() {
         ))}
       </div>
 
-      {/* Charts */}
+      {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm p-4 sm:p-5">
           <h3 className="text-foreground mb-1">Volume de Registros</h3>
@@ -156,9 +156,9 @@ export function Relatorios() {
         </div>
       </div>
 
-      {/* Filters + Table */}
+      {/* Filtros e tabela */}
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-        {/* Filters */}
+        {/* Filtros */}
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -193,7 +193,7 @@ export function Relatorios() {
           </div>
         </div>
 
-        {/* Table Desktop */}
+        {/* Tabela para desktop */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -239,7 +239,7 @@ export function Relatorios() {
           )}
         </div>
 
-        {/* Cards Mobile */}
+        {/* Cartões para dispositivos móveis */}
         <div className="sm:hidden divide-y divide-border">
           {paginated.map((r) => (
             <div key={r.id} className="p-4">
@@ -268,7 +268,7 @@ export function Relatorios() {
           )}
         </div>
 
-        {/* Pagination */}
+        {/* Paginação */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <p className="text-xs text-muted-foreground">

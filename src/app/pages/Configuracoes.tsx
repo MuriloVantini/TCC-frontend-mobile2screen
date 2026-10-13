@@ -747,7 +747,7 @@ export function Configuracoes() {
                           }
                         })
                         .catch(() => {
-                          // Errors are reflected through disabled state and existing form feedback.
+                          // Os erros são refletidos pelo estado desabilitado e pelas mensagens existentes no formulário.
                         });
                     }}
                   >

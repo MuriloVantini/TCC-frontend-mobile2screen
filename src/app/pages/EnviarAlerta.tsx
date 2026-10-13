@@ -353,7 +353,7 @@ export function EnviarAlerta() {
         <p className="text-muted-foreground text-sm mt-0.5">Envie mensagens para grupos de televisores por tags</p>
       </div>
 
-      {/* Step indicator */}
+      {/* Indicador de etapas */}
       <div className="flex items-center w-full">
         {([1, 2, 3] as Step[]).map((s, i) => (
           <React.Fragment key={s}>
@@ -387,7 +387,7 @@ export function EnviarAlerta() {
       </div>
 
       <div ref={stepContentRef}>
-      {/* Step 1: Select tags */}
+      {/* Etapa 1: selecionar tags */}
       {step === 1 && (
         <div className="space-y-4">
           <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
@@ -433,7 +433,7 @@ export function EnviarAlerta() {
               ))}
             </div>
 
-            {/* Matching devices preview */}
+            {/* Prévia dos dispositivos correspondentes */}
             <div className="border-t border-border pt-4">
               <p className="text-sm font-medium text-foreground mb-2">
                 {matchingDevices.length > 0
@@ -461,7 +461,7 @@ export function EnviarAlerta() {
         </div>
       )}
 
-      {/* Step 2: Compose */}
+      {/* Etapa 2: compor */}
       {step === 2 && (
         <div className="space-y-4">
           <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-4">
@@ -530,7 +530,7 @@ export function EnviarAlerta() {
               </DropdownMenu>
             </div>
 
-            {/* Preview */}
+            {/* Prévia */}
             <div className="form-field">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-muted-foreground">Prévia na TV</Label>
@@ -584,11 +584,11 @@ export function EnviarAlerta() {
         </div>
       )}
 
-      {/* Step 3: Review & Send */}
+      {/* Etapa 3: revisar e enviar */}
       {step === 3 && (
         <div className="space-y-4">
           <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-            {/* Alert preview */}
+            {/* Prévia do alerta */}
             <div className={`p-5 border-l-4 ${currentType.border} ${currentType.light}`}>
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 ${currentType.color} rounded-xl flex items-center justify-center shrink-0 shadow`}>

@@ -65,7 +65,7 @@ function persistAuthToken(token: string | null): void {
 
     window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   } catch {
-    // Ignore storage write errors (private mode, quota exceeded, etc.).
+    // Ignora erros de gravação no armazenamento (modo privado, cota excedida etc.).
   }
 }
 

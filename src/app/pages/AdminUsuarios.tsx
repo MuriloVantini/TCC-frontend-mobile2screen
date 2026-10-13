@@ -183,7 +183,7 @@ export function AdminUsuarios() {
         setSelected((current) => (current ? { ...current, status: nextStatus } : null));
       }
     } catch {
-      // Keep current status if backend update fails.
+      // Mantém o estado atual se a atualização no backend falhar.
     }
   };
 
@@ -207,7 +207,7 @@ export function AdminUsuarios() {
         <p className="text-muted-foreground text-sm mt-0.5">{localUsers.length} usuários cadastrados · {localUsers.filter((u) => u.status === "active").length} ativos</p>
       </div>
 
-      {/* Stats */}
+      {/* Estatísticas */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Free", count: localUsers.filter((u) => u.plan === "free").length, cls: "text-muted-foreground bg-muted border-border" },
@@ -221,7 +221,7 @@ export function AdminUsuarios() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -251,7 +251,7 @@ export function AdminUsuarios() {
         </Select>
       </div>
 
-      {/* Table - Desktop */}
+      {/* Tabela para desktop */}
       <div className="hidden sm:block bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -332,7 +332,7 @@ export function AdminUsuarios() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Paginação */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
             <p className="text-xs text-muted-foreground">{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}</p>
@@ -351,7 +351,7 @@ export function AdminUsuarios() {
         )}
       </div>
 
-      {/* Mobile cards */}
+      {/* Cartões para dispositivos móveis */}
       <div ref={mobileListRef} className="sm:hidden space-y-3">
         {paginated.map((u) => (
           <div key={u.id} className="bg-card rounded-2xl border border-border shadow-sm p-4">
@@ -401,7 +401,7 @@ export function AdminUsuarios() {
           </div>
         ))}
 
-        {/* Mobile pagination */}
+        {/* Paginação para dispositivos móveis */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="flex items-center gap-1 px-3 py-2 border border-border rounded-xl text-sm text-muted-foreground disabled:opacity-40">
@@ -415,11 +415,11 @@ export function AdminUsuarios() {
         )}
       </div>
 
-      {/* User detail modal */}
+      {/* Modal de detalhes do usuário */}
       {selected && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-border">
-            {/* Header */}
+            {/* Cabeçalho */}
             <div className="flex items-start justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 bg-gradient-to-br from-primary to-chart-2 rounded-xl flex items-center justify-center shrink-0">
@@ -435,7 +435,7 @@ export function AdminUsuarios() {
               </Button>
             </div>
 
-            {/* Body */}
+            {/* Corpo */}
             <div className="overflow-y-auto p-5 space-y-4">
               <div className="flex flex-wrap gap-2">
                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${planConfig[selected.plan].cls}`}>{planConfig[selected.plan].label}</span>
@@ -486,7 +486,7 @@ export function AdminUsuarios() {
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Rodapé */}
             <div className="flex gap-3 px-5 py-4 border-t border-border shrink-0">
               <Button asChild variant="outline"><Link to={`/admin/atividades?user_id=${selected.id}`}>Ver atividades</Link></Button>
               <Button onClick={() => void removeUser(selected.id)} variant="ghost" className="cursor-pointer text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /> Remover</Button>

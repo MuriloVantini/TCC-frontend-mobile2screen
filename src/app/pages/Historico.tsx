@@ -231,7 +231,7 @@ export function Historico() {
         <p className="text-muted-foreground text-sm mt-0.5">{alertHistory.length} alertas enviados</p>
       </div>
 
-      {/* Summary */}
+      {/* Resumo */}
       <div ref={summaryRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total enviados", numericValue: alertHistory.length, suffix: "", icon: Zap, color: "text-primary", bg: "bg-accent" },
@@ -249,7 +249,7 @@ export function Historico() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
@@ -277,7 +277,7 @@ export function Historico() {
         </Select>
       </div>
 
-      {/* Alert list */}
+      {/* Lista de alertas */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         <div ref={listRef} className="divide-y divide-border">
           {paginated.map((alert) => {
@@ -327,7 +327,7 @@ export function Historico() {
           )}
         </div>
 
-        {/* Pagination */}
+        {/* Paginação */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
             <p className="text-xs text-muted-foreground">
@@ -368,7 +368,7 @@ export function Historico() {
         )}
       </div>
 
-      {/* Detail Dialog */}
+      {/* Caixa de diálogo de detalhes */}
       <Dialog open={!!selected} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh] gap-0">
           {selected && (

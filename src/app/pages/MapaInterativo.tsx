@@ -151,7 +151,7 @@ export function MapaInterativo() {
 
   return (
     <div className="flex flex-col md:flex-row overflow-hidden" style={{ height: "100%" }}>
-      {/* Mobile toggle */}
+      {/* Alternância para dispositivos móveis */}
       <div className="md:hidden flex items-center gap-2 px-4 py-2 bg-card border-b border-border shrink-0">
         <button
           onClick={() => setShowPanel(!showPanel)}
@@ -163,7 +163,7 @@ export function MapaInterativo() {
         <span className="text-xs text-muted-foreground">{filtered.length} pontos encontrados</span>
       </div>
 
-      {/* Left panel */}
+      {/* Painel esquerdo */}
       <aside
         ref={panelRef}
         className={`
@@ -173,7 +173,7 @@ export function MapaInterativo() {
           max-h-72 md:max-h-full
         `}
       >
-        {/* Search */}
+        {/* Pesquisa */}
         <div className="p-4 border-b border-border">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -186,7 +186,7 @@ export function MapaInterativo() {
           </div>
         </div>
 
-        {/* Layers */}
+        {/* Camadas */}
         <div className="p-4 border-b border-border">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ export function MapaInterativo() {
           </div>
         </div>
 
-        {/* Results */}
+        {/* Resultados */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4 pb-2">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Resultados ({filtered.length})</p>
@@ -249,12 +249,12 @@ export function MapaInterativo() {
         </div>
       </aside>
 
-      {/* Map area */}
+      {/* Área do mapa */}
       <div className="flex-1 relative overflow-hidden min-h-64">
-        {/* Leaflet mount target */}
+        {/* Elemento de montagem do Leaflet */}
         <div ref={mapContainerRef} className="absolute inset-0" />
 
-        {/* Custom zoom / nav controls */}
+        {/* Controles personalizados de zoom e navegação */}
         <div className="absolute top-4 right-4 flex flex-col gap-2" style={{ zIndex: 1001 }}>
           <div className="bg-card rounded-xl shadow-md overflow-hidden border border-border">
             <button
@@ -281,7 +281,7 @@ export function MapaInterativo() {
           </button>
         </div>
 
-        {/* Point detail card */}
+        {/* Cartão de detalhes do ponto */}
         {selectedPoint && (
           <div
             className="absolute bottom-16 left-1/2 -translate-x-1/2 md:bottom-auto md:top-4 md:left-4 md:translate-x-0 w-72 bg-card rounded-xl shadow-2xl overflow-hidden"

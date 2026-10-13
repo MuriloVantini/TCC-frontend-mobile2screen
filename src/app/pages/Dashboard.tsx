@@ -225,7 +225,7 @@ export function Dashboard() {
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-7xl mx-auto">
-      {/* Welcome banner */}
+      {/* Banner de boas-vindas */}
       <div className="bg-gradient-to-r from-primary to-chart-2 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-primary/20">
         <div>
           <p className="text-primary-foreground/80 text-sm">Bem-vindo de volta,</p>
@@ -242,7 +242,7 @@ export function Dashboard() {
         </Link>
       </div>
 
-      {/* Metrics */}
+      {/* Métricas */}
       <div ref={metricsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Dispositivos", numericValue: devices.length, suffix: "", sub: `${onlineCount} online`, icon: Monitor, color: "text-primary", bg: "bg-accent" },
@@ -261,9 +261,9 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Main content */}
+      {/* Conteúdo principal */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Activity chart */}
+        {/* Gráfico de atividades */}
         <div className="lg:col-span-3 bg-card rounded-2xl border border-border shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -291,7 +291,7 @@ export function Dashboard() {
           </ChartContainer>
         </div>
 
-        {/* Devices status */}
+        {/* Estado dos dispositivos */}
         <div className="lg:col-span-2 bg-card rounded-2xl border border-border shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-foreground">Dispositivos</h3>
@@ -335,7 +335,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Recent alerts */}
+      {/* Alertas recentes */}
       <div className="bg-card rounded-2xl border border-border shadow-sm">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="text-foreground">Alertas Recentes</h3>
